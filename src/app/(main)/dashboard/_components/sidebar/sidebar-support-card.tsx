@@ -9,11 +9,11 @@ export function SidebarSupportCard() {
   return (
     <Card size="sm" className="shadow-none group-data-[collapsible=icon]:hidden">
       <CardHeader className="px-4">
-        <CardTitle className="text-sm">Looking for something more?</CardTitle>
+        <CardTitle className="text-sm">Need a hand?</CardTitle>
         <CardDescription>
-          Open an issue or do reach out to me on&nbsp;
+          Reach out to the SyncOffset team on&nbsp;
           <Link
-            href="https://x.com/arhamkhnz"
+            href="https://x.com/syncoffset"
             target="_blank"
             rel="noreferrer"
             aria-label="Reach out on X"

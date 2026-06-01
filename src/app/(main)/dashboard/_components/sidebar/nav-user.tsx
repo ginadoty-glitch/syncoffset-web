@@ -22,6 +22,7 @@ export function NavUser({
     readonly name: string;
     readonly email: string;
     readonly avatar: string;
+    readonly role?: string;
   };
 }) {
   const { isMobile } = useSidebar();
@@ -41,7 +42,7 @@ export function NavUser({
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-muted-foreground text-xs">{user.email}</span>
+                <span className="truncate text-muted-foreground text-xs capitalize">{user.role ?? user.email}</span>
               </div>
               <EllipsisVertical className="ml-auto size-4" />
             </SidebarMenuButton>
