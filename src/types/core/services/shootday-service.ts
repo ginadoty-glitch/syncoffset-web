@@ -1,4 +1,5 @@
 /**
+ * @deprecated Superseded by `src/types/core/shootday/` constitutional layer.
  * SyncOffset ShootDay Authority Service — interface contracts only
  *
  * Article VII: ShootDay is the calendar authority object.
@@ -10,7 +11,7 @@
 import type { ObjectId } from "../../operations/shared";
 import type { PlatformRelationship } from "../relationships/relationship-edge";
 import type { RecordProvenance } from "../source/provenance";
-import type { ShootDay, ShootDayScheduleState } from "./shoot-day-record";
+import type { LegacyShootDay, ShootDayScheduleState } from "./shoot-day-record";
 import type {
   ReviseShootDayInput,
   ReviseShootDayResult,
@@ -32,7 +33,7 @@ export type CreateShootDayInput = {
 };
 
 export type CreateShootDayResult = {
-  readonly shootDay: ShootDay;
+  readonly shootDay: LegacyShootDay;
 };
 
 export type ArchiveShootDayInput = {
@@ -43,7 +44,7 @@ export type ArchiveShootDayInput = {
 };
 
 export type ArchiveShootDayResult = {
-  readonly shootDay: ShootDay;
+  readonly shootDay: LegacyShootDay;
 };
 
 export type GetShootDayInput = {
@@ -52,7 +53,7 @@ export type GetShootDayInput = {
 };
 
 export type GetShootDayResult = {
-  readonly shootDay: ShootDay | null;
+  readonly shootDay: LegacyShootDay | null;
 };
 
 export type GetShootDayRelationshipsInput = {

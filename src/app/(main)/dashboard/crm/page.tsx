@@ -1,3 +1,4 @@
+/** RUNTIME CLASSIFICATION: MOCK — Studio Admin demo; not in production navigation. */
 import { KpiCards } from "./_components/kpi-cards";
 import { OpportunitiesSection } from "./_components/opportunities-section";
 import { PipelineActivity } from "./_components/pipeline-activity";

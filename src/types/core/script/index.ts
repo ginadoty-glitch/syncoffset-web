@@ -1,9 +1,11 @@
 /**
  * SyncOffset Script Authority Layer — barrel export
  *
- * Constitutional root: Script Revision → Scene → Breakdown → downstream graph
+ * Script provenance: Script Revision → Scene (Scene Authority) → Breakdown → downstream graph
  */
 
+/** @deprecated Prefer SCENE_RELATIONSHIP_HUB_TARGETS from Scene Authority */
+export { SCENE_RELATIONSHIP_HUB_TARGETS } from "../scene";
 export type { BreakdownCategory, BreakdownCategoryDefinition } from "./breakdown-category";
 export { BREAKDOWN_CATEGORY_REGISTRY, isBreakdownCategory } from "./breakdown-category";
 export type { BreakdownElement } from "./breakdown-element";
@@ -13,7 +15,6 @@ export { REVISION_CHANGE_KIND_REGISTRY } from "./revision-change-kind";
 export type { Scene } from "./scene";
 export type { SceneDayNight, SceneIntExt } from "./scene-type";
 export {
-  SCENE_RELATIONSHIP_HUB_TARGETS,
   SCRIPT_CANONICAL_RELATIONSHIP_PATHS,
   SCRIPT_RELATIONSHIP_SCHEMA_REGISTRY,
 } from "./script-relationship-contracts";

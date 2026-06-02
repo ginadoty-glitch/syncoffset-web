@@ -1,5 +1,5 @@
 /**
- * SyncOffset ShootDay — conflict detection contracts (no evaluation engine)
+ * @deprecated Superseded by `src/types/core/shootday/`. See SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md
  *
  * Article IX: intelligence evaluates records; conflicts are derived findings, not sources.
  */

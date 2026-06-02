@@ -3,6 +3,7 @@
  *
  * Article I: source documents are never overwritten.
  * All platform source types extend this contract + AuditableCoreObject fields.
+ * Persists as CoreObjectKind `source-document` — resolves to Document Authority via DocumentRevision.
  *
  * Note: operations/callsheet-revision.ts models issued operational scheduling
  * records derived from sources — not this ingestion layer.
@@ -40,7 +41,7 @@ export type ImmutableSourceMetadata = {
  * Base contract for every immutable production source document.
  */
 export type ImmutableSourceDocument = AuditableCoreObject & {
-  readonly kind: "document";
+  readonly kind: "source-document";
   readonly sourceDocumentKind: SourceDocumentKind;
   readonly status: SourceDocumentStatus;
   readonly immutable: ImmutableSourceMetadata;

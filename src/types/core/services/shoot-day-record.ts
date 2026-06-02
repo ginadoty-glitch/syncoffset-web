@@ -1,8 +1,8 @@
 /**
- * SyncOffset ShootDay — calendar authority record (Article VII)
+ * @deprecated Use `ShootDay` from `src/types/core/shootday/shoot-day.ts`.
+ * See docs/SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md. Retained as `LegacyShootDay` for service contract migration.
  *
- * ShootDay is the only constitutional calendar authority object.
- * All schedule-based outputs are consumers of ShootDay; never the reverse.
+ * SyncOffset ShootDay — legacy calendar record shape (Article VII services)
  */
 
 import type { ObjectId, RefCode } from "../../operations/shared";
@@ -12,11 +12,8 @@ import type { ShootDayRevisionRecord } from "./shootday-revision";
 /** Lifecycle of a shoot day on the production calendar. */
 export type ShootDayScheduleState = "planned" | "confirmed" | "in-production" | "wrapped" | "cancelled";
 
-/**
- * Canonical ShootDay core object.
- * Mutations flow only through ShootDayAuthorityService (future implementation).
- */
-export type ShootDay = AuditableCoreObject & {
+/** @deprecated Import `ShootDay` from `@/types/core` (shootday authority). */
+export type LegacyShootDay = AuditableCoreObject & {
   readonly kind: "shoot-day";
   readonly ref?: RefCode;
   readonly dayLabel: string;
@@ -27,3 +24,6 @@ export type ShootDay = AuditableCoreObject & {
   /** Head revision metadata — full history via revision service */
   readonly currentRevision: ShootDayRevisionRecord;
 };
+
+/** @deprecated Alias for `LegacyShootDay` — do not use in new constitutional work. */
+export type ShootDay = LegacyShootDay;

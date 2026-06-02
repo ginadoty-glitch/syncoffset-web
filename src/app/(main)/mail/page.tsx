@@ -1,3 +1,4 @@
+/** RUNTIME CLASSIFICATION: MOCK — mail demo data; not in production navigation. */
 import { getValueFromCookie } from "@/server/server-actions";
 
 import { mails } from "./_components/data";

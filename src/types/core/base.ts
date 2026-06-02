@@ -36,7 +36,7 @@ export type AuditableCoreObject = {
   readonly createdAt: Timestamp;
   readonly modifiedBy: string;
   readonly modifiedAt: Timestamp;
-  /** FK to immutable Document in Media Hub / document store */
+  /** FK to Article I `source-document` ingestion record and/or Document Authority revision */
   readonly sourceDocumentId?: ObjectId;
   readonly sourceVersionId?: ObjectId;
   readonly relationships: ReadonlyArray<CoreRelationship>;

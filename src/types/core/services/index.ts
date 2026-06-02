@@ -1,8 +1,10 @@
 /**
- * SyncOffset Core Services — authority service contracts (no implementations)
+ * @deprecated Shoot Day **core object** shape moved to `src/types/core/shootday/`.
+ * Service interfaces below remain for future implementation reference only.
+ * See docs/SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md
  */
 
-export type { ShootDay, ShootDayScheduleState } from "./shoot-day-record";
+export type { LegacyShootDay, ShootDayScheduleState } from "./shoot-day-record";
 export type {
   EvaluateShootDayConflictsInput,
   EvaluateShootDayConflictsResult,

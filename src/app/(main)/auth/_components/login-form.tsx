@@ -49,7 +49,7 @@ export function LoginForm() {
                 {...field}
                 id="login-email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="you@syncoffset.com"
                 autoComplete="email"
                 aria-invalid={fieldState.invalid}
               />

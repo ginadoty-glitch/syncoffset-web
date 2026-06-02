@@ -6,7 +6,7 @@
 
 import type { CoreObjectKind } from "../kinds";
 import type { CanonicalRelationshipPath } from "../relationships/relationship-path";
-import type { RelationshipSchemaEntry } from "../relationships/relationship-schema-registry";
+import type { RelationshipSchemaEntry } from "../relationships/relationship-schema-entry";
 
 export const CREW_CANONICAL_RELATIONSHIP_PATHS: ReadonlyArray<CanonicalRelationshipPath> = [
   {

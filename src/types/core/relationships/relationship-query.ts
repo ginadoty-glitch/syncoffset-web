@@ -54,7 +54,18 @@ export type ScenesByShootDayQuery = RelationshipQueryBase & {
   readonly kinds?: ReadonlyArray<Extract<RelationshipKind, "scheduled-on" | "references">>;
 };
 
-/** Find all GeneratedOutputs derived from a CallsheetRevision source document. */
+/** Find all GeneratedOutputs for a constitutional Callsheet (preferred). */
+export type GeneratedOutputsByCallsheetQuery = RelationshipQueryBase & {
+  readonly type: "generated-outputs-by-callsheet";
+  readonly callsheetId: ObjectId;
+  readonly outputKinds?: ReadonlyArray<GeneratedOutputKind>;
+  readonly kinds?: ReadonlyArray<Extract<RelationshipKind, "generated-from" | "references">>;
+};
+
+/**
+ * @deprecated Prefer `GeneratedOutputsByCallsheetQuery` — source-document id for ingested file only.
+ * @see docs/SYNCOFFSET_NAMING_REGISTRY.md — callsheet-revision disambiguation
+ */
 export type GeneratedOutputsByCallsheetRevisionQuery = RelationshipQueryBase & {
   readonly type: "generated-outputs-by-callsheet-revision";
   readonly callsheetRevisionSourceDocumentId: ObjectId;
@@ -126,6 +137,7 @@ export type MediaByShootDayQuery = RelationshipQueryBase & {
 export type RelationshipQuery =
   | ShootDaysByLocationQuery
   | ScenesByShootDayQuery
+  | GeneratedOutputsByCallsheetQuery
   | GeneratedOutputsByCallsheetRevisionQuery
   | MediaAssetsByLocationQuery
   | CompanyMovesByShootDayQuery
@@ -142,6 +154,7 @@ export function isRelationshipQueryType(value: RelationshipQuery["type"]): value
   const types: RelationshipQuery["type"][] = [
     "shoot-days-by-location",
     "scenes-by-shoot-day",
+    "generated-outputs-by-callsheet",
     "generated-outputs-by-callsheet-revision",
     "media-by-location",
     "company-moves-by-shoot-day",

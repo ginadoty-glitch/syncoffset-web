@@ -1,3 +1,4 @@
+/** RUNTIME CLASSIFICATION: MOCK — Studio Admin demo; not in production navigation. */
 import { BookOpenCheck, Megaphone, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

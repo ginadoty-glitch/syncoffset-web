@@ -1,12 +1,12 @@
 /**
- * SyncOffset ShootDay — authority query contracts (no database)
+ * @deprecated Superseded by `src/types/core/shootday/`. See SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md
  *
  * Service-level queries for calendar authority records.
  * Graph-level traversal may also use RelationshipQuery from relationships/.
  */
 
 import type { ObjectId } from "../../operations/shared";
-import type { ShootDay } from "./shoot-day-record";
+import type { LegacyShootDay } from "./shoot-day-record";
 
 export type ShootDayQueryBase = {
   readonly productionId: ObjectId;
@@ -54,7 +54,7 @@ export type ShootDayQuery =
 
 export type ShootDayQueryResult = {
   readonly queryType: ShootDayQuery["type"];
-  readonly shootDays: ReadonlyArray<ShootDay>;
+  readonly shootDays: ReadonlyArray<LegacyShootDay>;
 };
 
 export type GetShootDayByIdQuery = {
@@ -63,7 +63,7 @@ export type GetShootDayByIdQuery = {
 };
 
 export type GetShootDayByIdResult = {
-  readonly shootDay: ShootDay | null;
+  readonly shootDay: LegacyShootDay | null;
 };
 
 /**

@@ -1,3 +1,4 @@
+/** RUNTIME CLASSIFICATION: MOCK — Studio Admin demo; not in production navigation. */
 import { format } from "date-fns";
 import { Settings2 } from "lucide-react";
 

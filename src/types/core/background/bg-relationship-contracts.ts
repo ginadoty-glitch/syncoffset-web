@@ -8,7 +8,7 @@
 import type { CoreObjectKind } from "../kinds";
 import type { RelationshipKind } from "../relationships/relationship-kind";
 import type { CanonicalRelationshipPath, RelationshipPathStep } from "../relationships/relationship-path";
-import type { RelationshipSchemaEntry } from "../relationships/relationship-schema-registry";
+import type { RelationshipSchemaEntry } from "../relationships/relationship-schema-entry";
 import type { SourceDocumentKind } from "../source/source-document-kind";
 
 export type BgRelationshipPathStep = RelationshipPathStep;
@@ -64,10 +64,10 @@ export const BG_CANONICAL_RELATIONSHIP_PATHS: ReadonlyArray<BgCanonicalRelations
     pathId: "shootday-callsheet-bg",
     label: "Shoot Day → Callsheet",
     steps: [
-      { nodeKind: "shoot-day", relationshipKind: "generated-from" },
-      { nodeKind: "callsheet-revision" as SourceDocumentKind, relationshipKind: "generated-from" },
+      { nodeKind: "shoot-day", relationshipKind: "derived-from" },
+      { nodeKind: "callsheet", relationshipKind: "derived-from" },
     ],
-    notes: "Callsheet source/output consumes ShootDay authority; BG counts flow via assignments.",
+    notes: "Constitutional Callsheet Authority — not SourceDocumentKind terminal. BG counts flow via assignments.",
   },
   {
     pathId: "shootday-dood-bg",

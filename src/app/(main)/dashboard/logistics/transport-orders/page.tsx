@@ -1,3 +1,4 @@
+/** RUNTIME CLASSIFICATION: PLACEHOLDER — not in production navigation. */
 import { Truck } from "lucide-react";
 
 import { ModulePlaceholder } from "../_components/module-placeholder";

@@ -88,7 +88,7 @@ const LEDGER_ROWS: LedgerRow[] = [
   },
   {
     id: 5,
-    account: "Acme Industries",
+    account: "Northpoint Studios",
     dealId: "OPP-421",
     stage: "Negotiation",
     blocker: "Close date overdue by 32 days",

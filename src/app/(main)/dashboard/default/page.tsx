@@ -1,3 +1,4 @@
+/** RUNTIME CLASSIFICATION: MOCK — Studio Admin demo; not in production navigation. */
 import { MetricCards } from "./_components/metric-cards";
 import { PerformanceOverview } from "./_components/performance-overview";
 import { SubscriberOverview } from "./_components/subscriber-overview";

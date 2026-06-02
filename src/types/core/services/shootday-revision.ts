@@ -1,5 +1,5 @@
 /**
- * SyncOffset ShootDay — revision contracts (no persistence)
+ * @deprecated Superseded by `src/types/core/shootday/`. See SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md
  *
  * Revisions create new ShootDay lineage nodes; sources remain immutable.
  */

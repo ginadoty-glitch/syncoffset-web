@@ -1,3 +1,4 @@
+/** RUNTIME CLASSIFICATION: MOCK — Studio Admin mail iframe; not in production navigation. */
 import Link from "next/link";
 
 import { ExternalLink } from "lucide-react";

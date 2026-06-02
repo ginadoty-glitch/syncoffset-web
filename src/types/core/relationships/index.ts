@@ -24,12 +24,17 @@ export type {
   RelationshipPathId,
   RelationshipPathStep,
 } from "./relationship-path";
-export { CANONICAL_RELATIONSHIP_PATHS, getCanonicalRelationshipPath } from "./relationship-path";
+export {
+  CANONICAL_RELATIONSHIP_PATHS,
+  getCanonicalRelationshipPath,
+  LEGACY_CANONICAL_RELATIONSHIP_PATHS,
+} from "./relationship-path";
 export type {
   AssetsBySceneQuery,
   AuthorityRecordsByGeneratedOutputQuery,
   CastBySceneQuery,
   CompanyMovesByShootDayQuery,
+  GeneratedOutputsByCallsheetQuery,
   GeneratedOutputsByCallsheetRevisionQuery,
   GeneratedOutputsBySourceDocumentQuery,
   LocationsByShootDayQuery,
@@ -45,7 +50,11 @@ export type {
   ShootDaysByLocationQuery,
 } from "./relationship-query";
 export { isRelationshipQueryType } from "./relationship-query";
-export type { RelationshipSchemaEntry } from "./relationship-schema-registry";
+export type { RelationshipSchemaEntry } from "./relationship-schema-entry";
+export {
+  CONSTITUTIONAL_RELATIONSHIP_SCHEMA_REGISTRY,
+  mergeRelationshipSchemaRegistries,
+} from "./relationship-schema-merge";
 export { RELATIONSHIP_SCHEMA_REGISTRY } from "./relationship-schema-registry";
 export type { RelationshipStrength, RelationshipStrengthDefinition } from "./relationship-strength";
 export {

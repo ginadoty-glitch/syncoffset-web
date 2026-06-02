@@ -53,7 +53,7 @@ export function RegisterForm() {
                 {...field}
                 id="register-email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="you@syncoffset.com"
                 autoComplete="email"
                 aria-invalid={fieldState.invalid}
               />

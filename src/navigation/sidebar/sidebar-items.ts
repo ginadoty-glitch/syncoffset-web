@@ -1,23 +1,16 @@
 import {
-  Bell,
   BookOpen,
   Calendar,
   ClipboardList,
-  FileCheck2,
+  FileUp,
   FolderArchive,
   LayoutDashboard,
   type LucideIcon,
-  Mail,
   MapPin,
-  MessageSquareDot,
-  Package,
-  PauseOctagon,
   ReceiptText,
   Settings,
   TrendingUp,
-  Truck,
   Users,
-  Zap,
 } from "lucide-react";
 
 export interface NavSubItem {
@@ -45,73 +38,26 @@ export interface NavGroup {
   items: NavMainItem[];
 }
 
+/**
+ * Production navigation (TestFlight / field). MOCK routes are preserved on disk but
+ * excluded — see `hiddenMockRoutes` in `./sidebar-route-registry.ts`.
+ */
 export const sidebarItems: NavGroup[] = [
-  {
-    id: 2,
-    label: "Logistics",
-    items: [
-      {
-        title: "Overview",
-        url: "/dashboard/logistics",
-        icon: LayoutDashboard,
-      },
-      {
-        title: "Transport Orders",
-        url: "/dashboard/logistics/transport-orders",
-        icon: Truck,
-      },
-      {
-        title: "Shipments",
-        url: "/dashboard/logistics/shipments",
-        icon: Package,
-      },
-      {
-        title: "Brokerage Docs",
-        url: "/dashboard/logistics/brokerage",
-        icon: FileCheck2,
-      },
-      {
-        title: "Rush Orders",
-        url: "/dashboard/logistics/rush",
-        icon: Zap,
-      },
-      {
-        title: "Holdbacks",
-        url: "/dashboard/logistics/holdbacks",
-        icon: PauseOctagon,
-      },
-    ],
-  },
-  {
-    id: 6,
-    label: "Communications",
-    items: [
-      {
-        title: "Chat",
-        url: "/dashboard/communications/chat",
-        icon: MessageSquareDot,
-      },
-      {
-        title: "Email",
-        url: "/dashboard/communications/email",
-        icon: Mail,
-      },
-      {
-        title: "Notifications",
-        url: "/dashboard/communications/notifications",
-        icon: Bell,
-      },
-    ],
-  },
   {
     id: 3,
     label: "Production",
     items: [
       {
-        title: "Schedule",
-        url: "/dashboard/coming-soon",
+        title: "Sets",
+        url: "/dashboard/sets",
+        icon: LayoutDashboard,
+        isNew: true,
+      },
+      {
+        title: "Production Calendar",
+        url: "/dashboard/production-calendar",
         icon: Calendar,
-        comingSoon: true,
+        isNew: true,
       },
       {
         title: "Locations",
@@ -148,6 +94,22 @@ export const sidebarItems: NavGroup[] = [
         url: "/dashboard/coming-soon",
         icon: ReceiptText,
         comingSoon: true,
+      },
+    ],
+  },
+  {
+    id: 7,
+    label: "Ingestion",
+    items: [
+      {
+        title: "Review Queue",
+        url: "/ingestion",
+        icon: FileUp,
+      },
+      {
+        title: "Upload",
+        url: "/ingestion/upload",
+        icon: FileUp,
       },
     ],
   },

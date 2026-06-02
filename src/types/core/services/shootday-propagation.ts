@@ -1,5 +1,5 @@
 /**
- * SyncOffset ShootDay — propagation contracts (no execution logic)
+ * @deprecated Superseded by `src/types/core/shootday/`. See SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md
  *
  * Documents how calendar authority changes fan out to consumers.
  * Distinct from logistics/propagation.ts until unified in a future phase.

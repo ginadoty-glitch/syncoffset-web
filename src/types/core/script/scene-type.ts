@@ -1,7 +1,4 @@
 /**
- * SyncOffset Script Authority — scene classification
+ * @deprecated Use `InteriorExterior` and `TimeOfDay` from Scene Authority.
  */
-
-export type SceneIntExt = "int" | "ext" | "int-ext";
-
-export type SceneDayNight = "day" | "night" | "dawn" | "dusk" | "continuous";
+export type { InteriorExterior as SceneIntExt, TimeOfDay as SceneDayNight } from "../scene/scene-production";
