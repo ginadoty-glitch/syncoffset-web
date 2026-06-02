@@ -6,7 +6,7 @@ Version 1.0 — Type foundation (no graph service, no DB)
 
 **Code:** `src/types/core/relationships/`
 
-**Related:** [`SYNCOFFSET_CORE_OBJECT_REGISTRY.md`](./SYNCOFFSET_CORE_OBJECT_REGISTRY.md) · [`SYNCOFFSET_SOURCE_INGESTION.md`](./SYNCOFFSET_SOURCE_INGESTION.md)
+**Related:** [`SYNCOFFSET_CORE_OBJECT_REGISTRY.md`](./SYNCOFFSET_CORE_OBJECT_REGISTRY.md) · [`SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md`](./SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md) · [`SYNCOFFSET_RETURN_AUTHORITY.md`](./SYNCOFFSET_RETURN_AUTHORITY.md) · [`SYNCOFFSET_BROKERAGE_AUTHORITY.md`](./SYNCOFFSET_BROKERAGE_AUTHORITY.md) · [`SYNCOFFSET_SHIPMENT_AUTHORITY.md`](./SYNCOFFSET_SHIPMENT_AUTHORITY.md) · [`SYNCOFFSET_PURCHASE_AUTHORITY.md`](./SYNCOFFSET_PURCHASE_AUTHORITY.md) · [`SYNCOFFSET_SCENE_AUTHORITY.md`](./SYNCOFFSET_SCENE_AUTHORITY.md) · [`SYNCOFFSET_PRODUCTION_HIERARCHY.md`](./SYNCOFFSET_PRODUCTION_HIERARCHY.md) · [`SYNCOFFSET_SOURCE_INGESTION.md`](./SYNCOFFSET_SOURCE_INGESTION.md)
 
 ---
 
@@ -47,9 +47,37 @@ Registry: `RELATIONSHIP_KIND_REGISTRY` in `relationship-kind.ts`
 | ShootDay ↔ Location | `occurs-at` |
 | ShootDay ↔ CompanyMove | `scheduled-on` / `impacts` |
 | ShootDay ↔ Media | `attached-to` |
+| Script Revision → Scene | `derived-from` |
+| Scene → Breakdown Element | `derived-from` |
+| Scene → Budget Requirement | `derived-from` |
+| Scene → Set | `references` |
+| Scene → Location Requirement | `derived-from` |
+| Scene → Crew / Cast / BG Requirement | `derived-from` |
+| Scene → Shoot Day | `scheduled-on` |
 | Scene ↔ Location | `occurs-at` |
 | Scene ↔ Cast | `assigned-to` |
-| Scene ↔ Assets | `requires` |
+| Scene → Set → Asset | `references` / `attached-to` (no direct Scene → Asset) |
+| Asset → Budget Requirement | `references` |
+| Asset → Asset Instance | `derived-from` |
+| Asset → Asset Package | `attached-to` |
+| Set → Asset | `attached-to` |
+| Asset Assignment → Shoot Day | `scheduled-on` |
+| Set → Asset / Location | `references` / `attached-to` |
+| Budget Requirement → Purchase Order | `derived-from` |
+| Purchase Order → Vendor / Set / Department | `references` / `assigned-to` |
+| Purchase Order → Purchase Line / Package | `derived-from` / `attached-to` |
+| Purchase Line → Asset | `references` |
+| Purchase Order → Shipment | `depends-on` (from shipment) |
+| Shipment → Stop / Event / Package | `derived-from` / `attached-to` |
+| Shipment → Vendor / Asset / Location / Return / Output | various |
+| Shipment Stop → Location | `occurs-at` |
+| Shipment Package → Generated Output | `generated-from` |
+| Shipment → Brokerage Record | `derived-from` |
+| Brokerage Record → Line / Package / Vendor / Asset / PO / Return | various |
+| Brokerage Package → Generated Output | `generated-from` |
+| Return → Line / Package / Asset / Vendor / Shipment / PO / Brokerage | canonical Return Authority |
+| Return Package → Generated Output | `generated-from` |
+| Purchase Order → Return (closeout) | via `rental-closeout` path |
 | Location ↔ Permits | `attached-to` / `requires` |
 | GeneratedOutput ↔ Source Documents | `generated-from` |
 | GeneratedOutput ↔ Authority Records | `generated-from` / `references` |
@@ -64,7 +92,8 @@ Schema samples: `RELATIONSHIP_SCHEMA_REGISTRY`
 |------------|---------|
 | `shoot-days-by-location` | All shoot days linked to a location |
 | `scenes-by-shoot-day` | Scenes on a shoot day |
-| `generated-outputs-by-callsheet-revision` | Outputs from callsheet source |
+| `generated-outputs-by-callsheet` | Outputs for constitutional `callsheet` (preferred) |
+| `generated-outputs-by-callsheet-revision` | **Deprecated** — source-document id only |
 | `media-by-location` | Media attached to a location |
 | `company-moves-by-shoot-day` | Company moves affecting a day |
 | `generated-outputs-by-source-document` | Outputs by any source doc |
@@ -76,15 +105,13 @@ Future service: `RelationshipQueryService.execute(query)` — not implemented.
 
 ## Canonical paths (documentation only)
 
-| pathId | Path |
-|--------|------|
-| `schedule-shootday-callsheet` | Shoot Schedule → Shoot Day → Callsheet |
-| `schedule-shootday-transport` | Shoot Schedule → Shoot Day → Transport Order |
-| `schedule-shootday-company-move` | Shoot Schedule → Shoot Day → Company Move |
-| `scriptrevision-scene-shootday` | Script Revision → Scene → Shoot Day |
-| `callsheetrevision-generated-output` | Callsheet Revision → Generated Output |
+**Active:** `CANONICAL_RELATIONSHIP_PATHS` — includes `full-production-timeline`, `source-document-chain`, `callsheet-document-chain`, procurement/logistics document chains.
 
-Full list: `CANONICAL_RELATIONSHIP_PATHS` in `relationship-path.ts`
+**Legacy (deprecated):** `LEGACY_CANONICAL_RELATIONSHIP_PATHS` — `schedule-shootday-callsheet`, `callsheetrevision-generated-output`.
+
+**Schema:** `RELATIONSHIP_SCHEMA_REGISTRY` is merged from authority `*_RELATIONSHIP_SCHEMA_REGISTRY` exports (`relationship-schema-merge.ts`).
+
+Full lists: `relationship-path.ts`
 
 **No path evaluation engine** in this phase.
 

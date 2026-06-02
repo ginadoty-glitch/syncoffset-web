@@ -1,313 +1,170 @@
 # SyncOffset Core Object Registry
 
-Version 1.0
+**Version:** 2.0 — synced with `src/types/core/kinds.ts` and `registry.ts` (Phase 1 remediation)
 
-**Companions:** [`SYNCOFFSET_DATA_CONSTITUTION.md`](./SYNCOFFSET_DATA_CONSTITUTION.md) · [`SYNCOFFSET_PLATFORM_WORKSPACES.md`](./SYNCOFFSET_PLATFORM_WORKSPACES.md) · TypeScript: `src/types/core/`
+**Companions:** [`SYNCOFFSET_DATA_CONSTITUTION.md`](./SYNCOFFSET_DATA_CONSTITUTION.md) · [`SYNCOFFSET_NAMING_REGISTRY.md`](./SYNCOFFSET_NAMING_REGISTRY.md) · [`SYNCOFFSET_IMPLEMENTATION_SPRINT.md`](./SYNCOFFSET_IMPLEMENTATION_SPRINT.md)
+
+**Code:** `CORE_OBJECT_REGISTRY` in `src/types/core/registry.ts` — **94 kinds**
 
 ---
 
 ## Rule
 
-Every record in SyncOffset must belong to a Core Object.
+Every record in SyncOffset must belong to a `CoreObjectKind`.
 
-- Core Objects may reference other Core Objects.
-- Core Objects may generate Outputs.
-- Core Objects may **not** overwrite Source Documents.
-
----
-
-## Production
-
-### Show
-
-**Purpose:** Top-level production entity.
-
-**Relationships:** Seasons, Episodes, Shoot Days, Departments, Locations, Vendors, Assets
-
-### Season
-
-**Relationships:** Show, Episodes
-
-### Episode
-
-**Relationships:** Show, Scenes, Shoot Days
-
-### Department
-
-**Examples:** Production, Art, Set Dec, Props, Construction, Locations, Transportation, Costume, Makeup, Camera, Grip, Electric, Sound
+- Core objects may reference other core objects via the relationship graph.
+- Core objects may generate `generated-output` records.
+- Core objects may **not** overwrite Article I source files (`source-document`).
 
 ---
 
-## Scheduling
+## Production spine
 
-### ShootDay
+```
+Script Revision → Scene → Set → Budget Requirement
+  → Shooting Schedule → Production Calendar → Calendar Day
+  → Shoot Day → Callsheet
+```
 
-**Platform authority object.**
+**Document provenance (all authorities):**
 
-**Owns:** Date, Call Time, Unit, Schedule State
-
-**Relationships:** Scenes, Locations, Callsheets, Crew, Cast, Company Moves, Assets, Shipments
-
-### PrepDay
-
-**Relationships:** Department, ShootDay
-
-### WrapDay
-
-**Relationships:** Department, ShootDay
-
-### CompanyMove
-
-**Relationships:** ShootDay, Locations, Vehicles, Crew
+```
+source-document → document-revision → document
+```
 
 ---
 
-## Script
+## Calendar authority flags
 
-### Script authority
+| `isCalendarAuthority` | Kinds |
+|----------------------|-------|
+| **true** | `production-calendar`, `calendar-day` |
+| **false** | `shoot-day`, `shooting-schedule`, `callsheet`, all others |
 
-See [`SYNCOFFSET_SCRIPT_AUTHORITY.md`](./SYNCOFFSET_SCRIPT_AUTHORITY.md). Types: `src/types/core/script/`
+**Shoot Day is execution, not master planning.** Production Calendar owns **when**; Shooting Schedule owns **what** gets shot.
 
-| Object | Kind |
-|--------|------|
-| ScriptRevision | `script-revision` |
-| RevisionChange | `revision-change` |
-| Scene | `scene` |
-| BreakdownElement | `breakdown-element` |
+---
 
-### Script (parent)
+## Authority index
 
-**Relationships:** Revisions, Scenes
+| Authority | Doc | Core kinds |
+|-----------|-----|------------|
+| Script | [`SYNCOFFSET_SCRIPT_AUTHORITY.md`](./SYNCOFFSET_SCRIPT_AUTHORITY.md) | `script`, `script-revision`, `revision-change`, `breakdown-element` |
+| Scene | [`SYNCOFFSET_SCENE_AUTHORITY.md`](./SYNCOFFSET_SCENE_AUTHORITY.md) | `scene`, `set`, `budget-requirement`, `element` |
+| Shooting Schedule | [`SYNCOFFSET_SHOOTING_SCHEDULE_AUTHORITY.md`](./SYNCOFFSET_SHOOTING_SCHEDULE_AUTHORITY.md) | `shooting-schedule`, `shooting-schedule-revision`, `shooting-schedule-package` |
+| Production Calendar | [`SYNCOFFSET_PRODUCTION_CALENDAR_AUTHORITY.md`](./SYNCOFFSET_PRODUCTION_CALENDAR_AUTHORITY.md) | `production-calendar`, `calendar-day`, `calendar-revision`, `calendar-package` |
+| Shoot Day | [`SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md`](./SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md) | `shoot-day`, `shootday-assignment`, `shootday-package` |
+| Callsheet | [`SYNCOFFSET_CALLSHEET_AUTHORITY.md`](./SYNCOFFSET_CALLSHEET_AUTHORITY.md) | `callsheet`, `callsheet-revision`, `callsheet-distribution`, `callsheet-package` |
+| Document | [`SYNCOFFSET_DOCUMENT_AUTHORITY.md`](./SYNCOFFSET_DOCUMENT_AUTHORITY.md) | `document`, `document-revision`, `document-package`, `document-link` |
+| Source (Article I) | [`SYNCOFFSET_SOURCE_INGESTION.md`](./SYNCOFFSET_SOURCE_INGESTION.md) | `source-document` |
+| Creative | [`SYNCOFFSET_CREATIVE_AUTHORITY.md`](./SYNCOFFSET_CREATIVE_AUTHORITY.md) | `director-note`, `creative-reference`, `department-package`, `tech-pack`, `approval-record` |
+| Cast | [`SYNCOFFSET_CAST_AUTHORITY.md`](./SYNCOFFSET_CAST_AUTHORITY.md) | `character`, `cast-requirement`, `cast-member`, `cast-assignment` |
+| Crew | [`SYNCOFFSET_CREW_AUTHORITY.md`](./SYNCOFFSET_CREW_AUTHORITY.md) | `crew-requirement`, `crew-member`, `crew-assignment` |
+| Background | [`SYNCOFFSET_BACKGROUND_AUTHORITY.md`](./SYNCOFFSET_BACKGROUND_AUTHORITY.md) | `bg-requirement`, `background-performer`, `bg-assignment` |
+| Location | [`SYNCOFFSET_LOCATION_AUTHORITY.md`](./SYNCOFFSET_LOCATION_AUTHORITY.md) | `location`, `location-requirement`, `location-package`, `location-assignment`, `permit` |
+| Asset | [`SYNCOFFSET_ASSET_AUTHORITY.md`](./SYNCOFFSET_ASSET_AUTHORITY.md) | `asset`, `asset-instance`, `asset-assignment`, `asset-package` |
+| Inventory | [`SYNCOFFSET_INVENTORY_AUTHORITY.md`](./SYNCOFFSET_INVENTORY_AUTHORITY.md) | `inventory-record`, `inventory-movement`, `inventory-audit`, `inventory-package` |
+| Vendor | [`SYNCOFFSET_VENDOR_AUTHORITY.md`](./SYNCOFFSET_VENDOR_AUTHORITY.md) | `vendor`, `vendor-contact`, `vendor-agreement` |
+| Purchase | [`SYNCOFFSET_PURCHASE_AUTHORITY.md`](./SYNCOFFSET_PURCHASE_AUTHORITY.md) | `purchase-order`, `purchase-line`, `purchase-package` |
+| Shipment | [`SYNCOFFSET_SHIPMENT_AUTHORITY.md`](./SYNCOFFSET_SHIPMENT_AUTHORITY.md) | `shipment`, `shipment-stop`, `shipment-event`, `shipment-package` |
+| Brokerage | [`SYNCOFFSET_BROKERAGE_AUTHORITY.md`](./SYNCOFFSET_BROKERAGE_AUTHORITY.md) | `brokerage-record`, `brokerage-line`, `brokerage-package` |
+| Return | [`SYNCOFFSET_RETURN_AUTHORITY.md`](./SYNCOFFSET_RETURN_AUTHORITY.md) | `return`, `return-line`, `return-package` |
+| Work Order | [`SYNCOFFSET_WORK_ORDER_AUTHORITY.md`](./SYNCOFFSET_WORK_ORDER_AUTHORITY.md) | `work-order`, `work-order-task`, `work-order-package` |
+| Accounting | [`SYNCOFFSET_PRODUCTION_ACCOUNTING_AUTHORITY.md`](./SYNCOFFSET_PRODUCTION_ACCOUNTING_AUTHORITY.md) | `production-cost`, `department-cost`, `cost-report`, `cost-report-package` |
+| Communication | [`SYNCOFFSET_COMMUNICATION_AUTHORITY.md`](./SYNCOFFSET_COMMUNICATION_AUTHORITY.md) | `communication`, `distribution-list`, `communication-package` |
 
-### Element (legacy)
+---
 
-**Types:** Prop, Vehicle, Costume, … — prefer `breakdown-element` for new work
+## Show / season / episode
 
-**Relationships:** Scene
+| Kind | Role |
+|------|------|
+| `show` | Top-level production |
+| `season` | Season container |
+| `episode` | Episode slating |
+| `department` | Organizational department |
+
+---
+
+## Scheduling (legacy kinds)
+
+Prefer **`calendar-day`** + `CALENDAR_DAY_TYPE_REGISTRY` for new work.
+
+| Kind | Notes |
+|------|-------|
+| `prep-day` | Legacy — use `calendar-day` `dayType: prep` |
+| `wrap-day` | Legacy — use `calendar-day` `dayType: wrap` |
+| `company-move` | Company move day; links to location assignments |
 
 ---
 
 ## People
 
-### Person
+| Kind | Role |
+|------|------|
+| `person` | Base person (thin registry) |
+| `stunt-performer` | Stunt performer (thin registry) |
 
-Base object. **Subtypes:** Cast, Crew, Vendor Contact
-
-### Cast authority (see [`SYNCOFFSET_CAST_AUTHORITY.md`](./SYNCOFFSET_CAST_AUTHORITY.md))
-
-| Object | Kind |
-|--------|------|
-| Character | `character` |
-| CastRequirement | `cast-requirement` |
-| CastMember | `cast-member` |
-| CastAssignment | `cast-assignment` |
-
-### CastMember
-
-**Relationships:** CastAssignment, Scene, ShootDay, GeneratedOutput — performer, not character
-
-### BackgroundPerformer
-
-**Relationships:** ShootDay, Scene, BgAssignment, GeneratedOutput
-
-### BgRequirement
-
-Production need from breakdown — **not a person**. **Relationships:** Scene, BreakdownElement, Element, BgAssignment, ScriptRevision
-
-### BgAssignment
-
-Bridge: performer ↔ requirement ↔ shoot day. **Relationships:** BackgroundPerformer, BgRequirement, ShootDay, Scene
-
-See [`SYNCOFFSET_BACKGROUND_AUTHORITY.md`](./SYNCOFFSET_BACKGROUND_AUTHORITY.md).
-
-### StuntPerformer
-
-**Relationships:** Scene, ShootDay, Safety Documents
-
-### Crew authority (see [`SYNCOFFSET_CREW_AUTHORITY.md`](./SYNCOFFSET_CREW_AUTHORITY.md))
-
-| Object | Kind |
-|--------|------|
-| Department | `department` |
-| CrewRequirement | `crew-requirement` |
-| CrewMember | `crew-member` |
-| CrewAssignment | `crew-assignment` |
-
-### Department (organizational)
-
-**Relationships:** CrewMember, CrewRequirement, DepartmentPackage, CrewAssignment
-
-### CrewMember
-
-**Relationships:** Department, CrewAssignment, ShootDay, GeneratedOutput
+Cast, crew, and background kinds — see authority docs above.
 
 ---
 
-## Locations
+## Operations (registry only / cross-layer)
 
-### Location
-
-**Relationships:** ShootDay, Scene, Permit, Media, CompanyMove
-
-### Permit
-
-**Relationships:** Location — **Immutable source**
-
----
-
-## Assets
-
-### Asset
-
-Parent object. **Subtypes:** Prop, SetDecoration, Costume, Equipment, Vehicle
-
-**Relationships:** Scene, Shipment, Vendor
-
----
-
-## Vendors
-
-### Vendor
-
-**Relationships:** Assets, Orders, Shipments, Invoices
-
-### PurchaseOrder
-
-**Relationships:** Vendor, Assets, Budget Lines
-
----
-
-## Operations
-
-### TransportOrder
-
-**Relationships:** ShootDay, Assets, Vendor, Shipment
-
-### Shipment
-
-**Relationships:** TransportOrder, Asset, Vendor, Location
-
-### Return
-
-**Relationships:** Asset, Vendor
-
----
-
-## Documents
-
-### Creative authority (see [`SYNCOFFSET_CREATIVE_AUTHORITY.md`](./SYNCOFFSET_CREATIVE_AUTHORITY.md))
-
-| Object | Kind | Role |
-|--------|------|------|
-| DirectorNote | `director-note` | Creative instruction |
-| CreativeReference | `creative-reference` | Mood boards, look books, concept art |
-| DepartmentPackage | `department-package` | Department production intent |
-| TechPack | `tech-pack` | Technical implementation files |
-| ApprovalRecord | `approval-record` | Approval lifecycle |
-
-### Document
-
-Parent object. **Examples:** One-Liner, Callsheet, Schedule, Permit, Invoice — **Immutable**
-
-### GeneratedOutput
-
-**Relationships:** Source Documents, Source Records
-
-**Examples:** Callsheet PDF, DOOD Report, Logistics Package, Brokerage Package
-
----
-
-## Media
-
-### Media
-
-Parent object. **Subtypes:** Photo, Video, Audio, Daily, Reference
-
-**Relationships:** Scene, ShootDay, Location, Asset, Person
-
----
-
-## Intelligence
-
-### RiskEvaluation
-
-**Derived only. Never authoritative.**
-
-**Generated from:** ShootDays, Locations, Assets, Shipments, Vendors
-
-**Cannot mutate source records.**
+| Kind | Code status |
+|------|-------------|
+| `transport-order` | Core kind + graph edges; canonical type in `src/types/operations/transport-order.ts` |
+| `generated-output` | Derived outputs — Article VI |
+| `media` | Media attachments |
+| `risk-evaluation` | **Derived only** — intelligence, not authoritative |
 
 ---
 
 ## Relationship graph
 
-Core objects are **authoritative**. Relationships **connect** them and must not become a second source of truth.
-
 | Concept | Location |
 |---------|----------|
-| Graph edges | `PlatformRelationship` — `src/types/core/relationships/` |
-| Embedded hints | `CoreRelationship` on `AuditableCoreObject.relationships[]` |
-| Query contracts | `RelationshipQuery` (no service yet) |
-| Propagation paths | `CANONICAL_RELATIONSHIP_PATHS` (documentation only) |
+| Merged schema | `RELATIONSHIP_SCHEMA_REGISTRY` ← authority `*_RELATIONSHIP_SCHEMA_REGISTRY` only |
+| Merge implementation | `relationship-schema-merge.ts` |
+| Active paths | `CANONICAL_RELATIONSHIP_PATHS` |
+| Legacy paths | `LEGACY_CANONICAL_RELATIONSHIP_PATHS` (deprecated terminals) |
 
 See [`SYNCOFFSET_RELATIONSHIP_GRAPH.md`](./SYNCOFFSET_RELATIONSHIP_GRAPH.md).
 
-Future propagation may traverse the graph; existing `propagation.ts` in logistics is unchanged in this phase.
+---
+
+## Naming collisions (resolved)
+
+See [`SYNCOFFSET_NAMING_REGISTRY.md`](./SYNCOFFSET_NAMING_REGISTRY.md):
+
+- `callsheet-revision` — SourceDocumentKind vs CoreObjectKind  
+- `inventory-package` — CoreObjectKind vs `asset-inventory-report` (AssetPackageKind)  
+- `shoot-schedule` vs `shooting-schedule` — source vs core  
 
 ---
 
-## Audit (required on every Core Object)
+## Audit envelope (all `AuditableCoreObject`)
 
 | Field | Purpose |
 |-------|---------|
-| `createdBy` | Actor at creation |
-| `createdAt` | Timestamp |
-| `modifiedBy` | Last mutating actor |
-| `modifiedAt` | Last mutation |
-| `sourceDocumentId` | Immutable source link (Art. I) |
-| `sourceVersionId` | Extraction/revision version |
-| `status` | Lifecycle state |
-| `relationships` | Typed edges to other core objects |
+| `createdBy` / `createdAt` | Creation provenance |
+| `modifiedBy` / `modifiedAt` | Last mutation |
+| `sourceDocumentId` | Article I link where applicable |
+| `status` | Lifecycle |
+| `relationships` | Typed edge hints |
 
 ---
 
-## Implementation map (syncoffset-web)
+## Implementation map
 
-| Registry object | Code status | Notes |
-|-----------------|-------------|-------|
-| `TransportOrder` | **Canonical type** | `src/types/operations/transport-order.ts` |
-| `CallsheetRevision` | **Canonical type** (scheduling doc) | `src/types/operations/callsheet-revision.ts` — maps to issued callsheet lineage |
-| `Shipment` | **UI mock name** | `shipment-data.ts` — migrate to `TransportOrder` + display alias |
-| `Document` / `OwnedDocument` | **Partial** | `src/types/operations/shared.ts` — parent-owned docs, not global Media Hub |
-| `RiskEvaluation` | **Derived** | `DerivedOrderState` in `propagation.ts` — not persisted |
-| `ShootDay` | **Authority contracts** | `src/types/core/services/` — `ShootDay`, `ShootDayAuthorityService` |
-| `BgRequirement`, `BgAssignment` | **Typed** | `src/types/core/background/` |
-| Creative authority objects | **Typed** | `src/types/core/creative/` |
-| Script authority objects | **Typed** | `src/types/core/script/` |
-| Cast authority objects | **Typed** | `src/types/core/cast/` |
-| Crew authority objects | **Typed** | `src/types/core/crew/` |
-| `BackgroundPerformer` | **Typed** | `src/types/core/background/background-performer.ts` |
-| `Show` … `Media` (other) | **Registry only** | `src/types/core/` — kinds + audit base; fixtures TBD |
+| Layer | Path |
+|-------|------|
+| Constitutional types | `src/types/core/` |
+| Operations (Workspace 04) | `src/types/operations/` |
+| Legacy Shoot Day services | `src/types/core/services/` — **deprecated**; prefer `shootday/` |
 
-### Operations layer vs core registry
-
-- **`src/types/operations/`** — Detailed contracts for live Workspace 04 modules (transport, conditions, revisions).
-- **`src/types/core/`** — Platform-wide object kinds, audit envelope, relationship vocabulary, registry metadata.
-
-New objects must register a `CoreObjectKind` before UI or Supabase schemas are added.
-
-### Immutable / derived flags
-
-| Kind | Immutable source | Derived only | Calendar authority |
-|------|------------------|--------------|-------------------|
-| Document, Permit, Media | ✓ | | |
-| ScriptRevision (source file) | ✓ | via `source/` ingestion | |
-| ScriptRevision (authority) | | | |
-| GeneratedOutput | | ✓ (output) | |
-| RiskEvaluation | | ✓ | |
-| ShootDay | | | ✓ |
-| TransportOrder, Shipment | | | |
+**New objects:** register `CoreObjectKind` + `CORE_OBJECT_REGISTRY` entry + authority `*-relationship-contracts.ts` before UI or Supabase.
 
 ---
 
-*Normative registry. Code registry: `CORE_OBJECT_REGISTRY` in `src/types/core/registry.ts`.*
+*v2.0 — matches code as of Phase 1 remediation. Machine registry: `registry.ts`.*

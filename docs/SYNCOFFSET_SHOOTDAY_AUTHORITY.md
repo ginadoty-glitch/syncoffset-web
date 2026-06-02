@@ -1,6 +1,8 @@
-# SyncOffset ShootDay Authority
+# SyncOffset ShootDay Authority (Legacy)
 
 Version 1.0 — Service contracts only (no implementation)
+
+> **Superseded for core objects:** [`SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md`](./SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md) · `src/types/core/shootday/`
 
 **Governs:** Article VII of [`SYNCOFFSET_DATA_CONSTITUTION.md`](./SYNCOFFSET_DATA_CONSTITUTION.md)
 

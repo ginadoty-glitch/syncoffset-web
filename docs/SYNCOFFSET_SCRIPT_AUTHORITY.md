@@ -2,7 +2,7 @@
 
 Version 1.0 — Types and graph contracts only
 
-**Workspace:** 02 Script Breakdown (constitutional root of the production graph)
+**Workspace:** 02 Script Breakdown (script provenance — Scene Authority owns the Scene hub)
 
 **Code:** `src/types/core/script/`
 
@@ -10,22 +10,24 @@ Version 1.0 — Types and graph contracts only
 
 ## Constitutional hierarchy
 
-Script Authority sits **above** scheduling and operations. Nothing in schedule, callsheet, or logistics defines what the script contains — those layers **consume** script authority.
+Script Authority owns **revision provenance**. Scene Authority owns the **Scene hub** and downstream production linkage.
+
+See [`SYNCOFFSET_PRODUCTION_HIERARCHY.md`](./SYNCOFFSET_PRODUCTION_HIERARCHY.md) and [`SYNCOFFSET_SCENE_AUTHORITY.md`](./SYNCOFFSET_SCENE_AUTHORITY.md).
 
 ```
-Draft Script (source file)
-    → Shooting Script (source file / revision color)
-        → Script Revision (authority record)
-            → Revision Change (diff)
-                → Scene (central hub)
-                    → Breakdown Element (requirement)
-                        → BG Requirement · Department Package · Schedule · Operations
+Source Document
+    → Script Revision (this authority)
+        → Revision Change
+            → Scene (Scene Authority — central hub)
+                → Breakdown Element
+                    → Budget Requirement → Set → Asset → Vendor → Logistics → Shoot Day
 ```
 
 | Layer | Objects | Role |
 |-------|---------|------|
 | **Source (immutable)** | `ScriptRevisionSourceDocument` in `source/` | PDF/pages exactly as received |
-| **Script authority** | `ScriptRevision`, `RevisionChange`, `Scene`, `BreakdownElement` | Production truth derived from sources |
+| **Script authority** | `ScriptRevision`, `RevisionChange`, `BreakdownElement` | Script provenance derived from sources |
+| **Scene authority** | `Scene`, `ProductionSet`, `BudgetRequirement` | Central production unit — see Scene Authority doc |
 | **Creative authority** | `DirectorNote`, `DepartmentPackage`, … | Departmental interpretation of requirements |
 | **Calendar authority** | `ShootDay` | When scenes shoot — does not define script content |
 | **Operations** | `TransportOrder`, … | Executes approved plan |
@@ -69,11 +71,7 @@ Impact analysis only — no execution engine.
 
 ### Scene (`scene`)
 
-**Central relationship hub** of production.
-
-Connects: script revision, locations, cast, BG, stunts, vehicles, props, department packages, media, shoot days.
-
-See `SCENE_RELATIONSHIP_HUB_TARGETS`.
+Owned by **Scene Authority** (`src/types/core/scene/`). Script Authority links revisions to scenes only.
 
 ### BreakdownElement (`breakdown-element`)
 

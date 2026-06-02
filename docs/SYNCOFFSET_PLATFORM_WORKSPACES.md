@@ -126,6 +126,8 @@ Version 1.0 — Platform taxonomy (sources, outputs, views)
 
 **Core views:** Vendors, Orders, Rentals, Deliveries, Compliance.
 
+**Vendor authority types:** `Vendor`, `VendorContact`, `VendorAgreement` — [`SYNCOFFSET_VENDOR_AUTHORITY.md`](./SYNCOFFSET_VENDOR_AUTHORITY.md)
+
 **Layout binding:** **Table-primary** with optional three-column for order detail; Compliance in IntelligencePanel.
 
 ---

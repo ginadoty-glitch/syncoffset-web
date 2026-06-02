@@ -7,12 +7,21 @@ Version 1.0
 - [`SYNCOFFSET_CORE_OBJECT_REGISTRY.md`](./SYNCOFFSET_CORE_OBJECT_REGISTRY.md) — canonical object kinds and relationships
 - [`SYNCOFFSET_SOURCE_INGESTION.md`](./SYNCOFFSET_SOURCE_INGESTION.md) — immutable sources, provenance, generated outputs (types)
 - [`SYNCOFFSET_RELATIONSHIP_GRAPH.md`](./SYNCOFFSET_RELATIONSHIP_GRAPH.md) — graph edges, queries, canonical paths (types)
-- [`SYNCOFFSET_SHOOTDAY_AUTHORITY.md`](./SYNCOFFSET_SHOOTDAY_AUTHORITY.md) — ShootDay authority service contracts (Article VII)
+- [`SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md`](./SYNCOFFSET_SHOOTDAY_AUTHORITY_V2.md) — Shoot Day execution authority (constitutional)
+- [`SYNCOFFSET_SHOOTDAY_AUTHORITY.md`](./SYNCOFFSET_SHOOTDAY_AUTHORITY.md) — legacy service contracts (deprecated)
 - [`SYNCOFFSET_BACKGROUND_AUTHORITY.md`](./SYNCOFFSET_BACKGROUND_AUTHORITY.md) — BG requirement, performer, assignment (Workspace 06)
 - [`SYNCOFFSET_CREATIVE_AUTHORITY.md`](./SYNCOFFSET_CREATIVE_AUTHORITY.md) — creative packages, tech packs, approvals (Media Hub / departments)
-- [`SYNCOFFSET_SCRIPT_AUTHORITY.md`](./SYNCOFFSET_SCRIPT_AUTHORITY.md) — script revision, scene, breakdown (constitutional root)
+- [`SYNCOFFSET_PRODUCTION_HIERARCHY.md`](./SYNCOFFSET_PRODUCTION_HIERARCHY.md) — normative production flow (source → shoot day)
+- [`SYNCOFFSET_SCRIPT_AUTHORITY.md`](./SYNCOFFSET_SCRIPT_AUTHORITY.md) — script revision, breakdown provenance
+- [`SYNCOFFSET_SCENE_AUTHORITY.md`](./SYNCOFFSET_SCENE_AUTHORITY.md) — scene, set, budget requirement (central hub)
 - [`SYNCOFFSET_CAST_AUTHORITY.md`](./SYNCOFFSET_CAST_AUTHORITY.md) — character, cast requirement, member, assignment
 - [`SYNCOFFSET_CREW_AUTHORITY.md`](./SYNCOFFSET_CREW_AUTHORITY.md) — department, crew requirement, member, assignment
+- [`SYNCOFFSET_VENDOR_AUTHORITY.md`](./SYNCOFFSET_VENDOR_AUTHORITY.md) — vendor, contact, agreement (Workspace 08)
+- [`SYNCOFFSET_ASSET_AUTHORITY.md`](./SYNCOFFSET_ASSET_AUTHORITY.md) — asset, requirement, assignment on sets (Workspace 04)
+- [`SYNCOFFSET_PURCHASE_AUTHORITY.md`](./SYNCOFFSET_PURCHASE_AUTHORITY.md) — purchase order, line, package (Workspace 08)
+- [`SYNCOFFSET_SHIPMENT_AUTHORITY.md`](./SYNCOFFSET_SHIPMENT_AUTHORITY.md) — shipment, stop, event, package (movement)
+- [`SYNCOFFSET_BROKERAGE_AUTHORITY.md`](./SYNCOFFSET_BROKERAGE_AUTHORITY.md) — brokerage record, line, package (customs)
+- [`SYNCOFFSET_RETURN_AUTHORITY.md`](./SYNCOFFSET_RETURN_AUTHORITY.md) — return record, line, package (recovery)
 - [`SYNCOFFSET_PLATFORM_WORKSPACES.md`](./SYNCOFFSET_PLATFORM_WORKSPACES.md) — where data is consumed in the UI
 - [`SYNCOFFSET_LAYOUT_CONSTITUTION.md`](./SYNCOFFSET_LAYOUT_CONSTITUTION.md) — how surfaces present data (no replacement of source truth)
 
@@ -67,9 +76,14 @@ Everything in SyncOffset shall resolve to one or more core objects.
 
 - Shoot Day, Prep Day, Wrap Day, Company Move, Holiday, Milestone
 
-### Script
+### Script & Scene
 
-- Script, Revision, Scene, Sequence, Element
+- Script, Revision, Scene (Scene Authority), Breakdown Element, Budget Requirement
+- See [`SYNCOFFSET_PRODUCTION_HIERARCHY.md`](./SYNCOFFSET_PRODUCTION_HIERARCHY.md)
+
+### Sets (production containers)
+
+- Set (`set`) — supports scenes; **not** a location subtype. See Scene Authority.
 
 ### People
 
@@ -77,7 +91,7 @@ Everything in SyncOffset shall resolve to one or more core objects.
 
 ### Locations
 
-- Location, Stage, Set, Parking Area, Holding Area
+- Location, Stage, Parking Area, Holding Area (physical sites — distinct from production **Set** containers)
 
 ### Assets
 
