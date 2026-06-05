@@ -22,12 +22,20 @@ import * as React from "react";
 
 import { computeGlobalPropagation } from "@/lib/operations/propagation";
 
-import { activeCallsheetRevision, driverAssignments, operationalConditions, PRODUCTION_TIME } from "./operational-data";
+import type { LogisticsDeskDataSource, Shipment } from "../_lib/logistics-desk-types";
+import type { DriverAssignment } from "./operational-data";
+import { activeCallsheetRevision, operationalConditions, PRODUCTION_TIME } from "./operational-data";
 import { OperationalIntelligence } from "./operational-intelligence";
-import type { Shipment } from "./shipment-data";
-import { shipments } from "./shipment-data";
 import { TransportDetail } from "./transport-detail";
 import { parseProductionMinutes, TransportQueue } from "./transport-queue";
+
+export type LogisticsProps = {
+  shipments: Shipment[];
+  driverAssignments: DriverAssignment[];
+  dataSource?: LogisticsDeskDataSource;
+  fallbackReason?: string | null;
+  persistenceAvailable?: boolean;
+};
 
 // ─── Manifest sort ─────────────────────────────────────────────────────────────
 //
@@ -38,49 +46,64 @@ import { parseProductionMinutes, TransportQueue } from "./transport-queue";
 // urgency so coordinators can focus on active movement pressure.
 
 const urgencyOrder = { priority: 0, watch: 1, normal: 2 } as const;
-const productionMinutes = parseProductionMinutes(PRODUCTION_TIME) ?? 0;
+
+function sortShipments(shipments: Shipment[], productionMinutes: number): Shipment[] {
+  return [...shipments].sort((a, b) => {
+    const aCompleted = a.status === "Completed" ? 1 : 0;
+    const bCompleted = b.status === "Completed" ? 1 : 0;
+    if (aCompleted !== bCompleted) return aCompleted - bCompleted;
+
+    const urgencyDiff = urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
+    if (urgencyDiff !== 0) return urgencyDiff;
+
+    return temporalSortKey(a, productionMinutes) - temporalSortKey(b, productionMinutes);
+  });
+}
 
 /**
  * Returns a sort key based on temporal pressure for an order.
  * Lower = surfaces higher in the queue.
  */
-function temporalSortKey(s: Shipment): number {
+function temporalSortKey(s: Shipment, productionMinutes: number): number {
   if (s.status === "Completed") return 90;
-  // Hard-blocked orders with no ETA surface near top of their urgency tier.
   if (s.status === "On Hold" || s.status === "Awaiting Clearance") return 5;
 
   const etaMin = parseProductionMinutes(s.eta) ?? parseProductionMinutes(s.etaMeta);
   if (etaMin === null) return 20;
 
   const delta = etaMin - productionMinutes;
-  if (delta < 0) return 0; // overdue
-  if (delta < 20) return 10; // critical window
-  if (delta < 60) return 30; // approaching
-  return 50; // on schedule
+  if (delta < 0) return 0;
+  if (delta < 20) return 10;
+  if (delta < 60) return 30;
+  return 50;
 }
 
-const sortedShipments = [...shipments].sort((a, b) => {
-  // Completed orders sink regardless of urgency tag.
-  const aCompleted = a.status === "Completed" ? 1 : 0;
-  const bCompleted = b.status === "Completed" ? 1 : 0;
-  if (aCompleted !== bCompleted) return aCompleted - bCompleted;
+export function Logistics({
+  shipments,
+  driverAssignments,
+  dataSource = "mock",
+  fallbackReason = null,
+}: LogisticsProps) {
+  const productionMinutes = parseProductionMinutes(PRODUCTION_TIME) ?? 0;
+  const sortedShipments = React.useMemo(
+    () => sortShipments(shipments, productionMinutes),
+    [shipments, productionMinutes],
+  );
 
-  const urgencyDiff = urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
-  if (urgencyDiff !== 0) return urgencyDiff;
+  const [selectedOrderId, setSelectedOrderId] = React.useState<string | null>(
+    () => sortShipments(shipments, productionMinutes)[0]?.id ?? null,
+  );
 
-  return temporalSortKey(a) - temporalSortKey(b);
-});
+  React.useEffect(() => {
+    setSelectedOrderId((current) => {
+      if (current && sortedShipments.some((shipment) => shipment.id === current)) return current;
+      return sortedShipments[0]?.id ?? null;
+    });
+  }, [sortedShipments]);
 
-export function Logistics() {
-  const [selectedOrderId, setSelectedOrderId] = React.useState<string | null>(sortedShipments[0]?.id ?? null);
-
-  // Compute propagation state for ALL orders in a single pass.
   const derivedStates = React.useMemo(
     () => computeGlobalPropagation(sortedShipments, operationalConditions, activeCallsheetRevision, driverAssignments),
-    // Static mock data — deps array is stable.
-    // Future: [conditions, revision, assignments] from Supabase realtime.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [sortedShipments, driverAssignments],
   );
 
   const selectedShipment = shipments.find((s) => s.id === selectedOrderId) ?? null;
@@ -89,44 +112,48 @@ export function Logistics() {
   const linkedConditions = selectedDerived?.linkedConditions ?? [];
 
   return (
-    <div
-      data-content-padding="false"
-      className="grid h-[calc(100dvh-var(--dashboard-header-height))] overflow-hidden lg:grid-cols-[288px_minmax(0,1fr)_240px] lg:divide-x"
-    >
-      {/* LEFT — Compact transport manifest */}
-      <div className="h-full overflow-hidden">
-        <TransportQueue
-          shipments={sortedShipments}
-          derivedStates={derivedStates}
-          selectedShipmentId={selectedOrderId}
-          onSelectShipment={setSelectedOrderId}
-          productionTime={PRODUCTION_TIME}
-        />
-      </div>
+    <div className="flex h-[calc(100dvh-var(--dashboard-header-height))] flex-col overflow-hidden">
+      {dataSource === "mock" && fallbackReason ? (
+        <div className="shrink-0 border-amber-500/30 border-b bg-amber-500/5 px-4 py-2 text-amber-200/90 text-sm">
+          Mock manifest active — {fallbackReason}
+        </div>
+      ) : null}
 
-      {/* CENTER — Order detail with propagation banners and embedded map.
-           pt-[104px] aligns the map's top edge with the queue manifest list start,
-           which sits below the queue's CardHeader (~40px) + TabsList h-7 (~29px) +
-           gap + Search h-6 (~24px) + gap ≈ 105px. The padding reduces TransportDetail's
-           h-full content area by the same amount — the flex-1 ScrollArea absorbs it. */}
-      <div className="hidden h-full overflow-hidden lg:block lg:pt-[104px]">
-        <TransportDetail
-          shipment={selectedShipment}
-          assignment={selectedAssignment}
-          derived={selectedDerived}
-          linkedConditions={linkedConditions}
-        />
-      </div>
+      <div
+        data-content-padding="false"
+        className="grid min-h-0 flex-1 overflow-hidden lg:grid-cols-[288px_minmax(0,1fr)_240px] lg:divide-x"
+      >
+        {/* LEFT — Compact transport manifest */}
+        <div className="h-full overflow-hidden">
+          <TransportQueue
+            shipments={sortedShipments}
+            derivedStates={derivedStates}
+            selectedShipmentId={selectedOrderId}
+            onSelectShipment={setSelectedOrderId}
+            productionTime={PRODUCTION_TIME}
+          />
+        </div>
 
-      {/* RIGHT — Operational intelligence: conditions, revision, rush queue */}
-      <div className="hidden h-full overflow-hidden lg:block">
-        <OperationalIntelligence
-          selectedOrderId={selectedOrderId}
-          shipments={shipments}
-          conditions={operationalConditions}
-          revision={activeCallsheetRevision}
-          derivedStates={derivedStates}
-        />
+        {/* CENTER — Order detail with propagation banners and embedded map. */}
+        <div className="hidden h-full overflow-hidden lg:block lg:pt-[104px]">
+          <TransportDetail
+            shipment={selectedShipment}
+            assignment={selectedAssignment}
+            derived={selectedDerived}
+            linkedConditions={linkedConditions}
+          />
+        </div>
+
+        {/* RIGHT — Operational intelligence: conditions, revision, rush queue */}
+        <div className="hidden h-full overflow-hidden lg:block">
+          <OperationalIntelligence
+            selectedOrderId={selectedOrderId}
+            shipments={shipments}
+            conditions={operationalConditions}
+            revision={activeCallsheetRevision}
+            derivedStates={derivedStates}
+          />
+        </div>
       </div>
     </div>
   );

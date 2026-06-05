@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Droplets,
   Forklift,
-  type LucideIcon,
   Package,
   PackageCheck,
   PenLine,
@@ -15,98 +14,25 @@ import {
   Truck,
 } from "lucide-react";
 
-export type ShipmentStatus =
-  | "Scheduled"
-  | "En Route"
-  | "Dispatched"
-  | "Completed"
-  | "Held — Delayed"
-  | "On Hold"
-  | "Awaiting Clearance";
+export type {
+  AttachedDocument,
+  CustomerTier,
+  GeoCoordinate,
+  HandlingTag,
+  ManifestItem,
+  ProductionLogEntry,
+  RouteType,
+  RouteWaypoint,
+  Shipment,
+  ShipmentCustomer,
+  ShipmentHandling,
+  ShipmentLocation,
+  ShipmentStatus,
+  TransportMode,
+  Urgency,
+} from "../_lib/logistics-desk-types";
 
-export type TransportMode = "land" | "air" | "sea";
-export type RouteType = "road" | "flight" | "ship";
-export type CustomerTier = "Priority" | "Standard" | "Non-priority";
-export type Urgency = "priority" | "watch" | "normal";
-
-export type GeoCoordinate = [longitude: number, latitude: number];
-
-export type ShipmentLocation = {
-  coordinates: GeoCoordinate;
-  display: string;
-  country: string;
-  countryCode: string;
-};
-
-export type ShipmentCustomer = {
-  name: string;
-  initials: string;
-  id: string;
-  tier: CustomerTier;
-  tierLabel: string;
-};
-
-export type HandlingTag = {
-  label: string;
-  icon: LucideIcon;
-};
-
-export type ShipmentHandling = {
-  label: string;
-  note: string;
-  tags: HandlingTag[];
-};
-
-export type RouteWaypoint = {
-  location: string;
-  time: string;
-  note: string;
-  state: "completed" | "active" | "pending" | "restricted";
-};
-
-export type ManifestItem = {
-  description: string;
-  qty: string;
-  dept: string;
-  note?: string;
-};
-
-export type ProductionLogEntry = {
-  time: string;
-  from: string;
-  message: string;
-  type: "dispatch" | "update" | "alert" | "confirmation";
-};
-
-export type AttachedDocument = {
-  name: string;
-  ref: string;
-  type: "call-sheet" | "movement-order" | "permit" | "ci" | "revision";
-  issued: string;
-};
-
-export type Shipment = {
-  id: string;
-  customer: ShipmentCustomer;
-  origin: ShipmentLocation;
-  destination: ShipmentLocation;
-  cargo: string;
-  handling: ShipmentHandling;
-  weight: string;
-  eta: string;
-  etaMeta: string;
-  status: ShipmentStatus;
-  progress: number;
-  mode: TransportMode;
-  routeType: RouteType;
-  transportNumber: string;
-  operationalNote: string;
-  urgency: Urgency;
-  route: RouteWaypoint[];
-  manifest: ManifestItem[];
-  productionLog: ProductionLogEntry[];
-  documents: AttachedDocument[];
-};
+import type { Shipment, ShipmentCustomer, ShipmentLocation } from "../_lib/logistics-desk-types";
 
 // Production locations — Greater Vancouver area
 const bridgeStudios: ShipmentLocation = {
