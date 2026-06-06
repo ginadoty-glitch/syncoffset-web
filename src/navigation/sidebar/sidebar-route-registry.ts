@@ -16,17 +16,47 @@ export type HiddenRouteEntry = {
 
 /** MOCK + Studio Admin demos — excluded from sidebar, search, and production shortcuts. */
 export const hiddenMockRoutes: readonly HiddenRouteEntry[] = [
-  {
-    path: "/dashboard/logistics",
-    classification: "MOCK",
-    dataSource: "Mock",
-    note: "shipment-data.ts, operational-data.ts",
-  },
   { path: "/dashboard/logistics/brokerage", classification: "MOCK", dataSource: "Mock", note: "brokerage-data.ts" },
-  { path: "/dashboard/logistics/transport-orders", classification: "PLACEHOLDER", dataSource: "None" },
-  { path: "/dashboard/logistics/shipments", classification: "PLACEHOLDER", dataSource: "None" },
+  {
+    path: "/dashboard/logistics/shipments",
+    classification: "DEPRECATED",
+    dataSource: "None",
+    note: "Superseded by /logistics/shipment-tracking",
+  },
   { path: "/dashboard/logistics/rush", classification: "PLACEHOLDER", dataSource: "None" },
   { path: "/dashboard/logistics/holdbacks", classification: "PLACEHOLDER", dataSource: "None" },
+  // Displaced from sidebar during canon architecture expansion (2026-06-05).
+  // Routes preserved on disk — functionality intact, no sidebar entry.
+  {
+    path: "/dashboard/production-documents",
+    classification: "PARTIALLY IMPLEMENTED",
+    dataSource: "Supabase",
+    note: "Read surface — displaced, not in canon",
+  },
+  {
+    path: "/dashboard/operations",
+    classification: "PARTIALLY IMPLEMENTED",
+    dataSource: "Supabase",
+    note: "Read surface — displaced, not in canon",
+  },
+  {
+    path: "/dashboard/live-budget",
+    classification: "PARTIALLY IMPLEMENTED",
+    dataSource: "Supabase",
+    note: "Read surface — displaced, not in canon",
+  },
+  {
+    path: "/ingestion",
+    classification: "PRODUCTION READY",
+    dataSource: "Supabase",
+    note: "Ingestion — displaced, not in canon",
+  },
+  {
+    path: "/ingestion/upload",
+    classification: "PRODUCTION READY",
+    dataSource: "None",
+    note: "Ingestion upload — displaced, not in canon",
+  },
   { path: "/dashboard/communications/chat", classification: "MOCK", dataSource: "Mock", note: "chat-data.ts" },
   { path: "/dashboard/communications/email", classification: "MOCK", dataSource: "Mock", note: "email-data.ts" },
   {

@@ -112,7 +112,7 @@ export function Logistics({
   const linkedConditions = selectedDerived?.linkedConditions ?? [];
 
   return (
-    <div className="flex h-[calc(100dvh-var(--dashboard-header-height))] flex-col overflow-hidden">
+    <div className="flex h-full flex-col overflow-hidden">
       {dataSource === "mock" && fallbackReason ? (
         <div className="shrink-0 border-amber-500/30 border-b bg-amber-500/5 px-4 py-2 text-amber-200/90 text-sm">
           Mock manifest active — {fallbackReason}

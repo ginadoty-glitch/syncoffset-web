@@ -50,7 +50,7 @@ export async function loadLogisticsDeskSnapshot(): Promise<LogisticsDeskSnapshot
 
   if (isMissingRelation(runsheetError)) {
     return {
-      ...emptySnapshot("Runsheet persistence is not available on this project."),
+      ...emptySnapshot("Transport order persistence is not available on this project."),
       showId,
     };
   }

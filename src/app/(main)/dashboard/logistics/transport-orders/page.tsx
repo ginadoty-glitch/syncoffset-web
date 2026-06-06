@@ -1,14 +1,14 @@
-/** RUNTIME CLASSIFICATION: PLACEHOLDER — not in production navigation. */
 import { Truck } from "lucide-react";
 
-import { ModulePlaceholder } from "../_components/module-placeholder";
+import { CanonWorkspaceShell } from "@/components/canon/canon-workspace-shell";
 
-export default function Page() {
+export default function TransportOrdersPage() {
   return (
-    <ModulePlaceholder
+    <CanonWorkspaceShell
+      group="Logistics"
       title="Transport Orders"
+      description="Transport orders for crew, equipment, and material moves."
       icon={Truck}
-      description="Create, assign, and manage transport orders across the production. This workspace is being built."
     />
   );
 }

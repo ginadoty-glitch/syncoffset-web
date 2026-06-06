@@ -4,7 +4,7 @@ import type { LogisticsDeskSnapshot, ResolvedLogisticsDeskData } from "./logisti
 import { buildLogisticsDeskViewModel } from "./map-logistics-desk";
 
 /**
- * Prefer live runsheet data when the loader succeeds and returns rows.
+ * Prefer live transport order data when the loader succeeds and returns rows.
  * Otherwise fall back to mock manifest + driver assignments for rollback safety.
  */
 export function resolveLogisticsDeskData(snapshot: LogisticsDeskSnapshot): ResolvedLogisticsDeskData {
@@ -25,7 +25,7 @@ export function resolveLogisticsDeskData(snapshot: LogisticsDeskSnapshot): Resol
   const fallbackReason =
     snapshot.loadError !== null
       ? `Supabase load failed — ${snapshot.loadError}`
-      : "No runsheets found for this production.";
+      : "No transport orders found for this production.";
 
   return {
     shipments: mockShipments,
