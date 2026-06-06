@@ -22,7 +22,7 @@ export default async function ProductionCalendarPage({ searchParams }: PageProps
 
   const hasAnyProductionDay = data.cells.some((c) => c.inMonth && c.day !== null);
 
-  const useMock = !data.loadError && !hasAnyProductionDay;
+  const useMock = !hasAnyProductionDay;
   const displayData = useMock ? buildDefaultMockWallCalendarMonth() : data;
 
   return (
