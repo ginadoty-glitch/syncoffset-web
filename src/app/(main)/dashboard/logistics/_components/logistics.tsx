@@ -81,7 +81,7 @@ function temporalSortKey(s: Shipment, productionMinutes: number): number {
 export function Logistics({
   shipments,
   driverAssignments,
-  dataSource = "mock",
+  dataSource: _dataSource = "live",
   fallbackReason = null,
 }: LogisticsProps) {
   const productionMinutes = parseProductionMinutes(PRODUCTION_TIME) ?? 0;
@@ -113,9 +113,9 @@ export function Logistics({
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      {dataSource === "mock" && fallbackReason ? (
-        <div className="shrink-0 border-amber-500/30 border-b bg-amber-500/5 px-4 py-2 text-amber-200/90 text-sm">
-          Mock manifest active — {fallbackReason}
+      {fallbackReason && shipments.length === 0 ? (
+        <div className="shrink-0 border-border border-b bg-muted/20 px-4 py-2 text-muted-foreground text-sm">
+          {fallbackReason}
         </div>
       ) : null}
 

@@ -5,6 +5,8 @@ import { ProductionStripMonth } from "@/components/production-calendar/productio
 import { adjacentMonth, parseCalendarMonthParam } from "@/lib/production-calendar/calendar-utils";
 import { loadProductionCalendarMonth } from "@/lib/production-calendar/load-production-calendar-month";
 
+import "@/styles/production-wall-calendar.css";
+
 export const dynamic = "force-dynamic";
 
 type PageProps = {
@@ -21,7 +23,7 @@ export default async function ProductionCalendarPage({ searchParams }: PageProps
   const hasAnyProductionDay = data.cells.some((c) => c.inMonth && c.day !== null);
 
   return (
-    <div className="flex flex-col gap-6 px-4 py-6 md:px-6 md:py-8" data-content-padding="false">
+    <div className="flex flex-col gap-4 px-2 py-4 md:px-4 md:py-6" data-content-padding="false">
       <ProductionCalendarToolbar data={data} prev={prev} next={next} />
 
       {data.loadError ? (
@@ -34,19 +36,12 @@ export default async function ProductionCalendarPage({ searchParams }: PageProps
 
       {!data.loadError && !hasAnyProductionDay ? (
         <ProductionCalendarEmpty
-          message="Month grid is ready — seed calendar days to fill cells (DAY #, location, scenes, obligations). No demo rows."
+          message="Month grid is ready — publish schedule days to fill wall cells with DAY #, location, scenes, units, and notes."
           showMigrationHint={data.tablesAvailable}
         />
       ) : null}
 
-      {!data.loadError ? <ProductionStripMonth data={data} /> : null}
-
-      {!data.loadError && hasAnyProductionDay ? (
-        <p className="text-[10px] text-muted-foreground">
-          Forecast layers: scenes (constitutional), obligations, work orders by due date, transport activity. Read-only
-          wall view — not Google Calendar.
-        </p>
-      ) : null}
+      <ProductionStripMonth data={data} variant="screen" />
     </div>
   );
 }

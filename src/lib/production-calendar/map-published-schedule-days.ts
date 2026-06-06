@@ -24,13 +24,35 @@ function extractEmbeddedShadow(rawNotes: string | null): { cleanedNotes: string;
   return { cleanedNotes, meta };
 }
 
-function mapDayType(raw: string | null, intExtHint: string | null): CalendarDayType {
-  const d = (raw ?? "").trim().toLowerCase();
-  if (d === "prep" || d === "shoot" || d === "wrap" || d === "travel" || d === "company-move") {
+function mapDayType(raw: string | null): CalendarDayType {
+  const d = (raw ?? "").trim().toLowerCase().replace(/_/g, "-");
+  if (d === "construction" || d.includes("construction")) return "prep";
+  const known: CalendarDayType[] = [
+    "prep",
+    "shoot",
+    "wrap",
+    "travel",
+    "company-move",
+    "holiday",
+    "dark-day",
+    "tech-scout",
+    "weather-hold",
+    "strike",
+    "pickup",
+    "reshoot",
+    "camera-test",
+    "custom",
+  ];
+  if (known.includes(d as CalendarDayType)) {
     return d as CalendarDayType;
   }
-  const ie = (intExtHint ?? "").toUpperCase();
-  if (ie.startsWith("E")) return "shoot";
+  if (d.includes("tech") && d.includes("scout")) return "tech-scout";
+  if (d.includes("dark")) return "dark-day";
+  if (d.includes("holiday")) return "holiday";
+  if (d.includes("prep")) return "prep";
+  if (d.includes("construct")) return "prep";
+  if (d.includes("wrap")) return "wrap";
+  if (d.includes("travel")) return "travel";
   return "shoot";
 }
 
@@ -61,8 +83,8 @@ export function publishedScheduleDayToCalendarRow(row: PublishedScheduleDayRow):
     row: {
       id: row.id,
       calendar_date: dateIso,
-      day_number: parsed.meta?.scenes?.length ? row.strip_position + 1 : row.strip_position + 1,
-      day_type: mapDayType(row.day_type, row.day_type),
+      day_number: row.strip_position + 1,
+      day_type: mapDayType(row.day_type),
       shoot_location: shootLocation,
       unit_label: (parsed.meta?.unitLabel ?? "").trim(),
       zone_color: (parsed.meta?.zone ?? "unit-a").trim() || "unit-a",

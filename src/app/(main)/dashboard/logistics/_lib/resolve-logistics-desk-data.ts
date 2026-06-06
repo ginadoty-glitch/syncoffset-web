@@ -1,11 +1,9 @@
-import { driverAssignments as mockDriverAssignments } from "../_components/operational-data";
-import { shipments as mockShipments } from "../_components/shipment-data";
 import type { LogisticsDeskSnapshot, ResolvedLogisticsDeskData } from "./logistics-desk-types";
 import { buildLogisticsDeskViewModel } from "./map-logistics-desk";
 
 /**
  * Prefer live transport order data when the loader succeeds and returns rows.
- * Otherwise fall back to mock manifest + driver assignments for rollback safety.
+ * Phase 1C: no mock fallback — empty manifest when Supabase has no rows.
  */
 export function resolveLogisticsDeskData(snapshot: LogisticsDeskSnapshot): ResolvedLogisticsDeskData {
   const viewModel = buildLogisticsDeskViewModel(snapshot);
@@ -28,11 +26,11 @@ export function resolveLogisticsDeskData(snapshot: LogisticsDeskSnapshot): Resol
       : "No transport orders found for this production.";
 
   return {
-    shipments: mockShipments,
-    driverAssignments: mockDriverAssignments,
-    dataSource: "mock",
+    shipments: [],
+    driverAssignments: viewModel.driverAssignments,
+    dataSource: "live",
     fallbackReason,
     loadError: snapshot.loadError,
-    persistenceAvailable: snapshot.persistenceAvailable,
+    persistenceAvailable: viewModel.persistenceAvailable,
   };
 }

@@ -1,0 +1,295 @@
+/* SyncOffset Production Wall Calendar — film strip-calendar layout + 24×36 print */
+
+.production-wall-calendar {
+  --wall-cell-min-height: 11.5rem;
+  --wall-border: #2b3a55;
+  --wall-text: #f8fafc;
+  --wall-text-muted: #94a3b8;
+  --wall-grid-bg: #0f172a;
+  --wall-header-bg: #101a2d;
+}
+
+.production-wall-calendar__month-title {
+  letter-spacing: 0.06em;
+}
+
+.production-wall-calendar__weekday-row {
+  border: 1px solid var(--wall-border);
+  background: var(--wall-header-bg);
+}
+
+.production-wall-calendar__weekday-cell {
+  border-right: 1px solid var(--wall-border);
+  color: var(--wall-text-muted);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  padding: 0.5rem 0.35rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.production-wall-calendar__weekday-cell:last-child {
+  border-right: none;
+}
+
+.production-wall-calendar__grid {
+  border: 1px solid var(--wall-border);
+  border-top: none;
+}
+
+.production-wall-calendar__week-row {
+  border-bottom: 1px solid var(--wall-border);
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.production-wall-calendar__week-row:last-child {
+  border-bottom: none;
+}
+
+.production-wall-calendar__cell {
+  border-right: 1px solid var(--wall-border);
+  min-height: var(--wall-cell-min-height);
+  padding: 0.35rem 0.4rem;
+}
+
+.production-wall-calendar__cell:last-child {
+  border-right: none;
+}
+
+.production-wall-calendar__cell--outside {
+  background: #131e33;
+  opacity: 0.45;
+}
+
+.production-wall-calendar__cell--empty {
+  background: #18243a;
+}
+
+.production-wall-calendar__date-num {
+  color: var(--wall-text);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.production-wall-calendar__headline {
+  color: var(--wall-text);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  margin-top: 0.25rem;
+  text-transform: uppercase;
+}
+
+.production-wall-calendar__location {
+  color: var(--wall-text);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.production-wall-calendar__scenes {
+  color: #dbeafe;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  margin-top: 0.2rem;
+}
+
+.production-wall-calendar__scene-loc {
+  color: var(--wall-text-muted);
+  font-size: 0.5625rem;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.production-wall-calendar__notes {
+  color: var(--wall-text-muted);
+  font-size: 0.5625rem;
+  line-height: 1.35;
+  margin-top: auto;
+  padding-top: 0.25rem;
+}
+
+.production-wall-calendar__unit-badge {
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 2px;
+  display: inline-block;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin-top: 0.2rem;
+  padding: 0.1rem 0.25rem;
+  text-transform: uppercase;
+}
+
+.production-wall-calendar__legend {
+  border: 1px solid var(--wall-border);
+  background: #18243a;
+}
+
+.production-wall-calendar__legend-swatch {
+  border: 1px solid rgb(255 255 255 / 12%);
+  height: 0.75rem;
+  width: 0.75rem;
+}
+
+/* Day-type block fills — wall calendar color coding */
+.wall-block-prep {
+  background: rgb(245 158 11 / 22%);
+  border-left: 3px solid #f59e0b;
+}
+
+.wall-block-shoot {
+  background: rgb(16 185 129 / 22%);
+  border-left: 3px solid #10b981;
+}
+
+.wall-block-wrap {
+  background: rgb(56 189 248 / 18%);
+  border-left: 3px solid #38bdf8;
+}
+
+.wall-block-travel {
+  background: rgb(139 92 246 / 18%);
+  border-left: 3px solid #8b5cf6;
+}
+
+.wall-block-tech-scout {
+  background: rgb(59 130 246 / 18%);
+  border-left: 3px solid #3b82f6;
+}
+
+.wall-block-holiday {
+  background: rgb(100 116 139 / 22%);
+  border-left: 3px solid #64748b;
+}
+
+.wall-block-dark-day {
+  background: rgb(30 41 59 / 55%);
+  border-left: 3px dashed #475569;
+}
+
+.wall-block-second-unit {
+  background: rgb(168 85 247 / 16%);
+  border-left: 3px solid #a855f7;
+}
+
+.wall-block-splinter-unit {
+  background: rgb(236 72 153 / 16%);
+  border-left: 3px solid #ec4899;
+}
+
+.wall-block-custom {
+  background: #1e2b45;
+  border-left: 3px solid #2b3a55;
+}
+
+.wall-unit-second {
+  background: rgb(168 85 247 / 25%);
+  color: #e9d5ff;
+}
+
+.wall-unit-splinter {
+  background: rgb(236 72 153 / 25%);
+  color: #fbcfe8;
+}
+
+.wall-unit-main {
+  background: rgb(56 189 248 / 18%);
+  color: #bae6fd;
+}
+
+/* Print mode — 24×36 landscape wall calendar */
+html.production-calendar-print-mode [data-sidebar="sidebar"],
+html.production-calendar-print-mode [data-sidebar="trigger"],
+html.production-calendar-print-mode header,
+html.production-calendar-print-mode .production-calendar-screen-only {
+  display: none !important;
+}
+
+html.production-calendar-print-mode [data-slot="sidebar-inset"],
+html.production-calendar-print-mode .peer-data-\[variant\=inset\]\:border {
+  border: none !important;
+  margin: 0 !important;
+  max-width: none !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+html.production-calendar-print-mode body {
+  background: #fff !important;
+  color: #0f172a !important;
+}
+
+html.production-calendar-print-mode .production-wall-calendar {
+  --wall-cell-min-height: 2.35in;
+  --wall-border: #1e293b;
+  --wall-text: #0f172a;
+  --wall-text-muted: #475569;
+  --wall-grid-bg: #fff;
+  --wall-header-bg: #f1f5f9;
+  background: #fff;
+  box-shadow: none;
+  margin: 0;
+  max-width: none;
+  padding: 0.25in 0.35in;
+}
+
+html.production-calendar-print-mode .production-wall-calendar__cell--outside {
+  background: #f8fafc;
+  opacity: 0.6;
+}
+
+html.production-calendar-print-mode .production-wall-calendar__cell--empty {
+  background: #fff;
+}
+
+html.production-calendar-print-mode .production-wall-calendar__legend {
+  background: #f8fafc;
+  break-inside: avoid;
+  margin-top: 0.2in;
+  page-break-inside: avoid;
+}
+
+html.production-calendar-print-mode .production-wall-calendar__grid {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+@media print {
+  @page {
+    margin: 0.25in 0.35in;
+    size: 36in 24in;
+  }
+
+  html.production-calendar-print-mode [data-sidebar="sidebar"],
+  html.production-calendar-print-mode header,
+  html.production-calendar-print-mode .production-calendar-screen-only {
+    display: none !important;
+  }
+
+  html.production-calendar-print-mode body {
+    background: #fff !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  html.production-calendar-print-mode .production-wall-calendar {
+    height: auto;
+    overflow: visible !important;
+  }
+
+  html.production-calendar-print-mode .production-wall-calendar__grid,
+  html.production-calendar-print-mode .production-wall-calendar__week-row {
+    overflow: visible !important;
+  }
+}

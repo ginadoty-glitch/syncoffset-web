@@ -1,14 +1,11 @@
-import { Route } from "lucide-react";
+/** RUNTIME CLASSIFICATION: PRODUCTION — read-only trips + trip_stops; live Supabase only. */
 
-import { CanonWorkspaceShell } from "@/components/canon/canon-workspace-shell";
+import { TripsIndex } from "@/components/trips/trips-index";
+import { loadTrips } from "@/lib/trips/load-trips";
 
-export default function TripsPage() {
-  return (
-    <CanonWorkspaceShell
-      group="Logistics"
-      title="Trips"
-      description="Active and completed trips with driver assignments and stop sequences."
-      icon={Route}
-    />
-  );
+export const dynamic = "force-dynamic";
+
+export default async function TripsPage() {
+  const data = await loadTrips();
+  return <TripsIndex data={data} />;
 }

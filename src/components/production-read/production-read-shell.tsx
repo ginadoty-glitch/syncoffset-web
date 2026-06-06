@@ -26,7 +26,9 @@ export function ProductionReadShell({
       <header className="shrink-0">
         <p className="text-muted-foreground text-xs uppercase tracking-widest">{eyebrow}</p>
         <h1 className="text-2xl tracking-tight">{title}</h1>
-        <p className="text-muted-foreground text-sm">{subtitle}</p>
+        <p className="text-muted-foreground text-sm">
+          {subtitle} · <span className="font-mono tabular-nums">{count}</span> records
+        </p>
       </header>
 
       {loadError ? (
