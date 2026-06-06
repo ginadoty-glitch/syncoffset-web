@@ -10,7 +10,7 @@ import type { CalendarDayType } from "@/types/core/production-calendar/calendar-
 
 const WEEKDAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 
-const ZONE_STRIP_COLOR: Record<string, string> = {
+const ZONE_STRIP_BG: Record<string, string> = {
   van: "bg-emerald-600",
   north: "bg-sky-600",
   east: "bg-amber-600",
@@ -48,23 +48,24 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
   const sceneNumbers = cell.scenes.map((s) => s.scene_number);
   const sceneRefLine = formatSceneReferenceList(sceneNumbers);
   const isShootDay = dayType === "shoot" && productionDay.day_number != null;
-  const zoneColor = ZONE_STRIP_COLOR[productionDay.zone_color ?? ""] ?? "bg-emerald-600";
+  const zoneBg = ZONE_STRIP_BG[productionDay.zone_color ?? ""] ?? "bg-emerald-600";
 
   if (isShootDay) {
     return (
       <div className={cn("production-wall-calendar__cell flex flex-col", blockClass)}>
-        <span className="production-wall-calendar__date-num">{dayNum}</span>
-
-        {/* Production strip — dominant visual element */}
-        <div className={cn("mt-1 flex flex-col items-center justify-center rounded-sm px-1 py-2", zoneColor)}>
-          <span className="font-mono text-[15px] font-black leading-tight tracking-wider text-white drop-shadow-sm">
-            DAY {productionDay.day_number}
-          </span>
-          {productionDay.shoot_location?.trim() ? (
-            <span className="mt-0.5 text-center text-[9px] font-bold leading-tight tracking-wide text-white/90 uppercase">
-              {productionDay.shoot_location}
+        {/* Header row — date box + strip share the same line (PDF canonical layout) */}
+        <div className="flex items-stretch gap-0">
+          <span className="production-wall-calendar__date-num shrink-0 self-start pr-1">{dayNum}</span>
+          <div className={cn("flex min-w-0 flex-1 items-baseline gap-1 rounded-sm px-1.5 py-0.5", zoneBg)}>
+            <span className="shrink-0 font-mono text-[11px] font-black leading-tight tracking-wider text-white">
+              DAY {productionDay.day_number}
             </span>
-          ) : null}
+            {productionDay.shoot_location?.trim() ? (
+              <span className="min-w-0 truncate text-[9px] font-bold leading-tight tracking-wide text-white/90 uppercase">
+                {productionDay.shoot_location}
+              </span>
+            ) : null}
+          </div>
         </div>
 
         {unit ? (
@@ -97,7 +98,6 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
     );
   }
 
-  // Non-shoot day types: prep, travel, wrap, holiday, etc.
   const typeLabel = dayTypeLabel(dayType).toUpperCase();
   const location = productionDay.shoot_location?.trim();
 
