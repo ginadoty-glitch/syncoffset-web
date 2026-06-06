@@ -189,6 +189,7 @@ export async function transitionIngestionStatus(
 
     if (to === "approved") {
       await syncDocumentStatusForSource(sourceDocumentId, "approved");
+      await triggerScheduleParseIfApplicable(sourceDocumentId);
     }
     if (to === "rejected") {
       await syncDocumentStatusForSource(sourceDocumentId, "draft");
@@ -233,6 +234,27 @@ export async function getSourceDocumentDownloadUrl(
   }
 
   return { ok: true, url: signed.signedUrl, fileName: sourceFile.originalFileName };
+}
+
+const SCHEDULE_PARSE_KINDS = new Set(["shoot-schedule", "one-liner", "dood"]);
+
+async function triggerScheduleParseIfApplicable(sourceDocumentId: string): Promise<void> {
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from("source_documents")
+      .select("source_document_kind")
+      .eq("id", sourceDocumentId)
+      .maybeSingle();
+
+    if (!data?.source_document_kind) return;
+    if (!SCHEDULE_PARSE_KINDS.has(data.source_document_kind as string)) return;
+
+    const { parseAndMirrorSchedule } = await import("./schedule-actions");
+    await parseAndMirrorSchedule(sourceDocumentId);
+  } catch {
+    // Schedule parsing failure must not block document approval
+  }
 }
 
 async function syncDocumentStatusForSource(sourceDocumentId: string, statusId: "approved" | "draft"): Promise<void> {

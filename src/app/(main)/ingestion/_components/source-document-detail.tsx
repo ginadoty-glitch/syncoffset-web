@@ -13,6 +13,8 @@ import { DocumentTimelineView } from "./document-timeline";
 import { DownloadOriginalButton } from "./download-original-button";
 import { IngestionDetailActions } from "./ingestion-detail-actions";
 
+const SCHEDULE_KINDS = new Set(["shoot-schedule", "one-liner", "dood"]);
+
 function formatDate(iso: string) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
 }
@@ -37,6 +39,7 @@ export async function SourceDocumentDetailView({ detail }: { detail: SourceDocum
         <IngestionDetailActions
           sourceDocumentId={sourceDocument.id}
           ingestionStatus={sourceDocument.ingestion_status}
+          sourceDocumentKind={sourceDocument.source_document_kind}
         />
       </div>
 
@@ -74,6 +77,24 @@ export async function SourceDocumentDetailView({ detail }: { detail: SourceDocum
           </div>
         </CardContent>
       </Card>
+
+      {sourceDocument.ingestion_status === "approved" && SCHEDULE_KINDS.has(sourceDocument.source_document_kind) && (
+        <Card>
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-medium text-sm">Schedule Import</p>
+                <p className="text-muted-foreground text-xs">
+                  This schedule has been parsed. Review and publish to the Production Calendar.
+                </p>
+              </div>
+              <Button size="sm" asChild>
+                <Link href={`/ingestion/${sourceDocument.id}/schedule-preview`}>View Schedule Preview</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {timeline && timeline.entries.length > 0 && (
         <Card>
