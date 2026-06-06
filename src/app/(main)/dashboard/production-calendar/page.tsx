@@ -1,9 +1,9 @@
-import { ProductionCalendarEmpty } from "@/components/production-calendar/production-calendar-empty";
 import { ProductionCalendarLegend } from "@/components/production-calendar/production-calendar-legend";
 import { ProductionCalendarToolbar } from "@/components/production-calendar/production-calendar-toolbar";
 import { ProductionStripMonth } from "@/components/production-calendar/production-strip-month";
 import { adjacentMonth, parseCalendarMonthParam } from "@/lib/production-calendar/calendar-utils";
 import { loadProductionCalendarMonth } from "@/lib/production-calendar/load-production-calendar-month";
+import { buildDefaultMockWallCalendarMonth } from "@/lib/production-calendar/mock-wall-calendar-data";
 
 import "@/styles/production-wall-calendar.css";
 
@@ -22,6 +22,9 @@ export default async function ProductionCalendarPage({ searchParams }: PageProps
 
   const hasAnyProductionDay = data.cells.some((c) => c.inMonth && c.day !== null);
 
+  const useMock = !data.loadError && !hasAnyProductionDay;
+  const displayData = useMock ? buildDefaultMockWallCalendarMonth() : data;
+
   return (
     <div className="flex flex-col gap-4 px-2 py-4 md:px-4 md:py-6" data-content-padding="false">
       <ProductionCalendarToolbar data={data} prev={prev} next={next} />
@@ -32,16 +35,15 @@ export default async function ProductionCalendarPage({ searchParams }: PageProps
         </div>
       ) : null}
 
-      <ProductionCalendarLegend />
-
-      {!data.loadError && !hasAnyProductionDay ? (
-        <ProductionCalendarEmpty
-          message="Month grid is ready — publish schedule days to fill wall cells with DAY #, location, scenes, units, and notes."
-          showMigrationHint={data.tablesAvailable}
-        />
+      {useMock ? (
+        <div className="rounded border border-border bg-muted/20 px-3 py-2 font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
+          Preview — August 2024 Block 03 mock data · No published schedule days for this production
+        </div>
       ) : null}
 
-      <ProductionStripMonth data={data} variant="screen" />
+      <ProductionCalendarLegend />
+
+      <ProductionStripMonth data={displayData} variant="screen" />
     </div>
   );
 }
