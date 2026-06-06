@@ -36,16 +36,16 @@ export function ProductionReadWorkspace<T extends { id: string }>({
   const selected = filtered.find((row) => row.id === selectedId) ?? filtered[0] ?? null;
 
   return (
-    <div className="grid min-h-[480px] overflow-hidden rounded-lg border border-border bg-card lg:grid-cols-[minmax(240px,320px)_minmax(0,1fr)]">
-      <div className="flex flex-col border-border border-b lg:border-r lg:border-b-0">
-        <div className="border-border border-b p-3">
+    <div className="grid min-h-[480px] overflow-hidden rounded-xl border border-[var(--desk-border-subtle)] bg-card lg:grid-cols-[minmax(240px,320px)_minmax(0,1fr)]">
+      <div className="flex flex-col border-[var(--desk-border-subtle)] border-b lg:border-r lg:border-b-0">
+        <div className="border-[var(--desk-border-subtle)] border-b p-3">
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={searchPlaceholder}
-            className="h-8 text-sm"
+            className="h-8 text-[13px]"
           />
-          <p className="mt-2 font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
+          <p className="mt-2 font-mono text-[10px] text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
             Showing {filtered.length} of {rows.length}
           </p>
         </div>
@@ -59,12 +59,16 @@ export function ProductionReadWorkspace<T extends { id: string }>({
                   type="button"
                   onClick={() => setSelectedId(row.id)}
                   className={cn(
-                    "w-full border-border border-b px-3 py-2.5 text-left transition-colors",
-                    active ? "bg-muted/50" : "hover:bg-muted/30",
+                    "w-full border-[var(--desk-border-subtle)] border-b px-3 py-2.5 text-left transition-colors",
+                    active
+                      ? "border-l-2 border-l-[var(--desk-primary)] bg-[var(--desk-row-selected)]"
+                      : "hover:bg-[var(--desk-hover)]",
                   )}
                 >
-                  <p className="font-medium text-sm">{renderListLabel(row)}</p>
-                  {meta ? <p className="mt-0.5 truncate text-muted-foreground text-xs">{meta}</p> : null}
+                  <p className="text-[13px] font-semibold leading-[18px]">{renderListLabel(row)}</p>
+                  {meta ? (
+                    <p className="mt-0.5 truncate text-[11px] leading-[15px] text-muted-foreground">{meta}</p>
+                  ) : null}
                 </button>
               </li>
             );
@@ -72,8 +76,12 @@ export function ProductionReadWorkspace<T extends { id: string }>({
         </ul>
       </div>
 
-      <div className="overflow-y-auto p-4 md:p-6">
-        {selected ? renderDetail(selected) : <p className="text-muted-foreground text-sm">{emptySelectionMessage}</p>}
+      <div className="overflow-y-auto p-4 md:p-5">
+        {selected ? (
+          renderDetail(selected)
+        ) : (
+          <p className="text-muted-foreground text-[13px]">{emptySelectionMessage}</p>
+        )}
       </div>
     </div>
   );

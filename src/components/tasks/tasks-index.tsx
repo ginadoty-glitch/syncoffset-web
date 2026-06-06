@@ -10,13 +10,13 @@ import { cn } from "@/lib/utils";
 function statusTone(status: string): string {
   switch (status) {
     case "done":
-      return "border-[var(--desk-emerald)]/40 bg-[var(--desk-emerald)]/10 text-[var(--desk-emerald)]";
+      return "border-[var(--desk-jade)]/40 bg-[var(--desk-jade)]/10 text-[var(--desk-jade)]";
     case "in_progress":
       return "border-[var(--desk-marigold)]/40 bg-[var(--desk-marigold)]/10 text-[var(--desk-marigold)]";
     case "blocked":
-      return "border-[var(--desk-red)]/40 bg-[var(--desk-red)]/10 text-[var(--desk-red)]";
+      return "border-[var(--desk-risk)]/40 bg-[var(--desk-risk)]/10 text-[var(--desk-risk)]";
     default:
-      return "border-border bg-muted/30 text-muted-foreground";
+      return "border-[var(--desk-border-subtle)] bg-muted/30 text-muted-foreground";
   }
 }
 
@@ -53,17 +53,17 @@ export function TasksIndex({ data }: { data: ProductionReadResult<ProductionTask
         renderDetail={(row) => (
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="font-semibold text-lg tracking-tight">{row.title}</h2>
+              <h2 className="text-[15px] font-extrabold tracking-[-0.02em]">{row.title}</h2>
               <span
                 className={cn(
-                  "inline-block rounded border px-1.5 py-0.5 text-[10px] uppercase tracking-wide",
+                  "inline-block rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em]",
                   statusTone(row.status),
                 )}
               >
                 {row.status.replace(/_/g, " ")}
               </span>
             </div>
-            <dl className="mt-4">
+            <dl className="mt-3">
               <ProductionReadDetailField label="Priority" value={row.priority} />
               <ProductionReadDetailField label="Assigned to" value={row.assignee_name} />
               <ProductionReadDetailField label="Due" value={formatDue(row.due_at)} />

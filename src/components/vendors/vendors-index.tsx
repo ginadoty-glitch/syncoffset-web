@@ -32,17 +32,17 @@ export function VendorsIndex({ data }: { data: ProductionReadResult<VendorRow> }
       loadError={data.loadError}
       emptyMessage="No vendors in"
     >
-      <div className="mb-3 flex flex-wrap gap-2">
+      <div className="mb-3 flex flex-wrap gap-1.5">
         {categories.map((cat) => (
           <button
             key={cat}
             type="button"
             onClick={() => setCategory(cat)}
             className={cn(
-              "rounded border px-2 py-1 text-[10px] uppercase tracking-wide",
+              "rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.04em]",
               category === cat
                 ? "border-primary/40 bg-primary/10 text-primary"
-                : "border-border bg-muted/20 text-muted-foreground",
+                : "border-[var(--desk-border-subtle)] bg-[var(--desk-surface-elevated)] text-muted-foreground",
             )}
           >
             {cat === "all" ? "All" : cat.replace(/-/g, " ")}
@@ -60,11 +60,13 @@ export function VendorsIndex({ data }: { data: ProductionReadResult<VendorRow> }
         renderListMeta={(row) => [row.category, row.phone].filter(Boolean).join(" · ")}
         renderDetail={(row) => (
           <div>
-            <h2 className="font-semibold text-lg tracking-tight">{row.name}</h2>
+            <h2 className="text-[15px] font-extrabold tracking-[-0.02em]">{row.name}</h2>
             {row.category ? (
-              <p className="mt-1 text-muted-foreground text-xs uppercase tracking-wide">{row.category}</p>
+              <p className="mt-1 text-[10px] font-bold text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
+                {row.category}
+              </p>
             ) : null}
-            <dl className="mt-4">
+            <dl className="mt-3">
               <ProductionReadDetailField label="Phone" value={row.phone} mono />
               <ProductionReadDetailField label="Email" value={row.email} />
               <ProductionReadDetailField label="Address" value={row.address} />

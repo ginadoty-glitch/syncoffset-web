@@ -9,6 +9,15 @@
   --wall-header-bg: #101a2d;
 }
 
+/* Light mode overrides */
+:root:not(.dark) .production-wall-calendar {
+  --wall-border: #CBD3DE;
+  --wall-text: #0F1117;
+  --wall-text-muted: #64748B;
+  --wall-grid-bg: #FFFFFF;
+  --wall-header-bg: #F1F3F5;
+}
+
 .production-wall-calendar__month-title {
   letter-spacing: 0.06em;
 }
@@ -63,8 +72,17 @@
   opacity: 0.45;
 }
 
+:root:not(.dark) .production-wall-calendar__cell--outside {
+  background: #F1F3F5;
+  opacity: 0.6;
+}
+
 .production-wall-calendar__cell--empty {
   background: #18243a;
+}
+
+:root:not(.dark) .production-wall-calendar__cell--empty {
+  background: #FFFFFF;
 }
 
 .production-wall-calendar__date-num {
@@ -104,6 +122,10 @@
   margin-top: 0.2rem;
 }
 
+:root:not(.dark) .production-wall-calendar__scenes {
+  color: #1E40AF;
+}
+
 .production-wall-calendar__scene-loc {
   color: var(--wall-text-muted);
   font-size: 0.5625rem;
@@ -131,15 +153,27 @@
   text-transform: uppercase;
 }
 
+:root:not(.dark) .production-wall-calendar__unit-badge {
+  border-color: rgb(0 0 0 / 15%);
+}
+
 .production-wall-calendar__legend {
   border: 1px solid var(--wall-border);
   background: #18243a;
+}
+
+:root:not(.dark) .production-wall-calendar__legend {
+  background: #F8F9FA;
 }
 
 .production-wall-calendar__legend-swatch {
   border: 1px solid rgb(255 255 255 / 12%);
   height: 0.75rem;
   width: 0.75rem;
+}
+
+:root:not(.dark) .production-wall-calendar__legend-swatch {
+  border-color: rgb(0 0 0 / 12%);
 }
 
 /* Day-type block fills — wall calendar color coding */
@@ -193,9 +227,18 @@
   border-left: 3px solid #2b3a55;
 }
 
+:root:not(.dark) .wall-block-custom {
+  background: #F1F3F5;
+  border-left-color: #CBD3DE;
+}
+
 .wall-unit-second {
   background: rgb(168 85 247 / 25%);
   color: #e9d5ff;
+}
+
+:root:not(.dark) .wall-unit-second {
+  color: #7C3AED;
 }
 
 .wall-unit-splinter {
@@ -203,9 +246,17 @@
   color: #fbcfe8;
 }
 
+:root:not(.dark) .wall-unit-splinter {
+  color: #DB2777;
+}
+
 .wall-unit-main {
   background: rgb(56 189 248 / 18%);
   color: #bae6fd;
+}
+
+:root:not(.dark) .wall-unit-main {
+  color: #0284C7;
 }
 
 /* Print mode — 24×36 landscape wall calendar */

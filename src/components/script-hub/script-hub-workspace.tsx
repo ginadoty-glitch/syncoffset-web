@@ -72,7 +72,7 @@ function sceneStatusTone(status: SceneStatus): string {
     case "superseded":
       return "border-[var(--desk-marigold)]/40 bg-[var(--desk-marigold)]/10 text-[var(--desk-marigold)]";
     case "omitted":
-      return "border-[var(--desk-red)]/40 bg-[var(--desk-red)]/10 text-[var(--desk-red)]";
+      return "border-[var(--desk-risk)]/40 bg-[var(--desk-risk)]/10 text-[var(--desk-risk)]";
     default:
       return "border-border bg-muted/40 text-muted-foreground";
   }
@@ -83,7 +83,7 @@ function itemStatusTone(status: BreakdownItemStatus): string {
     case "draft":
       return "border-[var(--desk-marigold)]/40 bg-[var(--desk-marigold)]/10 text-[var(--desk-marigold)]";
     case "approved":
-      return "border-[var(--desk-emerald)]/40 bg-[var(--desk-emerald)]/10 text-[var(--desk-emerald)]";
+      return "border-[var(--desk-jade)]/40 bg-[var(--desk-jade)]/10 text-[var(--desk-jade)]";
     case "ignored":
       return "border-border bg-muted/30 text-muted-foreground";
     default:
@@ -381,7 +381,7 @@ function BreakdownItemRow({
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
         {budgetLink ? (
-          <span className="rounded border border-[var(--desk-emerald)]/40 bg-[var(--desk-emerald)]/10 px-1.5 py-0.5 text-[10px] text-[var(--desk-emerald)]">
+          <span className="rounded border border-[var(--desk-jade)]/40 bg-[var(--desk-jade)]/10 px-1.5 py-0.5 text-[10px] text-[var(--desk-jade)]">
             Budget linked · {budgetLink.status}
           </span>
         ) : (

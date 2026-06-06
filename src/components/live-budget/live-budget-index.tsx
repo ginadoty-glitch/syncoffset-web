@@ -19,7 +19,7 @@ function money(value: number | null): string {
 function statusTone(status: string): string {
   switch (status) {
     case "approved":
-      return "border-[var(--desk-emerald)]/40 bg-[var(--desk-emerald)]/10 text-[var(--desk-emerald)]";
+      return "border-[var(--desk-jade)]/40 bg-[var(--desk-jade)]/10 text-[var(--desk-jade)]";
     case "actualized":
       return "border-[var(--desk-marigold)]/40 bg-[var(--desk-marigold)]/10 text-[var(--desk-marigold)]";
     default:

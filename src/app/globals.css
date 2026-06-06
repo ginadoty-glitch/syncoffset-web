@@ -55,95 +55,125 @@
 /* Default theme styles (used when no data-theme-preset is set or when 'default' is selected).
 These serve as the fallback; there is no separate default.css file. */
 :root {
-  --radius: 0.625rem;
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.75rem;
+  /* ── Light mode ── SyncOffset signed-off palette ─────────────── */
+  --background: #F8F9FA;
+  --foreground: #0F1117;
+  --card: #FFFFFF;
+  --card-foreground: #0F1117;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F1117;
+  --primary: #4A6478;
+  --primary-foreground: #FFFFFF;
+  --secondary: #F1F3F5;
+  --secondary-foreground: #0F1117;
+  --muted: #F1F3F5;
+  --muted-foreground: #64748B;
+  --accent: #F1F3F5;
+  --accent-foreground: #0F1117;
+  --destructive: #E5484D;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #4A6478;
+  --chart-1: #4A6478;
+  --chart-2: #12A680;
+  --chart-3: #A87214;
+  --chart-4: #6F7388;
+  --chart-5: #94A3B8;
+  --sidebar: #F8F9FA;
+  --sidebar-foreground: #0F1117;
+  --sidebar-primary: #4A6478;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F1F3F5;
+  --sidebar-accent-foreground: #0F1117;
+  --sidebar-border: #E2E8F0;
+  --sidebar-ring: #4A6478;
+
+  /* ── SyncOffset desk semantic tokens (light) ────────────────── */
+  --desk-primary: #4A6478;
+  --desk-marigold: #A87214;
+  --desk-jade: #12A680;
+  --desk-risk: #E5484D;
+  --desk-tracking: #3B82F6;
+  --desk-titanium: #6F6583;
+  --desk-success: #12A680;
+  --desk-warning: #A87214;
+  --desk-danger: #E5484D;
+  --desk-hover: #F1F3F5;
+  --desk-row-alt: #F8F9FA;
+  --desk-row-selected: #EEF2F6;
+  --desk-surface-elevated: #F1F3F5;
+  --desk-border-subtle: #EEF1F5;
+  --desk-text-dim: #94A3B8;
+  --desk-panel-border: #E2E8F0;
 
   /* fonts */
   --font-sans: var(--font-geist);
   --font-mono: var(--font-geist-mono);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
 }
 
 .dark {
-  /* ── Navy operations palette ─────────────────────────────────── */
-  --background: #0F172A;
-  --foreground: #F8FAFC;
-  --card: #18243A;
-  --card-foreground: #F8FAFC;
-  --popover: #18243A;
-  --popover-foreground: #F8FAFC;
-  --primary: #38BDF8;
-  --primary-foreground: #0F172A;
-  --secondary: #131E33;
-  --secondary-foreground: #F8FAFC;
-  --muted: #1E2B45;
-  --muted-foreground: #94A3B8;
-  --accent: #1E2B45;
-  --accent-foreground: #F8FAFC;
-  --destructive: #EF4444;
-  --border: #2B3A55;
-  --input: #2B3A55;
-  --ring: #38BDF8;
-  --chart-1: #38BDF8;
-  --chart-2: #10B981;
-  --chart-3: #F59E0B;
-  --chart-4: #64748B;
-  --chart-5: #94A3B8;
+  /* ── SyncOffset signed-off palette ─────────────────────────────
+     Background  #0D1117    Cards       #1E2B40
+     Primary     #4A6478    Marigold    #C8922A
+     Jade        #16C79A    Risk        #FF5A5F
+     Tracking    #4DA3FF    Titanium    #7C748E
+     Text        #F0F0EE
+     ─────────────────────────────────────────────────────────────── */
+  --background: #0D1117;
+  --foreground: #F0F0EE;
+  --card: #1E2B40;
+  --card-foreground: #F0F0EE;
+  --popover: #16202E;
+  --popover-foreground: #F0F0EE;
+  --primary: #4A6478;
+  --primary-foreground: #F0F0EE;
+  --secondary: #141C28;
+  --secondary-foreground: #F0F0EE;
+  --muted: #16202E;
+  --muted-foreground: #9CA8B8;
+  --accent: #1E2B40;
+  --accent-foreground: #F0F0EE;
+  --destructive: #FF5A5F;
+  --border: #233040;
+  --input: #233040;
+  --ring: #4A6478;
+  --chart-1: #4A6478;
+  --chart-2: #16C79A;
+  --chart-3: #C8922A;
+  --chart-4: #7C748E;
+  --chart-5: #9CA8B8;
 
   /* ── Sidebar ─────────────────────────────────────────────────── */
-  --sidebar: #101A2D;
-  --sidebar-foreground: #F8FAFC;
-  --sidebar-primary: #38BDF8;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1E3A5F;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: #2B3A55;
-  --sidebar-ring: #38BDF8;
+  --sidebar: #101A28;
+  --sidebar-foreground: #F0F0EE;
+  --sidebar-primary: #4A6478;
+  --sidebar-primary-foreground: #F0F0EE;
+  --sidebar-accent: #1E2B40;
+  --sidebar-accent-foreground: #F0F0EE;
+  --sidebar-border: #1C2A3C;
+  --sidebar-ring: #4A6478;
 
   /* ── SyncOffset desk semantic tokens ─────────────────────────── */
+  --desk-primary: #4A6478;
   --desk-marigold: #C8922A;
-  --desk-emerald: #47AE90;
-  --desk-red: #C43030;
-  --desk-success: #10B981;
-  --desk-warning: #F59E0B;
-  --desk-danger: #EF4444;
+  --desk-jade: #16C79A;
+  --desk-risk: #FF5A5F;
+  --desk-tracking: #4DA3FF;
+  --desk-titanium: #7C748E;
+  --desk-success: #16C79A;
+  --desk-warning: #C8922A;
+  --desk-danger: #FF5A5F;
   --desk-hover: #1A2942;
   --desk-row-alt: #1C2942;
   --desk-row-selected: #213454;
-  --desk-surface-elevated: #1E2B45;
+  --desk-surface-elevated: #1E2B40;
+  --desk-border-subtle: #1C2A3C;
+  --desk-text-dim: #6B7A8F;
   --desk-map-water: #0B1830;
   --desk-map-land: #132544;
-  --desk-panel-border: #2B3A55;
-  --desk-panel-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+  --desk-panel-border: #233040;
+  --desk-panel-shadow: 0 2px 12px rgba(0, 0, 0, 0.28);
 }
 
 @layer base {

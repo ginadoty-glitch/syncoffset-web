@@ -37,9 +37,11 @@ export function CrewIndex({ data }: { data: ProductionReadResult<CrewDirectoryRo
         }
         renderDetail={(row) => (
           <div>
-            <h2 className="font-semibold text-lg tracking-tight">{row.name}</h2>
-            <p className="mt-1 text-muted-foreground text-xs uppercase tracking-wide">{SOURCE_LABEL[row.source]}</p>
-            <dl className="mt-4">
+            <h2 className="text-[15px] font-extrabold tracking-[-0.02em]">{row.name}</h2>
+            <p className="mt-1 text-[10px] font-bold text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
+              {SOURCE_LABEL[row.source]}
+            </p>
+            <dl className="mt-3">
               <ProductionReadDetailField label="Department" value={row.department} />
               <ProductionReadDetailField label="Role" value={row.role} />
               <ProductionReadDetailField label="Position" value={row.position} />

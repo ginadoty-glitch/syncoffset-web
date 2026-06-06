@@ -33,14 +33,14 @@ export function LocationsIndex({ data }: { data: ProductionReadResult<LocationRo
           const link = mapsLink(row.address);
           return (
             <div>
-              <h2 className="font-semibold text-lg tracking-tight">{row.name}</h2>
-              <dl className="mt-4">
+              <h2 className="text-[15px] font-extrabold tracking-[-0.02em]">{row.name}</h2>
+              <dl className="mt-3">
                 <ProductionReadDetailField label="Address" value={row.address} />
                 <ProductionReadDetailField label="Notes" value={row.notes?.trim() || null} />
                 <ProductionReadDetailField
                   label="Parking notes"
                   value={
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-[var(--desk-text-dim)] text-[11px]">
                       Not stored on locations row — check notes or location manager on mobile.
                     </span>
                   }
@@ -48,7 +48,7 @@ export function LocationsIndex({ data }: { data: ProductionReadResult<LocationRo
                 <ProductionReadDetailField
                   label="Permit notes"
                   value={
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-[var(--desk-text-dim)] text-[11px]">
                       Not stored on locations row — check notes or location manager on mobile.
                     </span>
                   }
@@ -56,7 +56,7 @@ export function LocationsIndex({ data }: { data: ProductionReadResult<LocationRo
                 <ProductionReadDetailField
                   label="Contact info"
                   value={
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-[var(--desk-text-dim)] text-[11px]">
                       Not stored on locations row — use notes if recorded by production.
                     </span>
                   }
@@ -65,7 +65,12 @@ export function LocationsIndex({ data }: { data: ProductionReadResult<LocationRo
                   label="Map"
                   value={
                     link ? (
-                      <a href={link} target="_blank" rel="noopener noreferrer" className="text-primary underline">
+                      <a
+                        href={link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-[13px] font-extrabold text-primary underline"
+                      >
                         Open in Maps
                       </a>
                     ) : null
