@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { ChevronLeft, ChevronRight, Printer } from "lucide-react";
+import { ChevronLeft, ChevronRight, Printer, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import type { ProductionCalendarMonthData } from "@/lib/production-calendar/calendar-types";
@@ -47,6 +47,12 @@ export function ProductionCalendarToolbar({ data, prev, next }: Props) {
           >
             <Printer className="mr-1.5 size-4" />
             Print 24×36
+          </Link>
+        </Button>
+        <Button size="sm" asChild>
+          <Link href="/ingestion/upload?kind=shoot-schedule">
+            <Upload className="mr-1.5 size-4" />
+            Import Schedule
           </Link>
         </Button>
       </div>

@@ -22,8 +22,15 @@ const SOURCE_KINDS = Object.keys(SOURCE_INGESTION_REGISTRY) as SourceDocumentKin
 
 const acceptAttr = ALLOWED_UPLOAD_EXTENSIONS.join(",");
 
-export function UploadForm() {
-  const [sourceDocumentKind, setSourceDocumentKind] = React.useState<SourceDocumentKind>("script-revision");
+type UploadFormProps = {
+  defaultKind?: string;
+};
+
+export function UploadForm({ defaultKind }: UploadFormProps) {
+  const initialKind = SOURCE_KINDS.includes(defaultKind as SourceDocumentKind)
+    ? (defaultKind as SourceDocumentKind)
+    : "script-revision";
+  const [sourceDocumentKind, setSourceDocumentKind] = React.useState<SourceDocumentKind>(initialKind);
   const [uploadedBy, setUploadedBy] = React.useState("");
   const [file, setFile] = React.useState<File | null>(null);
   const [dragOver, setDragOver] = React.useState(false);
