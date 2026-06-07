@@ -12,15 +12,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ALLOWED_UPLOAD_EXTENSIONS } from "@/lib/ingestion/upload-mime";
+import { ALLOWED_UPLOAD_EXTENSIONS, mimeTypeForFileName } from "@/lib/ingestion/upload-mime";
 import { cn } from "@/lib/utils";
-import { uploadSourceDocument } from "@/server/ingestion-actions";
+import { createSourceDocumentFromStorage, getSignedUploadUrl } from "@/server/ingestion-actions";
 import { SOURCE_INGESTION_REGISTRY } from "@/types/core/source/ingestion-registry";
 import type { SourceDocumentKind } from "@/types/core/source/source-document-kind";
 
 const SOURCE_KINDS = Object.keys(SOURCE_INGESTION_REGISTRY) as SourceDocumentKind[];
 
 const acceptAttr = ALLOWED_UPLOAD_EXTENSIONS.join(",");
+
+async function sha256Hex(buffer: ArrayBuffer): Promise<string> {
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
 
 type UploadFormProps = {
   defaultKind?: string;
@@ -59,14 +66,46 @@ export function UploadForm({ defaultKind }: UploadFormProps) {
       return;
     }
 
-    const formData = new FormData();
-    formData.set("file", file);
-    formData.set("sourceDocumentKind", sourceDocumentKind);
-    if (uploadedBy.trim()) formData.set("uploadedBy", uploadedBy.trim());
+    const mimeType = mimeTypeForFileName(file.name);
+    if (!mimeType) {
+      toast.error("Could not determine file type.");
+      return;
+    }
 
     setPending(true);
     try {
-      const result = await uploadSourceDocument(formData);
+      const signed = await getSignedUploadUrl(sourceDocumentKind, file.name);
+      if (!signed.ok) {
+        toast.error(signed.error);
+        return;
+      }
+
+      const arrayBuffer = await file.arrayBuffer();
+
+      const uploadResp = await fetch(signed.signedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": mimeType },
+        body: arrayBuffer,
+      });
+
+      if (!uploadResp.ok) {
+        const body = await uploadResp.text().catch(() => "");
+        toast.error(`Storage upload failed (${uploadResp.status}): ${body || uploadResp.statusText}`);
+        return;
+      }
+
+      const checksumSha256 = await sha256Hex(arrayBuffer);
+
+      const result = await createSourceDocumentFromStorage({
+        bucket: signed.bucket,
+        objectPath: signed.objectPath,
+        fileName: file.name,
+        fileSize: file.size,
+        mimeType,
+        checksumSha256,
+        sourceDocumentKind,
+        uploadedBy: uploadedBy.trim() || undefined,
+      });
 
       if (!result.ok) {
         toast.error(result.error);

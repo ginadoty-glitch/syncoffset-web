@@ -273,6 +273,149 @@ async function syncDocumentStatusForSource(sourceDocumentId: string, statusId: "
     .eq("id", revision.document_id);
 }
 
+export type SignedUploadUrlResult =
+  | { ok: true; signedUrl: string; token: string; bucket: string; objectPath: string; sourceDocumentId: string }
+  | { ok: false; error: string };
+
+/**
+ * Creates a short-lived signed upload URL so the client can PUT the file
+ * directly to Supabase Storage without routing bytes through the serverless
+ * function. Payload is tiny — just the file name and kind.
+ */
+export async function getSignedUploadUrl(sourceDocumentKind: string, fileName: string): Promise<SignedUploadUrlResult> {
+  if (!isSourceDocumentKind(sourceDocumentKind)) {
+    return { ok: false, error: "Invalid source document kind." };
+  }
+
+  const productionId = getDefaultProductionId();
+  const sourceDocumentId = randomUUID();
+  const bucket = bucketForSourceKind(sourceDocumentKind as SourceDocumentKind);
+  const objectPath = buildStorageObjectPath(productionId, sourceDocumentId, fileName);
+
+  const supabase = createServiceClient();
+  const { data, error } = await supabase.storage.from(bucket).createSignedUploadUrl(objectPath);
+
+  if (error || !data) {
+    return { ok: false, error: error?.message ?? "Could not create upload URL." };
+  }
+
+  return {
+    ok: true,
+    signedUrl: data.signedUrl,
+    token: data.token,
+    bucket,
+    objectPath,
+    sourceDocumentId,
+  };
+}
+
+export type CreateSourceDocumentInput = {
+  bucket: string;
+  objectPath: string;
+  fileName: string;
+  fileSize: number;
+  mimeType: string;
+  checksumSha256: string;
+  sourceDocumentKind: SourceDocumentKind;
+  uploadedBy?: string;
+};
+
+/**
+ * Server action for the direct-upload flow: file is already in Supabase
+ * Storage (uploaded from the client), so we only create the database records.
+ */
+export async function createSourceDocumentFromStorage(
+  input: CreateSourceDocumentInput,
+): Promise<UploadSourceDocumentResult> {
+  const { bucket, objectPath, fileName, fileSize, mimeType, checksumSha256, sourceDocumentKind } = input;
+
+  const uploadedBy = input.uploadedBy?.trim() || "ingestion@syncoffset.local";
+  const productionId = getDefaultProductionId();
+  const sourceDocumentId = randomUUID();
+  const now = new Date().toISOString();
+  const storageRef = `${bucket}/${objectPath}`;
+
+  const immutable = {
+    isImmutable: true as const,
+    originalFileName: fileName,
+    uploadedAt: now,
+    uploadedBy,
+    extractionHistoryIds: [] as string[],
+  };
+
+  const sourceFile = {
+    storageRef,
+    originalFileName: fileName,
+    mimeType,
+    byteSize: fileSize,
+    checksumSha256,
+    receivedAt: now,
+  };
+
+  const ingestion = {
+    sourceDocumentId,
+    sourceSystem: "manual-upload" as const,
+    sourceVersion: "1",
+    importedAt: now,
+    importedBy: uploadedBy,
+  };
+
+  const row = {
+    id: sourceDocumentId,
+    production_id: productionId,
+    kind: "source-document",
+    status: "draft",
+    ingestion_status: "uploaded",
+    created_by: uploadedBy,
+    created_at: now,
+    modified_by: uploadedBy,
+    modified_at: now,
+    source_document_id: null,
+    source_version_id: null,
+    relationships: [],
+    source_document_kind: sourceDocumentKind,
+    immutable,
+    source_file: sourceFile,
+    version_chain: [],
+    supersession: {},
+    ingestion,
+  };
+
+  const supabase = createServiceClient();
+  const { error: insertError } = await supabase.from("source_documents").insert(row);
+
+  if (insertError) {
+    await supabase.storage.from(bucket).remove([objectPath]);
+    return { ok: false, error: `Database insert failed: ${insertError.message}` };
+  }
+
+  try {
+    const chain = await completeDocumentChain(supabase, {
+      sourceDocument: row as SourceDocumentRow,
+      productionId,
+      sourceDocumentKind,
+      uploadedBy,
+      now,
+    });
+
+    revalidateIngestion();
+
+    return {
+      ok: true,
+      sourceDocumentId,
+      storageRef,
+      documentId: chain.documentId,
+      documentRevisionId: chain.documentRevisionId,
+      documentCreated: chain.documentCreated,
+    };
+  } catch (chainError) {
+    await supabase.from("source_documents").delete().eq("id", sourceDocumentId);
+    await supabase.storage.from(bucket).remove([objectPath]);
+    const message = chainError instanceof Error ? chainError.message : "Document chain failed.";
+    return { ok: false, error: message };
+  }
+}
+
 function revalidateIngestion(sourceDocumentId?: string) {
   revalidatePath("/ingestion");
   revalidatePath("/ingestion/upload");
