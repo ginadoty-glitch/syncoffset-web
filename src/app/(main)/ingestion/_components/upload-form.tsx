@@ -65,19 +65,25 @@ export function UploadForm({ defaultKind }: UploadFormProps) {
     if (uploadedBy.trim()) formData.set("uploadedBy", uploadedBy.trim());
 
     setPending(true);
-    const result = await uploadSourceDocument(formData);
-    setPending(false);
+    try {
+      const result = await uploadSourceDocument(formData);
 
-    if (!result.ok) {
-      toast.error(result.error);
-      return;
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+
+      toast.success("File uploaded — document chain created", {
+        description: `Source ${result.sourceDocumentId.slice(0, 8)}… · Document ${result.documentId.slice(0, 8)}…${result.documentCreated ? " (new)" : " (revision)"}`,
+      });
+      setFile(null);
+      if (inputRef.current) inputRef.current.value = "";
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "Upload failed — unknown error.";
+      toast.error(message);
+    } finally {
+      setPending(false);
     }
-
-    toast.success("File uploaded — document chain created", {
-      description: `Source ${result.sourceDocumentId.slice(0, 8)}… · Document ${result.documentId.slice(0, 8)}…${result.documentCreated ? " (new)" : " (revision)"}`,
-    });
-    setFile(null);
-    if (inputRef.current) inputRef.current.value = "";
   };
 
   return (
