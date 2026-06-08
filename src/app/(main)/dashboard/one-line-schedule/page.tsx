@@ -1,5 +1,6 @@
 import { type OneLinerRow, OneLineScheduleView } from "@/components/one-line-schedule/one-line-schedule-view";
 import { getDefaultProductionId } from "@/lib/ingestion/production";
+import { getActiveShow } from "@/lib/production/get-active-show";
 import { extractShadow } from "@/lib/schedule/extract-shadow";
 import { createServiceClient } from "@/lib/supabase/server";
 
@@ -27,7 +28,7 @@ export default async function OneLineSchedulePage() {
 
   try {
     const supabase = createServiceClient();
-    const showId = getDefaultProductionId();
+    const showId = await getDefaultProductionId();
 
     const { data: rev } = await supabase
       .from("production_schedule_revisions")
@@ -94,5 +95,7 @@ export default async function OneLineSchedulePage() {
     // Supabase not configured
   }
 
-  return <OneLineScheduleView rows={rows} revisionName={revisionName} totalDays={totalDays} />;
+  const show = await getActiveShow();
+
+  return <OneLineScheduleView rows={rows} revisionName={revisionName} totalDays={totalDays} showName={show.name} />;
 }

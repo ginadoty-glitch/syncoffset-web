@@ -581,7 +581,7 @@ const SHOW_UPDATE = {
 export async function importSoupProductionData(): Promise<ImportResult> {
   const errors: string[] = [];
   const tables: Record<string, number> = {};
-  const showId = getDefaultProductionId();
+  const showId = await getDefaultProductionId();
   const supabase = createServiceClient();
   const now = new Date().toISOString();
 

@@ -60,7 +60,7 @@ function detectRevisionLabelFromFileName(fileName: string): DetectedRevisionLabe
   }
   const revLetter = n.match(/\brev(?:ision)?[\s._-]*([a-d])\b/i);
   if (revLetter?.[1]) {
-    return { display: `Rev ${revLetter[1]!.toUpperCase()}`, certainty: "certain", source: "filename" };
+    return { display: `Rev ${revLetter[1]?.toUpperCase()}`, certainty: "certain", source: "filename" };
   }
   const revNum = n.match(/\brev(?:ision)?[\s._-]*(\d+(?:\.\d+)?)\b/i);
   if (revNum?.[1]) {
@@ -215,7 +215,7 @@ type CsvPreview = { headers: string[]; rows: Record<string, string>[] };
 function buildCsvPreview(content: string, maxRows = 500): CsvPreview {
   const matrix = parseCsvMatrix(content.trim());
   if (matrix.length === 0) return { headers: [], rows: [] };
-  const rawHeaders = matrix[0]!.map((h, idx) => {
+  const rawHeaders = matrix[0]?.map((h, idx) => {
     const t = h.trim();
     return t !== "" ? t : `Column ${idx + 1}`;
   });
@@ -470,7 +470,7 @@ function parseCsvText(text: string, defaultBlockId: string, docId: string | null
 
 function matrixToPreview(matrix: string[][]): { headers: string[]; rows: Record<string, string>[] } {
   if (matrix.length === 0) return { headers: [], rows: [] };
-  const rawHeaders = matrix[0]!.map((h, idx) => {
+  const rawHeaders = matrix[0]?.map((h, idx) => {
     const t = h.trim();
     return t !== "" ? t : `Column ${idx + 1}`;
   });
@@ -604,7 +604,7 @@ export function parseScheduleBuffer(input: {
   const revCol = result.rows
     .map((r) => {
       const cells = r.rawCells;
-      return cells["revision"] ?? cells["Revision"] ?? cells["rev"] ?? "";
+      return cells.revision ?? cells.Revision ?? cells.rev ?? "";
     })
     .filter(Boolean);
   const resolved = resolveRevisionLabel({

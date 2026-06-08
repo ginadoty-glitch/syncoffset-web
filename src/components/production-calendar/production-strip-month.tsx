@@ -17,7 +17,7 @@ export function ProductionStripMonth({ data, variant = "screen", showMeta = true
   return (
     <div className="production-wall-calendar w-full">
       {showMeta ? (
-        <div className="mb-3 flex flex-col gap-1 border-b border-border pb-3">
+        <div className="mb-3 flex flex-col gap-1 border-border border-b pb-3">
           <h2 className="production-wall-calendar__month-title text-center font-bold text-2xl uppercase tracking-wide">
             {data.monthLabel}
           </h2>

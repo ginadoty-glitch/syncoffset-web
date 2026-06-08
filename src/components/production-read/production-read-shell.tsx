@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 type ProductionReadShellProps = {
+  showName?: string | null;
   eyebrow: string;
   title: string;
   subtitle: string;
@@ -8,10 +9,12 @@ type ProductionReadShellProps = {
   count: number;
   loadError: string | null;
   emptyMessage: string;
+  actions?: ReactNode;
   children: ReactNode;
 };
 
 export function ProductionReadShell({
+  showName,
   eyebrow,
   title,
   subtitle,
@@ -19,6 +22,7 @@ export function ProductionReadShell({
   count,
   loadError,
   emptyMessage,
+  actions,
   children,
 }: ProductionReadShellProps) {
   return (
@@ -26,12 +30,20 @@ export function ProductionReadShell({
       data-content-padding="false"
       className="mx-auto flex h-full max-w-[1600px] flex-col gap-3 px-4 py-5 md:px-5 md:py-6"
     >
-      <header className="shrink-0">
-        <p className="text-[10px] font-bold uppercase tracking-[0.06em] text-[var(--desk-primary)]">{eyebrow}</p>
-        <h1 className="text-xl font-extrabold tracking-tight">{title}</h1>
-        <p className="mt-0.5 text-muted-foreground text-xs">
-          {subtitle} · <span className="font-mono tabular-nums">{count}</span> records
-        </p>
+      <header className="flex shrink-0 items-start justify-between gap-4">
+        <div>
+          {showName ? <h1 className="font-extrabold text-2xl tracking-tight">{showName}</h1> : null}
+          <p className="font-bold text-[10px] text-[var(--desk-primary)] uppercase tracking-[0.06em]">{eyebrow}</p>
+          {showName ? (
+            <h2 className="font-extrabold text-lg tracking-tight">{title}</h2>
+          ) : (
+            <h1 className="font-extrabold text-xl tracking-tight">{title}</h1>
+          )}
+          <p className="mt-0.5 text-muted-foreground text-xs">
+            {subtitle} · <span className="font-mono tabular-nums">{count}</span> records
+          </p>
+        </div>
+        {actions != null ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
       </header>
 
       {loadError ? (

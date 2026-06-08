@@ -28,13 +28,13 @@ export default function ImportSoupPage() {
       <header>
         <p className="text-muted-foreground text-xs uppercase tracking-widest">Ingestion</p>
         <h1 className="text-2xl tracking-tight">Import Production Data — Alphabet Soup</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
+        <p className="mt-1 text-muted-foreground text-sm">
           Populates schedule days, locations, crew contacts, and prep tasks from the 4 production documents.
         </p>
       </header>
 
       <div className="rounded-lg border border-border p-6">
-        <h2 className="mb-4 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Import Summary</h2>
+        <h2 className="mb-4 font-semibold text-muted-foreground text-sm uppercase tracking-wider">Import Summary</h2>
         <ul className="space-y-2 text-sm">
           <li className="flex items-center gap-2">
             <Database className="size-4 text-muted-foreground" />
@@ -76,7 +76,7 @@ export default function ImportSoupPage() {
 
         {result && (
           <div className="mt-6 rounded-md border border-border bg-muted/30 p-4">
-            <h3 className="text-sm font-semibold mb-2">
+            <h3 className="mb-2 font-semibold text-sm">
               {result.errors.length === 0 ? "All tables populated" : "Import completed with errors"}
             </h3>
             {Object.entries(result.tables).length > 0 && (
@@ -91,7 +91,7 @@ export default function ImportSoupPage() {
               </ul>
             )}
             {result.errors.length > 0 && (
-              <ul className="mt-3 space-y-1 text-sm text-red-400">
+              <ul className="mt-3 space-y-1 text-red-400 text-sm">
                 {result.errors.map((err, i) => (
                   <li key={i} className="flex items-center gap-2">
                     <XCircle className="size-3.5" />

@@ -24,7 +24,7 @@ export function SetDrawingsPanel({ documents, hasSet }: { documents: SetDocument
         />
         <div className="flex flex-wrap gap-2">
           {DRAWING_TYPES.map((t) => (
-            <span key={t} className="rounded-md border border-dashed px-2 py-1 text-muted-foreground text-[10px]">
+            <span key={t} className="rounded-md border border-dashed px-2 py-1 text-[10px] text-muted-foreground">
               {t}
             </span>
           ))}

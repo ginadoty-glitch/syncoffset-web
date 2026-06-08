@@ -13,7 +13,7 @@ export function ProductionCalendarPrintFrame({ monthLabel }: { monthLabel: strin
   }, []);
 
   return (
-    <div className="production-calendar-screen-only mb-4 flex items-center justify-between gap-3 border-b border-border pb-3 print:hidden">
+    <div className="production-calendar-screen-only mb-4 flex items-center justify-between gap-3 border-border border-b pb-3 print:hidden">
       <div>
         <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">Print preview</p>
         <p className="font-semibold text-sm uppercase">{monthLabel} · 24×36 landscape</p>

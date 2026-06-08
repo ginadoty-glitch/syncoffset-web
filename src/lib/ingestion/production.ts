@@ -1,11 +1,11 @@
+import { getActiveProductionId } from "@/lib/production/get-active-production-id";
+
 /**
- * Default production tenant for Phase 3 (single-production dev).
- * Replace with session production scope when Auth + RBAC land.
+ * Active production tenant — resolves from cookie, then env fallback.
+ *
+ * Previously synchronous and env-only (Phase 3 single-production dev).
+ * Now delegates to getActiveProductionId() for cookie-based production switching.
  */
-export function getDefaultProductionId(): string {
-  const id = process.env.NEXT_PUBLIC_DEFAULT_PRODUCTION_ID;
-  if (!id) {
-    throw new Error("Missing NEXT_PUBLIC_DEFAULT_PRODUCTION_ID");
-  }
-  return id;
+export async function getDefaultProductionId(): Promise<string> {
+  return getActiveProductionId();
 }

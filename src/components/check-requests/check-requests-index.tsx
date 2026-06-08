@@ -31,9 +31,16 @@ function statusTone(status: string): string {
   }
 }
 
-export function CheckRequestsIndex({ data }: { data: ProductionReadResult<ProductionCheckRequestRow> }) {
+export function CheckRequestsIndex({
+  data,
+  showName,
+}: {
+  data: ProductionReadResult<ProductionCheckRequestRow>;
+  showName?: string | null;
+}) {
   return (
     <ProductionReadShell
+      showName={showName}
       eyebrow="Finance · Check Requests"
       title="Check Requests"
       subtitle="Read-only · production_check_requests · staged payment intent"
@@ -58,13 +65,13 @@ export function CheckRequestsIndex({ data }: { data: ProductionReadResult<Produc
                 {row.request_number ?? row.id.slice(0, 8)}
               </ProductionReadTd>
               <ProductionReadTd className="font-medium">{row.vendor_name ?? "—"}</ProductionReadTd>
-              <ProductionReadTd className="capitalize text-muted-foreground">
+              <ProductionReadTd className="text-muted-foreground capitalize">
                 {row.request_scope.replace(/_/g, " ")}
               </ProductionReadTd>
               <ProductionReadTd className="text-right tabular-nums">
                 {money(row.requested_amount, row.currency_code)}
               </ProductionReadTd>
-              <ProductionReadTd className="capitalize text-muted-foreground text-xs">
+              <ProductionReadTd className="text-muted-foreground text-xs capitalize">
                 {row.payment_method_requested}
               </ProductionReadTd>
               <ProductionReadTd>

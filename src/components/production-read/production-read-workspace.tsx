@@ -65,9 +65,9 @@ export function ProductionReadWorkspace<T extends { id: string }>({
                       : "hover:bg-[var(--desk-hover)]",
                   )}
                 >
-                  <p className="text-[13px] font-semibold leading-[18px]">{renderListLabel(row)}</p>
+                  <p className="font-semibold text-[13px] leading-[18px]">{renderListLabel(row)}</p>
                   {meta ? (
-                    <p className="mt-0.5 truncate text-[11px] leading-[15px] text-muted-foreground">{meta}</p>
+                    <p className="mt-0.5 truncate text-[11px] text-muted-foreground leading-[15px]">{meta}</p>
                   ) : null}
                 </button>
               </li>
@@ -80,7 +80,7 @@ export function ProductionReadWorkspace<T extends { id: string }>({
         {selected ? (
           renderDetail(selected)
         ) : (
-          <p className="text-muted-foreground text-[13px]">{emptySelectionMessage}</p>
+          <p className="text-[13px] text-muted-foreground">{emptySelectionMessage}</p>
         )}
       </div>
     </div>

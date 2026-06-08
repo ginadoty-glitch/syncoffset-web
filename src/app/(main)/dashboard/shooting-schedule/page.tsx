@@ -5,6 +5,7 @@ import { Upload } from "lucide-react";
 import { ShootingScheduleView } from "@/components/shooting-schedule/shooting-schedule-view";
 import { Button } from "@/components/ui/button";
 import { getDefaultProductionId } from "@/lib/ingestion/production";
+import { getActiveShow } from "@/lib/production/get-active-show";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +22,7 @@ export default async function ShootingSchedulePage() {
 
   try {
     const supabase = createServiceClient();
-    const showId = getDefaultProductionId();
+    const showId = await getDefaultProductionId();
 
     const { data: rev } = await supabase
       .from("production_schedule_revisions")
@@ -42,12 +43,15 @@ export default async function ShootingSchedulePage() {
     // Supabase not configured
   }
 
+  const show = await getActiveShow();
+
   return (
     <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
       <header className="flex items-start justify-between gap-4">
         <div>
+          <h1 className="font-extrabold text-2xl tracking-tight">{show.name}</h1>
           <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
-          <h1 className="text-2xl tracking-tight">Shooting Schedule</h1>
+          <h2 className="text-xl tracking-tight">Shooting Schedule</h2>
           <p className="text-muted-foreground text-sm">
             {days.length > 0
               ? `${days.length} shoot days · Published revision`

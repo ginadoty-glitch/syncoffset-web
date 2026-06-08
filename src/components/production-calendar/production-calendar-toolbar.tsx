@@ -9,12 +9,13 @@ import type { ProductionCalendarMonthData } from "@/lib/production-calendar/cale
 import { monthParamFromParts } from "@/lib/production-calendar/calendar-utils";
 
 type Props = {
+  showName?: string | null;
   data: ProductionCalendarMonthData;
   prev: { year: number; month: number };
   next: { year: number; month: number };
 };
 
-export function ProductionCalendarToolbar({ data, prev, next }: Props) {
+export function ProductionCalendarToolbar({ showName, data, prev, next }: Props) {
   const monthParam = monthParamFromParts(data.year, data.month);
   const range = data.scheduleRange;
 
@@ -24,7 +25,12 @@ export function ProductionCalendarToolbar({ data, prev, next }: Props) {
     <div className="production-calendar-screen-only flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-semibold text-xl uppercase tracking-wide">Production Calendar</h1>
+          {showName ? <h1 className="font-extrabold text-2xl tracking-tight">{showName}</h1> : null}
+          {showName ? (
+            <h2 className="font-semibold text-lg uppercase tracking-wide">Production Calendar</h2>
+          ) : (
+            <h1 className="font-semibold text-xl uppercase tracking-wide">Production Calendar</h1>
+          )}
           {data.calendarName ? <p className="text-muted-foreground text-sm">{data.calendarName}</p> : null}
           <p className="text-muted-foreground text-xs">
             {data.monthLabel}

@@ -184,7 +184,7 @@ export function NavMain({ items }: NavMainProps) {
       {items.map((group) => (
         <SidebarGroup key={group.id}>
           {group.label && (
-            <SidebarGroupLabel className="mt-1 h-9 text-sidebar-foreground/90 text-sm font-semibold uppercase tracking-wider">
+            <SidebarGroupLabel className="mt-1 h-9 font-semibold text-sidebar-foreground/90 text-sm uppercase tracking-wider">
               {group.label}
             </SidebarGroupLabel>
           )}

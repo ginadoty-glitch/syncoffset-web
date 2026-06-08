@@ -86,8 +86,8 @@ export function NotificationsDigest() {
                         </span>
                         <span className="font-mono text-[8px] text-muted-foreground/45 tabular-nums">{item.time}</span>
                       </div>
-                      <div className="line-clamp-2 text-[9px] text-[#dbd5c5] leading-snug">{item.title}</div>
-                      {item.ref && <span className="font-mono text-[8px] text-[#bfd4ef]/70">{item.ref}</span>}
+                      <div className="line-clamp-2 text-[#dbd5c5] text-[9px] leading-snug">{item.title}</div>
+                      {item.ref && <span className="font-mono text-[#bfd4ef]/70 text-[8px]">{item.ref}</span>}
                     </div>
                   );
                 })}

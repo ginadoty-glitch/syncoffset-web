@@ -173,7 +173,7 @@ export function BrokerageIntelligence({
                       d.id === selectedDocId && "border-[#bfd4ef]/30 bg-[#bfd4ef]/[0.04]",
                     )}
                   >
-                    <div className="truncate text-[9px] text-[#dbd5c5]/85">{d.broker.company}</div>
+                    <div className="truncate text-[#dbd5c5]/85 text-[9px]">{d.broker.company}</div>
                     <div className="truncate text-[9px] text-muted-foreground/60">{d.title}</div>
                   </button>
                 ))}

@@ -19,7 +19,7 @@ export type DocumentDetailWithSet = {
 
 export async function listDocumentsForLinking(productionId?: string): Promise<DocumentListOption[]> {
   const supabase = createServiceClient();
-  const pid = productionId ?? getDefaultProductionId();
+  const pid = productionId ?? (await getDefaultProductionId());
 
   const { data, error } = await supabase
     .from("documents")

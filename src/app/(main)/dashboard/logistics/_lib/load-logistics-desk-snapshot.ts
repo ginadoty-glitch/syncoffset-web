@@ -37,7 +37,7 @@ export async function loadLogisticsDeskSnapshot(): Promise<LogisticsDeskSnapshot
 
   try {
     supabase = createServiceClient();
-    showId = getDefaultProductionId();
+    showId = await getDefaultProductionId();
   } catch (error) {
     return emptySnapshot(error instanceof Error ? error.message : "Supabase is not configured.");
   }

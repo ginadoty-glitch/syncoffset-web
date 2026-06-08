@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { SetsIndex } from "@/components/sets/sets-index";
 import { listProductionSets } from "@/lib/sets/list-production-sets";
 

@@ -58,7 +58,7 @@ export async function uploadSourceDocument(formData: FormData): Promise<UploadSo
       ? uploadedByRaw.trim()
       : "ingestion@syncoffset.local";
 
-  const productionId = getDefaultProductionId();
+  const productionId = await getDefaultProductionId();
   const sourceDocumentId = randomUUID();
   const now = new Date().toISOString();
   const bucket = bucketForSourceKind(sourceDocumentKind);
@@ -308,7 +308,7 @@ export async function getSignedUploadUrl(sourceDocumentKind: string, fileName: s
     return { ok: false, error: "Invalid source document kind." };
   }
 
-  const productionId = getDefaultProductionId();
+  const productionId = await getDefaultProductionId();
   const sourceDocumentId = randomUUID();
   const bucket = bucketForSourceKind(sourceDocumentKind as SourceDocumentKind);
   const objectPath = buildStorageObjectPath(productionId, sourceDocumentId, fileName);
@@ -351,7 +351,7 @@ export async function createSourceDocumentFromStorage(
   const { bucket, objectPath, fileName, fileSize, mimeType, checksumSha256, sourceDocumentKind } = input;
 
   const uploadedBy = input.uploadedBy?.trim() || "ingestion@syncoffset.local";
-  const productionId = getDefaultProductionId();
+  const productionId = await getDefaultProductionId();
   const sourceDocumentId = randomUUID();
   const now = new Date().toISOString();
   const storageRef = `${bucket}/${objectPath}`;

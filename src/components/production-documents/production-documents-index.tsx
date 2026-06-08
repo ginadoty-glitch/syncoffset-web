@@ -37,9 +37,16 @@ function formatUpdatedAt(iso: string): string {
   }
 }
 
-export function ProductionDocumentsIndex({ data }: { data: ProductionReadResult<ProductionDocumentRow> }) {
+export function ProductionDocumentsIndex({
+  data,
+  showName,
+}: {
+  data: ProductionReadResult<ProductionDocumentRow>;
+  showName?: string | null;
+}) {
   return (
     <ProductionReadShell
+      showName={showName}
       eyebrow="Production · Documents"
       title="Production Documents"
       subtitle="Read-only · archived sources from Expo · production_documents"
@@ -64,7 +71,7 @@ export function ProductionDocumentsIndex({ data }: { data: ProductionReadResult<
                 <p className="font-medium">{row.title}</p>
                 {row.is_read_only ? <span className="text-muted-foreground text-xs">Read-only archive</span> : null}
               </ProductionReadTd>
-              <ProductionReadTd className="capitalize text-muted-foreground">
+              <ProductionReadTd className="text-muted-foreground capitalize">
                 {formatKind(row.source_kind)}
               </ProductionReadTd>
               <ProductionReadTd>
@@ -81,10 +88,10 @@ export function ProductionDocumentsIndex({ data }: { data: ProductionReadResult<
                   {row.text_extract_status.replace(/_/g, " ")}
                 </span>
               </ProductionReadTd>
-              <ProductionReadTd className="text-right tabular-nums text-muted-foreground text-xs">
+              <ProductionReadTd className="text-right text-muted-foreground text-xs tabular-nums">
                 {row.page_count ?? "—"} / {row.row_count ?? "—"}
               </ProductionReadTd>
-              <ProductionReadTd className="text-right tabular-nums text-muted-foreground text-xs">
+              <ProductionReadTd className="text-right text-muted-foreground text-xs tabular-nums">
                 {formatUpdatedAt(row.updated_at)}
               </ProductionReadTd>
             </ProductionReadTr>

@@ -14,7 +14,7 @@ export async function loadForShow<T>(
   let showId: string;
 
   try {
-    showId = getDefaultProductionId();
+    showId = await getDefaultProductionId();
   } catch (error) {
     return emptyReadResult(error instanceof Error ? error.message : "Missing NEXT_PUBLIC_DEFAULT_PRODUCTION_ID.");
   }

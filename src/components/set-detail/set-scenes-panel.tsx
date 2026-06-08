@@ -35,7 +35,7 @@ export function SetScenesPanel({ scenes, hasSet }: { scenes: SceneRow[]; hasSet:
               <p className="line-clamp-3 text-[#dbd5c5] text-xs leading-relaxed">
                 {scene.description.trim() || "No description"}
               </p>
-              <div className="flex gap-4 text-muted-foreground text-[11px]">
+              <div className="flex gap-4 text-[11px] text-muted-foreground">
                 <span>Cast {scene.cast_count}</span>
                 <span>Assets {scene.asset_count}</span>
               </div>

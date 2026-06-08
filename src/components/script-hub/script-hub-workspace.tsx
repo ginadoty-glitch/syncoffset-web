@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 
 import Link from "next/link";
 
+import { FileText, Upload } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { DEPARTMENT_LENSES, filterItemsByDepartmentLens } from "@/lib/script-hub/department-lenses";
 import type {
   BreakdownItemStatus,
@@ -115,7 +118,7 @@ function sceneMetaParts(scene: ScriptHubData["scenes"][number]): string[] {
   ].filter(Boolean) as string[];
 }
 
-export function ScriptHubWorkspace({ data }: { data: ScriptHubData }) {
+export function ScriptHubWorkspace({ data, showName }: { data: ScriptHubData; showName?: string | null }) {
   const { selectedScript, scenes, breakdownItems, selectedSceneId, budgetByItemId } = data;
   const [departmentLens, setDepartmentLens] = useState<DepartmentLensId>("all");
   const [rawTextOpen, setRawTextOpen] = useState(false);
@@ -129,10 +132,35 @@ export function ScriptHubWorkspace({ data }: { data: ScriptHubData }) {
 
   return (
     <div className="flex h-[calc(100vh-var(--dashboard-header-height)-3rem)] min-h-[480px] flex-col gap-4">
-      <header className="shrink-0">
-        <p className="text-muted-foreground text-xs uppercase tracking-widest">Production · Script</p>
-        <h1 className="text-2xl tracking-tight">Script</h1>
-        <p className="text-muted-foreground text-sm">Read-only · live Supabase · Expo-authored data</p>
+      <header className="flex shrink-0 items-start justify-between gap-4">
+        <div>
+          {showName ? <h1 className="font-extrabold text-2xl tracking-tight">{showName}</h1> : null}
+          <p className="text-muted-foreground text-xs uppercase tracking-widest">Production · Script</p>
+          {showName ? (
+            <h2 className="text-xl tracking-tight">Script</h2>
+          ) : (
+            <h1 className="text-2xl tracking-tight">Script</h1>
+          )}
+          <p className="text-muted-foreground text-sm">
+            {data.scripts.length > 0
+              ? `${data.sceneCount} scenes · ${data.breakdownItemCount} breakdown items`
+              : "Production script viewer and scene breakdown workspace."}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/ingestion/upload?kind=script-revision">
+              <FileText className="mr-2 size-4" />
+              Upload Revision
+            </Link>
+          </Button>
+          <Button size="sm" asChild>
+            <Link href="/ingestion/upload?kind=script-revision">
+              <Upload className="mr-2 size-4" />
+              Upload Script
+            </Link>
+          </Button>
+        </div>
       </header>
 
       {data.loadError ? (
@@ -176,7 +204,7 @@ export function ScriptHubWorkspace({ data }: { data: ScriptHubData }) {
             ) : null}
 
             {data.previousScriptTitle ? (
-              <p className="rounded-md border border-[var(--desk-marigold)]/30 bg-[var(--desk-marigold)]/5 px-2 py-1.5 text-xs text-[var(--desk-marigold)]">
+              <p className="rounded-md border border-[var(--desk-marigold)]/30 bg-[var(--desk-marigold)]/5 px-2 py-1.5 text-[var(--desk-marigold)] text-xs">
                 Lineage · prior draft <span className="font-medium text-foreground">{data.previousScriptTitle}</span>
               </p>
             ) : null}

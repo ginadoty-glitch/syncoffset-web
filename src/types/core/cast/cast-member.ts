@@ -7,7 +7,6 @@
  * Constitutional object: kind "cast-member"
  */
 
-import type { ObjectId } from "../../operations/shared";
 import type { AuditableCoreObject } from "../base";
 import type { CastMemberAvailabilityStatus, CastMemberUnionStatus } from "./cast-contract-status";
 

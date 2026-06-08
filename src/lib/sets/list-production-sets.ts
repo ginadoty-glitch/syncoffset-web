@@ -32,7 +32,7 @@ export async function listProductionSets(): Promise<ProductionSetListResult> {
 
   try {
     supabase = createServiceClient();
-    productionId = getDefaultProductionId();
+    productionId = await getDefaultProductionId();
   } catch (error) {
     return {
       ...empty,

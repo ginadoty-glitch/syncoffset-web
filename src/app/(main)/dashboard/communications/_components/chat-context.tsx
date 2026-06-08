@@ -46,7 +46,7 @@ export function ChatContext({ channel }: { channel: ChatChannel }) {
       <div className="shrink-0 border-b px-3 py-2">
         <div className="flex items-center justify-between">
           <span className="text-[9px] text-muted-foreground uppercase tracking-[0.15em]">Channel Info</span>
-          <span className="font-mono text-[8px] text-[#47AE90]">{onShift} on shift</span>
+          <span className="font-mono text-[#47AE90] text-[8px]">{onShift} on shift</span>
         </div>
       </div>
 

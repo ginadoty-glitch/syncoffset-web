@@ -8,7 +8,7 @@ import { SetSectionEmpty } from "./set-section-empty";
 function Metric({ label, value }: { label: string; value: string | number }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <span className="text-muted-foreground text-[10px] uppercase tracking-wider">{label}</span>
+      <span className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</span>
       <span className="font-medium font-mono text-lg tabular-nums">{value}</span>
     </div>
   );

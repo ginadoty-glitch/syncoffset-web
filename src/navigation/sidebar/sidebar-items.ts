@@ -189,6 +189,7 @@ export const sidebarItems: NavGroup[] = [
     id: 8,
     label: "System",
     items: [
+      { title: "Productions", url: "/dashboard/productions", icon: Film, isNew: true },
       { title: "Crew", url: "/dashboard/crew", icon: Users, isNew: true },
       { title: "Settings", url: "/dashboard/settings", icon: Settings },
     ],

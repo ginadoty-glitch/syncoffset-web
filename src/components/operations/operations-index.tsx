@@ -33,9 +33,16 @@ function formatDue(iso: string | null): string {
   }
 }
 
-export function OperationsIndex({ data }: { data: ProductionReadResult<ProductionTaskRow> }) {
+export function OperationsIndex({
+  data,
+  showName,
+}: {
+  data: ProductionReadResult<ProductionTaskRow>;
+  showName?: string | null;
+}) {
   return (
     <ProductionReadShell
+      showName={showName}
       eyebrow="Production · Operations"
       title="Operations"
       subtitle="Read-only · production_tasks · operational queue from Expo"
@@ -70,9 +77,9 @@ export function OperationsIndex({ data }: { data: ProductionReadResult<Productio
                   {row.status.replace(/_/g, " ")}
                 </span>
               </ProductionReadTd>
-              <ProductionReadTd className="capitalize text-muted-foreground">{row.priority}</ProductionReadTd>
+              <ProductionReadTd className="text-muted-foreground capitalize">{row.priority}</ProductionReadTd>
               <ProductionReadTd className="text-muted-foreground">{row.assignee_name ?? "—"}</ProductionReadTd>
-              <ProductionReadTd className="tabular-nums text-muted-foreground text-xs">
+              <ProductionReadTd className="text-muted-foreground text-xs tabular-nums">
                 {formatDue(row.due_at)}
               </ProductionReadTd>
               <ProductionReadTd className="font-mono text-muted-foreground text-xs">

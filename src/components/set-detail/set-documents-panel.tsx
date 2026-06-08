@@ -55,7 +55,7 @@ export function SetDocumentsPanel({ documents, hasSet }: { documents: SetDocumen
             if (items.length === 0) return null;
             return (
               <div key={section.title} className="flex flex-col gap-2">
-                <h3 className="text-muted-foreground text-[10px] uppercase tracking-widest">{section.title}</h3>
+                <h3 className="text-[10px] text-muted-foreground uppercase tracking-widest">{section.title}</h3>
                 <ul className="flex flex-col gap-2">
                   {items.map((doc) => (
                     <li

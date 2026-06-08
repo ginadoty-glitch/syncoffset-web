@@ -19,9 +19,10 @@ function formatWhen(iso: string): string {
   }
 }
 
-export function TripsIndex({ data }: { data: ProductionReadResult<TripRow> }) {
+export function TripsIndex({ data, showName }: { data: ProductionReadResult<TripRow>; showName?: string | null }) {
   return (
     <ProductionReadShell
+      showName={showName}
       eyebrow="Logistics · Trips"
       title="Trips"
       subtitle="Read-only · trips + trip_stops · live Supabase"
@@ -50,8 +51,8 @@ export function TripsIndex({ data }: { data: ProductionReadResult<TripRow> }) {
         }
         renderDetail={(row) => (
           <div>
-            <h2 className="text-[15px] font-extrabold tracking-[-0.02em]">{tripLabel(row)}</h2>
-            <p className="mt-1 text-[10px] font-bold text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
+            <h2 className="font-extrabold text-[15px] tracking-[-0.02em]">{tripLabel(row)}</h2>
+            <p className="mt-1 font-bold text-[10px] text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
               {row.status}
             </p>
             <dl className="mt-3">
@@ -64,7 +65,7 @@ export function TripsIndex({ data }: { data: ProductionReadResult<TripRow> }) {
 
             {row.stops.length > 0 ? (
               <div className="mt-5">
-                <h3 className="mb-2 text-[10px] font-bold text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
+                <h3 className="mb-2 font-bold text-[10px] text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
                   Stops ({row.stops.length})
                 </h3>
                 <ol className="space-y-1.5">
@@ -77,7 +78,7 @@ export function TripsIndex({ data }: { data: ProductionReadResult<TripRow> }) {
                         <span className="font-mono text-[10px] text-[var(--desk-text-dim)]">{index + 1}</span>
                         <span
                           className={cn(
-                            "rounded-full border px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-[0.04em]",
+                            "rounded-full border px-1.5 py-0.5 font-bold text-[10px] uppercase tracking-[0.04em]",
                             stop.kind === "pickup"
                               ? "border-[var(--desk-marigold)]/40 bg-[var(--desk-marigold)]/10 text-[var(--desk-marigold)]"
                               : "border-[var(--desk-border-subtle)] text-muted-foreground",
@@ -85,16 +86,16 @@ export function TripsIndex({ data }: { data: ProductionReadResult<TripRow> }) {
                         >
                           {stop.kind}
                         </span>
-                        <span className="text-[10px] font-bold text-[var(--desk-text-dim)] uppercase tracking-[0.04em]">
+                        <span className="font-bold text-[10px] text-[var(--desk-text-dim)] uppercase tracking-[0.04em]">
                           {stop.status}
                         </span>
                       </div>
                       <p className="mt-1 text-[13px] leading-[18px]">{stop.address}</p>
                       {stop.vendor_name ? (
-                        <p className="mt-0.5 text-[11px] leading-[15px] text-muted-foreground">{stop.vendor_name}</p>
+                        <p className="mt-0.5 text-[11px] text-muted-foreground leading-[15px]">{stop.vendor_name}</p>
                       ) : null}
                       {stop.notes?.trim() ? (
-                        <p className="mt-1 text-[11px] leading-[15px] text-muted-foreground">{stop.notes.trim()}</p>
+                        <p className="mt-1 text-[11px] text-muted-foreground leading-[15px]">{stop.notes.trim()}</p>
                       ) : null}
                     </li>
                   ))}

@@ -1,5 +1,6 @@
 import { CastListView } from "@/components/cast/cast-list-view";
 import { getDefaultProductionId } from "@/lib/ingestion/production";
+import { getActiveShow } from "@/lib/production/get-active-show";
 import { createServiceClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,7 @@ export default async function CastListsPage() {
 
   try {
     const supabase = createServiceClient();
-    const showId = getDefaultProductionId();
+    const showId = await getDefaultProductionId();
     const { data } = await supabase
       .from("crew_contacts")
       .select("id, name, department, position, phone, email")
@@ -30,5 +31,7 @@ export default async function CastListsPage() {
     // Supabase not configured
   }
 
-  return <CastListView cast={cast} />;
+  const show = await getActiveShow();
+
+  return <CastListView cast={cast} showName={show.name} />;
 }

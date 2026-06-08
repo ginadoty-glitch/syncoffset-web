@@ -1,8 +1,11 @@
 "use client";
 
-import { format, parseISO } from "date-fns";
-import { ClipboardList } from "lucide-react";
+import Link from "next/link";
 
+import { format, parseISO } from "date-fns";
+import { ClipboardList, Upload } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 
 type PrepTask = {
@@ -24,7 +27,7 @@ function StatusPill({ status }: { status: string | null }) {
         ? "bg-amber-500/20 text-amber-400"
         : "bg-muted text-muted-foreground";
   return (
-    <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider ${color}`}>
+    <span className={`inline-block rounded px-1.5 py-0.5 font-medium text-[10px] uppercase tracking-wider ${color}`}>
       {s.replace("_", " ")}
     </span>
   );
@@ -36,13 +39,26 @@ function PriorityDot({ priority }: { priority: string | null }) {
   return null;
 }
 
-export function PrepMemoView({ tasks }: { tasks: PrepTask[] }) {
+export function PrepMemoView({ tasks, showName }: { tasks: PrepTask[]; showName?: string | null }) {
   if (tasks.length === 0) {
     return (
       <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
-        <header>
-          <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
-          <h1 className="text-2xl tracking-tight">Prep Memo</h1>
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            {showName ? <h1 className="font-extrabold text-2xl tracking-tight">{showName}</h1> : null}
+            <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
+            {showName ? (
+              <h2 className="text-xl tracking-tight">Prep Memo</h2>
+            ) : (
+              <h1 className="text-2xl tracking-tight">Prep Memo</h1>
+            )}
+          </div>
+          <Button size="sm" asChild>
+            <Link href="/ingestion/upload?kind=breakdown-package">
+              <Upload className="mr-2 size-4" />
+              Upload Prep Memo
+            </Link>
+          </Button>
         </header>
         <Empty className="min-h-[200px] border border-dashed">
           <EmptyHeader>
@@ -50,7 +66,7 @@ export function PrepMemoView({ tasks }: { tasks: PrepTask[] }) {
               <ClipboardList />
             </EmptyMedia>
             <EmptyTitle>No prep tasks</EmptyTitle>
-            <EmptyDescription>Import a prep schedule to populate this workspace.</EmptyDescription>
+            <EmptyDescription>Upload a prep schedule to populate this workspace.</EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>
@@ -59,10 +75,23 @@ export function PrepMemoView({ tasks }: { tasks: PrepTask[] }) {
 
   return (
     <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
-      <header>
-        <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
-        <h1 className="text-2xl tracking-tight">Prep Memo</h1>
-        <p className="text-muted-foreground mt-1 text-sm">{tasks.length} prep tasks</p>
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          {showName ? <h1 className="font-extrabold text-2xl tracking-tight">{showName}</h1> : null}
+          <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
+          {showName ? (
+            <h2 className="text-xl tracking-tight">Prep Memo</h2>
+          ) : (
+            <h1 className="text-2xl tracking-tight">Prep Memo</h1>
+          )}
+          <p className="mt-1 text-muted-foreground text-sm">{tasks.length} prep tasks</p>
+        </div>
+        <Button size="sm" asChild>
+          <Link href="/ingestion/upload?kind=breakdown-package">
+            <Upload className="mr-2 size-4" />
+            Upload Prep Memo
+          </Link>
+        </Button>
       </header>
 
       <div className="overflow-x-auto rounded-lg border border-border">

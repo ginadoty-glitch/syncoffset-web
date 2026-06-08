@@ -1,7 +1,10 @@
 "use client";
 
-import { Users } from "lucide-react";
+import Link from "next/link";
 
+import { Upload, Users } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 
 type CastRow = {
@@ -13,13 +16,26 @@ type CastRow = {
   email: string | null;
 };
 
-export function CastListView({ cast }: { cast: CastRow[] }) {
+export function CastListView({ cast, showName }: { cast: CastRow[]; showName?: string | null }) {
   if (cast.length === 0) {
     return (
       <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
-        <header>
-          <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
-          <h1 className="text-2xl tracking-tight">Cast Lists</h1>
+        <header className="flex items-start justify-between gap-4">
+          <div>
+            {showName ? <h1 className="font-extrabold text-2xl tracking-tight">{showName}</h1> : null}
+            <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
+            {showName ? (
+              <h2 className="text-xl tracking-tight">Cast Lists</h2>
+            ) : (
+              <h1 className="text-2xl tracking-tight">Cast Lists</h1>
+            )}
+          </div>
+          <Button size="sm" asChild>
+            <Link href="/ingestion/upload?kind=cast-list">
+              <Upload className="mr-2 size-4" />
+              Upload Cast List
+            </Link>
+          </Button>
         </header>
         <Empty className="min-h-[200px] border border-dashed">
           <EmptyHeader>
@@ -27,7 +43,7 @@ export function CastListView({ cast }: { cast: CastRow[] }) {
               <Users />
             </EmptyMedia>
             <EmptyTitle>No cast imported</EmptyTitle>
-            <EmptyDescription>Import production data to populate cast information.</EmptyDescription>
+            <EmptyDescription>Upload a cast list to populate this workspace.</EmptyDescription>
           </EmptyHeader>
         </Empty>
       </div>
@@ -36,10 +52,23 @@ export function CastListView({ cast }: { cast: CastRow[] }) {
 
   return (
     <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
-      <header>
-        <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
-        <h1 className="text-2xl tracking-tight">Cast Lists</h1>
-        <p className="text-muted-foreground mt-1 text-sm">{cast.length} cast members</p>
+      <header className="flex items-start justify-between gap-4">
+        <div>
+          {showName ? <h1 className="font-extrabold text-2xl tracking-tight">{showName}</h1> : null}
+          <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
+          {showName ? (
+            <h2 className="text-xl tracking-tight">Cast Lists</h2>
+          ) : (
+            <h1 className="text-2xl tracking-tight">Cast Lists</h1>
+          )}
+          <p className="mt-1 text-muted-foreground text-sm">{cast.length} cast members</p>
+        </div>
+        <Button size="sm" asChild>
+          <Link href="/ingestion/upload?kind=cast-list">
+            <Upload className="mr-2 size-4" />
+            Upload Cast List
+          </Link>
+        </Button>
       </header>
 
       <div className="overflow-x-auto rounded-lg border border-border">

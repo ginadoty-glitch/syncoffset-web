@@ -11,11 +11,11 @@
 
 /* Light mode overrides */
 :root:not(.dark) .production-wall-calendar {
-  --wall-border: #CBD3DE;
-  --wall-text: #0F1117;
-  --wall-text-muted: #64748B;
-  --wall-grid-bg: #FFFFFF;
-  --wall-header-bg: #F1F3F5;
+  --wall-border: #cbd3de;
+  --wall-text: #0f1117;
+  --wall-text-muted: #64748b;
+  --wall-grid-bg: #ffffff;
+  --wall-header-bg: #f1f3f5;
 }
 
 .production-wall-calendar__month-title {
@@ -73,7 +73,7 @@
 }
 
 :root:not(.dark) .production-wall-calendar__cell--outside {
-  background: #F1F3F5;
+  background: #f1f3f5;
   opacity: 0.6;
 }
 
@@ -82,7 +82,7 @@
 }
 
 :root:not(.dark) .production-wall-calendar__cell--empty {
-  background: #FFFFFF;
+  background: #ffffff;
 }
 
 .production-wall-calendar__date-num {
@@ -123,7 +123,7 @@
 }
 
 :root:not(.dark) .production-wall-calendar__scenes {
-  color: #1E40AF;
+  color: #1e40af;
 }
 
 .production-wall-calendar__scene-loc {
@@ -163,7 +163,7 @@
 }
 
 :root:not(.dark) .production-wall-calendar__legend {
-  background: #F8F9FA;
+  background: #f8f9fa;
 }
 
 .production-wall-calendar__legend-swatch {
@@ -228,8 +228,8 @@
 }
 
 :root:not(.dark) .wall-block-custom {
-  background: #F1F3F5;
-  border-left-color: #CBD3DE;
+  background: #f1f3f5;
+  border-left-color: #cbd3de;
 }
 
 .wall-unit-second {
@@ -238,7 +238,7 @@
 }
 
 :root:not(.dark) .wall-unit-second {
-  color: #7C3AED;
+  color: #7c3aed;
 }
 
 .wall-unit-splinter {
@@ -247,7 +247,7 @@
 }
 
 :root:not(.dark) .wall-unit-splinter {
-  color: #DB2777;
+  color: #db2777;
 }
 
 .wall-unit-main {
@@ -256,7 +256,7 @@
 }
 
 :root:not(.dark) .wall-unit-main {
-  color: #0284C7;
+  color: #0284c7;
 }
 
 /* Print mode — 24×36 landscape wall calendar */

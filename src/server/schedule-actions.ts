@@ -108,7 +108,7 @@ export async function parseAndMirrorSchedule(sourceDocumentId: string): Promise<
  */
 export async function publishScheduleRevision(revisionId: string): Promise<IngestionActionResult> {
   const supabase = createServiceClient();
-  const showId = getDefaultProductionId();
+  const showId = await getDefaultProductionId();
 
   const { data, error } = await supabase.rpc("publish_production_schedule_revision", {
     p_show_id: showId,
@@ -147,7 +147,7 @@ export async function loadSchedulePreview(_sourceDocumentId: string): Promise<{
   }>;
 } | null> {
   const supabase = createServiceClient();
-  const showId = getDefaultProductionId();
+  const showId = await getDefaultProductionId();
 
   const { data: revisions } = await supabase
     .from("production_schedule_revisions")

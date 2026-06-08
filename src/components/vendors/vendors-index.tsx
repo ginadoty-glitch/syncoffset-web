@@ -9,7 +9,7 @@ import type { ProductionReadResult } from "@/lib/production-read/empty-result";
 import { cn } from "@/lib/utils";
 import type { VendorRow } from "@/lib/vendors/types";
 
-export function VendorsIndex({ data }: { data: ProductionReadResult<VendorRow> }) {
+export function VendorsIndex({ data, showName }: { data: ProductionReadResult<VendorRow>; showName?: string | null }) {
   const [category, setCategory] = useState<string>("all");
 
   const categories = useMemo(() => {
@@ -24,6 +24,7 @@ export function VendorsIndex({ data }: { data: ProductionReadResult<VendorRow> }
 
   return (
     <ProductionReadShell
+      showName={showName}
       eyebrow="Accounting · Vendors"
       title="Vendor Lists"
       subtitle="Read-only · vendors table · live Supabase"
@@ -39,7 +40,7 @@ export function VendorsIndex({ data }: { data: ProductionReadResult<VendorRow> }
             type="button"
             onClick={() => setCategory(cat)}
             className={cn(
-              "rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.04em]",
+              "rounded-full border px-2.5 py-1 font-bold text-[11px] uppercase tracking-[0.04em]",
               category === cat
                 ? "border-primary/40 bg-primary/10 text-primary"
                 : "border-[var(--desk-border-subtle)] bg-[var(--desk-surface-elevated)] text-muted-foreground",
@@ -60,9 +61,9 @@ export function VendorsIndex({ data }: { data: ProductionReadResult<VendorRow> }
         renderListMeta={(row) => [row.category, row.phone].filter(Boolean).join(" · ")}
         renderDetail={(row) => (
           <div>
-            <h2 className="text-[15px] font-extrabold tracking-[-0.02em]">{row.name}</h2>
+            <h2 className="font-extrabold text-[15px] tracking-[-0.02em]">{row.name}</h2>
             {row.category ? (
-              <p className="mt-1 text-[10px] font-bold text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
+              <p className="mt-1 font-bold text-[10px] text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
                 {row.category}
               </p>
             ) : null}

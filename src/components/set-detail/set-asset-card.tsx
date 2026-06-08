@@ -36,7 +36,7 @@ export function SetAssetCard({ asset }: { asset: AssetRow }) {
             {categoryLabel}
           </Badge>
         </div>
-        <div className="flex justify-between gap-2 text-muted-foreground text-[11px]">
+        <div className="flex justify-between gap-2 text-[11px] text-muted-foreground">
           <span className="truncate">{asset.vendor_display_name ?? "—"}</span>
           <span className="shrink-0 font-mono tabular-nums">
             {asset.cost_display_amount != null ? `$${asset.cost_display_amount.toLocaleString()}` : "—"}

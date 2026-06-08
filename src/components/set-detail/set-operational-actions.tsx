@@ -3,7 +3,6 @@
 import type { LucideIcon } from "lucide-react";
 import { Box, Clapperboard, FileText, Wrench } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -29,7 +28,7 @@ const PLACEHOLDER_ACTIONS: { label: string; icon: LucideIcon }[] = [
 
 export function SetOperationalActions({ hasSet, currentSet, allSets }: Props) {
   return (
-    <section className="flex flex-col gap-3 rounded-xl border border-dashed border-border/80 bg-muted/10 px-4 py-4">
+    <section className="flex flex-col gap-3 rounded-xl border border-border/80 border-dashed bg-muted/10 px-4 py-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-medium text-sm tracking-tight">Set operations</h2>
       </div>

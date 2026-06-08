@@ -127,10 +127,10 @@ export function BrokerageDetail({ doc }: { doc: BrokerageDoc | null }) {
           <div className="px-3 py-2.5">
             <div className="mb-1.5 text-[8px] text-muted-foreground uppercase tracking-[0.15em]">Routing & Broker</div>
             <div className="flex items-center gap-2 text-[11px]">
-              <span className="font-mono text-muted-foreground/70 text-[10px]">{doc.origin.code}</span>
+              <span className="font-mono text-[10px] text-muted-foreground/70">{doc.origin.code}</span>
               <span className="text-muted-foreground/40">→</span>
               <span className="font-medium font-mono text-[#dbd5c5] text-[10px]">{doc.destination.code}</span>
-              <span className="text-muted-foreground/60 text-[10px]">
+              <span className="text-[10px] text-muted-foreground/60">
                 {doc.origin.country} → {doc.destination.country}
               </span>
             </div>
@@ -148,7 +148,7 @@ export function BrokerageDetail({ doc }: { doc: BrokerageDoc | null }) {
               {doc.fields.map((field) => (
                 <div key={field.label} className="flex flex-col gap-0.5">
                   <span className="text-[8px] text-muted-foreground/55 uppercase tracking-wider">{field.label}</span>
-                  <span className="text-[10px] text-[#dbd5c5]/85 leading-snug">{field.value}</span>
+                  <span className="text-[#dbd5c5]/85 text-[10px] leading-snug">{field.value}</span>
                 </div>
               ))}
               {doc.expiry && (

@@ -34,7 +34,7 @@ export async function linkDocumentToSet(documentId: string, setId: string): Prom
     return { ok: false, error: "Set not found." };
   }
 
-  const productionId = getDefaultProductionId();
+  const productionId = await getDefaultProductionId();
   if (document.production_id !== productionId || set.production_id !== productionId) {
     return { ok: false, error: "Document and set must belong to the current production." };
   }

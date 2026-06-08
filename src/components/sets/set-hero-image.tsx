@@ -29,7 +29,7 @@ export function SetHeroImage({
         <div
           role="img"
           aria-label={alt}
-          className="absolute inset-0 size-full bg-cover bg-center"
+          className="absolute inset-0 size-full bg-center bg-cover"
           style={{ backgroundImage: `url(${imageUrl})` }}
         />
       ) : (

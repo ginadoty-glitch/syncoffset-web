@@ -27,9 +27,16 @@ function statusTone(status: string): string {
   }
 }
 
-export function LiveBudgetIndex({ data }: { data: ProductionReadResult<ProductionBudgetLineRow> }) {
+export function LiveBudgetIndex({
+  data,
+  showName,
+}: {
+  data: ProductionReadResult<ProductionBudgetLineRow>;
+  showName?: string | null;
+}) {
   return (
     <ProductionReadShell
+      showName={showName}
       eyebrow="Finance · Live Budget"
       title="Live Budget"
       subtitle="Read-only · production_budget_lines · pressure surface excerpt"
@@ -60,7 +67,7 @@ export function LiveBudgetIndex({ data }: { data: ProductionReadResult<Productio
                 {row.source_type.replace(/_/g, " ")}
               </ProductionReadTd>
               <ProductionReadTd className="text-right tabular-nums">{money(row.estimated_cost)}</ProductionReadTd>
-              <ProductionReadTd className="text-right tabular-nums text-muted-foreground">
+              <ProductionReadTd className="text-right text-muted-foreground tabular-nums">
                 {money(row.actual_cost)}
               </ProductionReadTd>
               <ProductionReadTd>

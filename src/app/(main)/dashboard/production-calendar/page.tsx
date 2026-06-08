@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { ProductionCalendarLegend } from "@/components/production-calendar/production-calendar-legend";
 import { ProductionCalendarToolbar } from "@/components/production-calendar/production-calendar-toolbar";
 import { ProductionStripMonth } from "@/components/production-calendar/production-strip-month";
+import { getActiveShow } from "@/lib/production/get-active-show";
 import { adjacentMonth, monthParamFromParts, parseCalendarMonthParam } from "@/lib/production-calendar/calendar-utils";
 import { loadProductionCalendarMonth } from "@/lib/production-calendar/load-production-calendar-month";
 
@@ -28,7 +29,7 @@ export default async function ProductionCalendarPage({ searchParams }: PageProps
   }
 
   const { year, month } = parseCalendarMonthParam(monthParam);
-  const data = await loadProductionCalendarMonth(year, month);
+  const [data, show] = await Promise.all([loadProductionCalendarMonth(year, month), getActiveShow()]);
   const prev = adjacentMonth(year, month, -1);
   const next = adjacentMonth(year, month, 1);
 
@@ -36,7 +37,7 @@ export default async function ProductionCalendarPage({ searchParams }: PageProps
 
   return (
     <div className="flex flex-col gap-4 px-2 py-4 md:px-4 md:py-6" data-content-padding="false">
-      <ProductionCalendarToolbar data={data} prev={prev} next={next} />
+      <ProductionCalendarToolbar showName={show.name} data={data} prev={prev} next={next} />
 
       {data.loadError ? (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3 text-destructive text-sm">

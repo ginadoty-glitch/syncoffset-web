@@ -1,13 +1,4 @@
-import {
-  addDays,
-  eachDayOfInterval,
-  endOfMonth,
-  endOfWeek,
-  format,
-  parseISO,
-  startOfMonth,
-  startOfWeek,
-} from "date-fns";
+import { eachDayOfInterval, endOfMonth, endOfWeek, format, parseISO, startOfMonth, startOfWeek } from "date-fns";
 
 import { getDefaultProductionId } from "@/lib/ingestion/production";
 import { isMissingRelation } from "@/lib/operations/is-missing-relation";
@@ -72,7 +63,7 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
 
   try {
     supabase = createServiceClient();
-    showId = getDefaultProductionId();
+    showId = await getDefaultProductionId();
   } catch (error) {
     return {
       ...base,

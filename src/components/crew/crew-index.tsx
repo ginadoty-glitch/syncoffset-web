@@ -12,9 +12,16 @@ const SOURCE_LABEL: Record<CrewDirectoryRow["source"], string> = {
   member: "Show member",
 };
 
-export function CrewIndex({ data }: { data: ProductionReadResult<CrewDirectoryRow> }) {
+export function CrewIndex({
+  data,
+  showName,
+}: {
+  data: ProductionReadResult<CrewDirectoryRow>;
+  showName?: string | null;
+}) {
   return (
     <ProductionReadShell
+      showName={showName}
       eyebrow="System · Crew"
       title="Crew"
       subtitle="Read-only · crew_contacts + drivers + show_members"
@@ -37,8 +44,8 @@ export function CrewIndex({ data }: { data: ProductionReadResult<CrewDirectoryRo
         }
         renderDetail={(row) => (
           <div>
-            <h2 className="text-[15px] font-extrabold tracking-[-0.02em]">{row.name}</h2>
-            <p className="mt-1 text-[10px] font-bold text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
+            <h2 className="font-extrabold text-[15px] tracking-[-0.02em]">{row.name}</h2>
+            <p className="mt-1 font-bold text-[10px] text-[var(--desk-text-dim)] uppercase tracking-[0.06em]">
               {SOURCE_LABEL[row.source]}
             </p>
             <dl className="mt-3">
