@@ -14,7 +14,7 @@ const SCRIPT_SELECT =
   "id, title, version_label, revision_color, show_id, updated_at, source_type, import_kind, previous_script_id, source_document_name" as const;
 
 const SCENE_SELECT =
-  "id, script_id, scene_number, scene_heading, location_name, time_of_day, sort_order, raw_text, scene_status, change_summary, int_ext, episode, page_count, eighths" as const;
+  "id, script_id, scene_number, scene_heading, location_name, time_of_day, sort_order, raw_text, scene_status, change_summary, breakdown_draft" as const;
 
 const ITEM_SELECT =
   "id, script_id, scene_id, label, department, category, element_type, status, quantity, unit, estimated_unit_cost, notes, item_slot, source_column" as const;

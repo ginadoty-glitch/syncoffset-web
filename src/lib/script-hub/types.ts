@@ -30,10 +30,7 @@ export type ScriptHubSceneRow = {
   raw_text: string;
   scene_status: SceneStatus;
   change_summary: string | null;
-  int_ext: string | null;
-  episode: string | null;
-  page_count: string | null;
-  eighths: string | null;
+  breakdown_draft: Record<string, unknown> | null;
 };
 
 export type ScriptHubBreakdownItemRow = {

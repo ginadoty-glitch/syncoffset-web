@@ -190,6 +190,7 @@ export async function transitionIngestionStatus(
     if (to === "approved") {
       await syncDocumentStatusForSource(sourceDocumentId, "approved");
       await triggerScheduleParseIfApplicable(sourceDocumentId);
+      await triggerScriptParseIfApplicable(sourceDocumentId);
     }
     if (to === "rejected") {
       await syncDocumentStatusForSource(sourceDocumentId, "draft");
@@ -237,6 +238,26 @@ export async function getSourceDocumentDownloadUrl(
 }
 
 const SCHEDULE_PARSE_KINDS = new Set(["shoot-schedule", "one-liner", "dood"]);
+const SCRIPT_PARSE_KINDS = new Set(["script-revision"]);
+
+async function triggerScriptParseIfApplicable(sourceDocumentId: string): Promise<void> {
+  try {
+    const supabase = createServiceClient();
+    const { data } = await supabase
+      .from("source_documents")
+      .select("source_document_kind")
+      .eq("id", sourceDocumentId)
+      .maybeSingle();
+
+    if (!data?.source_document_kind) return;
+    if (!SCRIPT_PARSE_KINDS.has(data.source_document_kind as string)) return;
+
+    const { parseAndMirrorScript } = await import("./script-actions");
+    await parseAndMirrorScript(sourceDocumentId);
+  } catch {
+    // Script parsing failure must not block document approval
+  }
+}
 
 async function triggerScheduleParseIfApplicable(sourceDocumentId: string): Promise<void> {
   try {

@@ -104,11 +104,14 @@ function formatMoney(value: number | null, quantity: number): string | null {
 }
 
 function sceneMetaParts(scene: ScriptHubData["scenes"][number]): string[] {
+  const bd = scene.breakdown_draft ?? {};
+  const intExt = typeof bd.int_ext === "string" ? bd.int_ext.trim() : null;
+  const subLoc = typeof bd.sub_location === "string" ? bd.sub_location.trim() : null;
   return [
-    scene.int_ext?.trim() ? scene.int_ext : null,
-    scene.episode?.trim() ? `Ep ${scene.episode}` : null,
-    scene.page_count?.trim() ? `${scene.page_count} pgs` : null,
-    scene.eighths?.trim() ? `${scene.eighths} ⅛` : null,
+    intExt ?? null,
+    scene.time_of_day?.trim() ?? null,
+    subLoc ? `(${subLoc})` : null,
+    scene.location_name?.trim() ?? null,
   ].filter(Boolean) as string[];
 }
 

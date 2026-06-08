@@ -78,7 +78,21 @@ export async function parseAndMirrorSchedule(sourceDocumentId: string): Promise<
     return { ok: false, error: mirrorResult.error };
   }
 
+  // Sync extracted scenes into scene_registry
+  try {
+    const { syncScenesFromRevision } = await import("@/lib/schedule/scene-registry");
+    const sceneResult = await syncScenesFromRevision(supabase, showId, mirrorResult.revisionId);
+    if (sceneResult.created > 0 || sceneResult.updated > 0) {
+      parseResult.warnings.push(
+        `scene_registry: ${sceneResult.created} created, ${sceneResult.updated} updated, ${sceneResult.omitted} omitted`,
+      );
+    }
+  } catch {
+    parseResult.warnings.push("scene_registry sync skipped (table may not exist).");
+  }
+
   revalidatePath(`/ingestion/${sourceDocumentId}`);
+  revalidatePath("/dashboard/one-line-schedule");
 
   return {
     ok: true,
