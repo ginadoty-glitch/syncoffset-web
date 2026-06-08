@@ -1,7 +1,7 @@
 /**
  * Schedule revision mirror — ported from expo/services/scheduleShadowMirror.ts.
  * Writes parsed ShootDay[] into production_schedule_revisions + production_schedule_days.
- * Embeds SYNCO_SHADOW_JSON:v1: in notes for calendar round-tripping.
+ * Embeds SYNCO_SHADOW_JSON:v2: in notes for calendar round-tripping.
  */
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -30,31 +30,40 @@ function mapRowsForMirror(
 ): Record<string, unknown>[] {
   return shootDays.map((d, idx) => {
     const iso = Number.isFinite(d.date) ? new Date(d.date).toISOString() : new Date(importedAt).toISOString();
-    const title = [d.location, d.setName].filter(Boolean).join(" · ").slice(0, 500) || "Shoot day";
-    const metaPayload = JSON.stringify({
-      localId: d.id,
+
+    const setupNames = d.setups.map((s) => s.setName).filter(Boolean);
+    const title = [d.location, ...setupNames.slice(0, 2)].filter(Boolean).join(" · ").slice(0, 500) || "Shoot day";
+
+    const v2Payload = JSON.stringify({
+      v: 2,
+      setups: d.setups,
+      units: d.units,
+      markers: d.markers ?? [],
+      events: d.events ?? [],
+      zone: d.zone ?? null,
+      companyMove: d.companyMove ?? false,
+      companyMoveDestination: d.companyMoveDestination ?? null,
+      secondaryLocation: d.secondaryLocation ?? null,
+      totalPages: d.totalPages ?? null,
+      splitDay: d.splitDay ?? false,
+      workPeriods: d.workPeriods ?? [],
+      preLightNotes: d.preLightNotes ?? [],
+      vfxElements: d.vfxElements ?? [],
+      omittedScenes: d.omittedScenes ?? [],
       blockId: d.blockId,
-      dayNumber: d.dayNumber,
-      scenes: d.scenes,
-      isUpdate: d.isUpdate ?? false,
-      unitLabel: d.unitLabel ?? null,
-      companyMove: d.companyMove ?? null,
-      mealBreakNote: d.mealBreakNote ?? null,
-      crewCallNote: d.crewCallNote ?? null,
-      meetingTitle: d.meetingTitle ?? null,
-      meetingTimezone: d.meetingTimezone ?? null,
-      meetingDetails: d.meetingDetails ?? null,
+      localId: d.id,
     });
-    const bodyNotes = [(d.notes ?? "").trim(), metaPayload ? `SYNCO_SHADOW_JSON:v1:${metaPayload}` : ""]
-      .filter(Boolean)
-      .join("\n\n");
+
+    const bodyNotes = [(d.notes ?? "").trim(), `SYNCO_SHADOW_JSON:v2:${v2Payload}`].filter(Boolean).join("\n\n");
+
+    const primaryIntExt = d.setups[0]?.intExt ?? d.intExt ?? null;
 
     return {
       revision_id: revisionId,
       show_id: showId.trim(),
       strip_position: idx,
       shoot_day: iso,
-      day_type: d.intExt ?? null,
+      day_type: primaryIntExt,
       title,
       notes: bodyNotes.slice(0, 49_000) || null,
       meeting_url: d.meetingJoinUrl?.trim() || null,

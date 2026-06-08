@@ -13,6 +13,8 @@ import type {
   OneLinerUnresolvedRow,
   ParsedOneLinerRow,
   ShootDay,
+  ShootDaySetup,
+  ShootDayUnit,
 } from "@/types/schedule";
 
 import { extractPdfTextLinesFromBinaryPageIsolated } from "./pdf-text-extract";
@@ -342,10 +344,22 @@ function mapRecordToShootDay(
   const blockId = resolveColumn(row, "block") || defaultBlockId;
   const pages = resolveColumn(row, "pages");
   const dn = resolveColumn(row, "dayNight");
-  const notesParts = [resolveColumn(row, "notes"), pages ? `Pages: ${pages}` : "", dn ? `D/N: ${dn}` : ""].filter(
-    Boolean,
-  );
+  const notesParts = [resolveColumn(row, "notes"), pages ? `Pages: ${pages}` : ""].filter(Boolean);
   const notes = notesParts.join(" · ") || undefined;
+
+  const setup: ShootDaySetup = {
+    setName: setName && setName !== location ? setName : location,
+    intExt: intExt ?? "INT",
+    dayNight: (dn?.toUpperCase().startsWith("N")
+      ? "N"
+      : dn?.toUpperCase().startsWith("D")
+        ? "D"
+        : undefined) as ShootDaySetup["dayNight"],
+    scenes,
+    sortOrder: 0,
+  };
+
+  const units: ShootDayUnit[] = unitLabel ? [{ unitLabel }] : [{ unitLabel: "MAIN UNIT" }];
 
   const dateConf: OneLinerFieldConfidence = dateRaw ? "certain" : "missing";
   const locConf: OneLinerFieldConfidence = locationRaw ? "certain" : "uncertain";
@@ -360,13 +374,15 @@ function mapRecordToShootDay(
     date: ts,
     location,
     zone,
+    setups: [setup],
+    units,
+    companyMove,
+    notes,
+    productionDocumentSourceId: docId ?? undefined,
     scenes,
     intExt,
     setName: setName !== location ? setName : undefined,
-    companyMove,
     unitLabel,
-    notes,
-    productionDocumentSourceId: docId ?? undefined,
   };
 
   return {

@@ -17,6 +17,7 @@ import type {
   CalendarDaySceneRow,
   ProductionCalendarDayCell,
   ProductionCalendarMonthData,
+  ScheduleDateRange,
 } from "@/lib/production-calendar/calendar-types";
 import {
   type PublishedScheduleDayRow,
@@ -63,6 +64,7 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
     persistenceAvailable: false,
     tablesAvailable: false,
     loadError: null,
+    scheduleRange: null,
   };
 
   let supabase: ReturnType<typeof createServiceClient>;
@@ -106,6 +108,39 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
     (publishedRev.revision_name as string | null)?.trim() ||
     (publishedRev.revision_number != null ? `Revision ${publishedRev.revision_number}` : "Published schedule");
 
+  // Fetch the full date range for the published revision (for navigation)
+  const [firstDayResult, lastDayResult, dayCountResult] = await Promise.all([
+    supabase
+      .from("production_schedule_days")
+      .select("shoot_day")
+      .eq("revision_id", revisionId)
+      .order("shoot_day", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("production_schedule_days")
+      .select("shoot_day")
+      .eq("revision_id", revisionId)
+      .order("shoot_day", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("production_schedule_days")
+      .select("id", { count: "exact", head: true })
+      .eq("revision_id", revisionId),
+  ]);
+
+  let scheduleRange: ScheduleDateRange | null = null;
+  if (firstDayResult.data?.shoot_day && lastDayResult.data?.shoot_day) {
+    const firstParsed = parseISO(firstDayResult.data.shoot_day as string);
+    scheduleRange = {
+      firstDate: firstDayResult.data.shoot_day as string,
+      lastDate: lastDayResult.data.shoot_day as string,
+      firstMonth: { year: firstParsed.getFullYear(), month: firstParsed.getMonth() + 1 },
+      totalDays: dayCountResult.count ?? 0,
+    };
+  }
+
   const { data: dayRows, error: daysError } = await supabase
     .from("production_schedule_days")
     .select("id, strip_position, shoot_day, day_type, title, notes, meeting_url, map_url")
@@ -128,12 +163,15 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
   for (const raw of (dayRows ?? []) as PublishedScheduleDayRow[]) {
     const mapped = publishedScheduleDayToCalendarRow(raw);
     dayByDate.set(mapped.row.calendar_date, mapped);
-    if (mapped.sceneLabels.length > 0) {
+
+    if (mapped.sceneRows.length > 0) {
+      scenesByDate.set(mapped.row.calendar_date, mapped.sceneRows);
+    } else if (mapped.sceneLabels.length > 0) {
       scenesByDate.set(
         mapped.row.calendar_date,
         mapped.sceneLabels.map((label) => ({
           scene_number: label,
-          interior_exterior: "INT",
+          interior_exterior: "",
           description: label,
           set_name: null,
           location_label: mapped.row.shoot_location,
@@ -217,5 +255,6 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
     persistenceAvailable: true,
     tablesAvailable: true,
     loadError: null,
+    scheduleRange,
   };
 }

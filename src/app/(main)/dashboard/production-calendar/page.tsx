@@ -1,9 +1,10 @@
+import { redirect } from "next/navigation";
+
 import { ProductionCalendarLegend } from "@/components/production-calendar/production-calendar-legend";
 import { ProductionCalendarToolbar } from "@/components/production-calendar/production-calendar-toolbar";
 import { ProductionStripMonth } from "@/components/production-calendar/production-strip-month";
-import { adjacentMonth, parseCalendarMonthParam } from "@/lib/production-calendar/calendar-utils";
+import { adjacentMonth, monthParamFromParts, parseCalendarMonthParam } from "@/lib/production-calendar/calendar-utils";
 import { loadProductionCalendarMonth } from "@/lib/production-calendar/load-production-calendar-month";
-import { buildDefaultMockWallCalendarMonth } from "@/lib/production-calendar/mock-wall-calendar-data";
 
 import "@/styles/production-wall-calendar.css";
 
@@ -15,15 +16,23 @@ type PageProps = {
 
 export default async function ProductionCalendarPage({ searchParams }: PageProps) {
   const { month: monthParam } = await searchParams;
+
+  // When no month param, load current month first to detect schedule range,
+  // then redirect to the first month of the published schedule if available.
+  if (!monthParam) {
+    const probe = await loadProductionCalendarMonth(new Date().getFullYear(), new Date().getMonth() + 1);
+    if (probe.scheduleRange) {
+      const { year: fy, month: fm } = probe.scheduleRange.firstMonth;
+      redirect(`/dashboard/production-calendar?month=${monthParamFromParts(fy, fm)}`);
+    }
+  }
+
   const { year, month } = parseCalendarMonthParam(monthParam);
   const data = await loadProductionCalendarMonth(year, month);
   const prev = adjacentMonth(year, month, -1);
   const next = adjacentMonth(year, month, 1);
 
   const hasAnyProductionDay = data.cells.some((c) => c.inMonth && c.day !== null);
-
-  const useMock = !hasAnyProductionDay;
-  const displayData = useMock ? buildDefaultMockWallCalendarMonth() : data;
 
   return (
     <div className="flex flex-col gap-4 px-2 py-4 md:px-4 md:py-6" data-content-padding="false">
@@ -35,15 +44,15 @@ export default async function ProductionCalendarPage({ searchParams }: PageProps
         </div>
       ) : null}
 
-      {useMock ? (
+      {!hasAnyProductionDay && !data.loadError ? (
         <div className="rounded border border-border bg-muted/20 px-3 py-2 font-mono text-[10px] text-muted-foreground uppercase tracking-widest">
-          Preview — August 2024 Block 03 mock data · No published schedule days for this production
+          No shoot days scheduled for {data.monthLabel}
         </div>
       ) : null}
 
       <ProductionCalendarLegend />
 
-      <ProductionStripMonth data={displayData} variant="screen" />
+      <ProductionStripMonth data={data} variant="screen" />
     </div>
   );
 }

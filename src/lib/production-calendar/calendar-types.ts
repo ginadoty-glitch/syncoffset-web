@@ -1,4 +1,5 @@
 import type { CalendarDayType } from "@/types/core/production-calendar/calendar-day-type";
+import type { ShootDayMarker } from "@/types/schedule";
 
 /** Postgres row → constitutional CalendarDay + strip-calendar display fields. */
 export type CalendarDayRow = {
@@ -10,6 +11,10 @@ export type CalendarDayRow = {
   unit_label: string;
   zone_color: string;
   notes: string;
+  markers?: ShootDayMarker[];
+  total_pages?: string | null;
+  split_day?: boolean;
+  company_move?: boolean;
 };
 
 export type CalendarDaySceneRow = {
@@ -18,6 +23,9 @@ export type CalendarDaySceneRow = {
   description: string;
   set_name: string | null;
   location_label: string;
+  day_night?: string;
+  /** Lighting continuity reference: D2, D3, N1, N4 */
+  d_number?: string;
 };
 
 export type CalendarDayObligationRow = {
@@ -42,6 +50,13 @@ export type ProductionCalendarDayCell = {
   transportCount: number;
 };
 
+export type ScheduleDateRange = {
+  firstDate: string;
+  lastDate: string;
+  firstMonth: { year: number; month: number };
+  totalDays: number;
+};
+
 export type ProductionCalendarMonthData = {
   year: number;
   month: number;
@@ -51,4 +66,5 @@ export type ProductionCalendarMonthData = {
   persistenceAvailable: boolean;
   tablesAvailable: boolean;
   loadError: string | null;
+  scheduleRange: ScheduleDateRange | null;
 };
