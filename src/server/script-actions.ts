@@ -59,10 +59,13 @@ export async function parseAndMirrorScript(sourceDocumentId: string): Promise<Sc
   const buffer = Buffer.from(await fileData.arrayBuffer());
   const extraction = await extractScriptPdfText(buffer);
 
+  const diagSnippet = (extraction.text ?? "").slice(0, 500).replace(/\n/g, "\\n");
+  const diagPrefix = `[method=${extraction.method}][pages=${extraction.pageCount}][chars=${extraction.text?.length ?? 0}]`;
+
   if (!extraction.text || extraction.text.length < 20) {
     return {
       ok: false,
-      error: `PDF text extraction yielded ${extraction.text.length} characters (${extraction.method}). Script may be scanned/image-only.`,
+      error: `${diagPrefix} PDF text extraction yielded ${extraction.text.length} characters. Preview: ${diagSnippet || "(empty)"}`,
     };
   }
 
@@ -71,7 +74,10 @@ export async function parseAndMirrorScript(sourceDocumentId: string): Promise<Sc
   // 3. Parse scenes from extracted text
   const parsedScenes = parseScriptScenes(extraction.text);
   if (parsedScenes.length === 0) {
-    return { ok: false, error: "Parser found 0 scenes in extracted text." };
+    return {
+      ok: false,
+      error: `${diagPrefix} Scene parser found 0 scenes. Text preview: ${diagSnippet}`,
+    };
   }
 
   if (parsedScenes.length === 1 && !parsedScenes[0]?.sceneNumber) {
