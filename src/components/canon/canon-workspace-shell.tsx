@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 
 import type { LucideIcon } from "lucide-react";
 
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { SyncOffsetLogo } from "@/components/brand/syncoffset-logo";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/ui/empty";
 import { getActiveShow } from "@/lib/production/get-active-show";
 
 type CanonWorkspaceShellProps = {
@@ -19,7 +20,7 @@ export async function CanonWorkspaceShell({
   group,
   title,
   description,
-  icon: Icon,
+  icon: _Icon,
   actions,
 }: CanonWorkspaceShellProps) {
   const showName = showNameProp ?? (await getActiveShow()).name;
@@ -41,9 +42,7 @@ export async function CanonWorkspaceShell({
 
       <Empty className="min-h-[200px] border border-dashed">
         <EmptyHeader>
-          <EmptyMedia variant="icon">
-            <Icon />
-          </EmptyMedia>
+          <SyncOffsetLogo size={40} className="opacity-30" />
           <EmptyTitle>No data yet</EmptyTitle>
           <EmptyDescription>
             This workspace will display {title.toLowerCase()} when production data is available.

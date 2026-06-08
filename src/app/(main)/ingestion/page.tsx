@@ -21,9 +21,9 @@ export default async function IngestionReviewQueuePage() {
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl tracking-tight">Ingestion review queue</h1>
+          <h1 className="text-xl tracking-tight">Upload History</h1>
           <p className="text-muted-foreground text-sm">
-            Constitutional document chain — open, approve, or reject uploads in review. No extraction.
+            Track, approve, and manage uploaded production documents.
           </p>
         </div>
         <Button asChild>

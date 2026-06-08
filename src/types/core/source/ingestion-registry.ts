@@ -88,7 +88,7 @@ export const SOURCE_INGESTION_REGISTRY: Record<SourceDocumentKind, SourceIngesti
   },
   "breakdown-package": {
     sourceDocumentKind: "breakdown-package",
-    label: "Breakdown Package",
+    label: "Script Breakdown",
     isImmutable: true,
     supportedSourceSystems: ["scriptation", "movie-magic-scheduling", "excel", "pdf", "manual-upload"],
     extractionTargets: ["scene", "element", "breakdown-element", "asset"],

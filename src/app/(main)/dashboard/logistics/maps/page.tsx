@@ -15,13 +15,13 @@ export default function MapsPage() {
       actions={
         <>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/ingestion/upload?kind=reference-media">
+            <Link href="/ingestion/upload?kind=reference-media&label=Site+Plan">
               <Upload className="mr-2 size-4" />
               Upload Site Plan
             </Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href="/ingestion/upload?kind=reference-media">
+            <Link href="/ingestion/upload?kind=reference-media&label=Map">
               <Upload className="mr-2 size-4" />
               Upload Map
             </Link>

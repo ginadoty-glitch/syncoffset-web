@@ -15,6 +15,12 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: APP_CONFIG.meta.title,
   description: APP_CONFIG.meta.description,
+  applicationName: "SyncOffset",
+  appleWebApp: {
+    title: "SyncOffset",
+    capable: true,
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {

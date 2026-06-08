@@ -16,6 +16,23 @@ import { isSourceDocumentKind } from "@/types/core/source/source-documents";
 
 import { createHash, randomUUID } from "node:crypto";
 
+export type ParseOutcome =
+  | {
+      parsed: true;
+      parserKind: "script" | "schedule";
+      sceneCount?: number;
+      locationCount?: number;
+      castCount?: number;
+      dayCount?: number;
+      revisionId?: string;
+      scriptId?: string;
+      warnings: string[];
+    }
+  | {
+      parsed: false;
+      reason: string;
+    };
+
 export type UploadSourceDocumentResult =
   | {
       ok: true;
@@ -24,6 +41,7 @@ export type UploadSourceDocumentResult =
       documentId: string;
       documentRevisionId: string;
       documentCreated: boolean;
+      parseOutcome: ParseOutcome | null;
     }
   | { ok: false; error: string };
 
@@ -150,6 +168,7 @@ export async function uploadSourceDocument(formData: FormData): Promise<UploadSo
       documentId: chain.documentId,
       documentRevisionId: chain.documentRevisionId,
       documentCreated: chain.documentCreated,
+      parseOutcome: null,
     };
   } catch (chainError) {
     await supabase.from("source_documents").delete().eq("id", sourceDocumentId);
@@ -419,6 +438,12 @@ export async function createSourceDocumentFromStorage(
       now,
     });
 
+    let parseOutcome: ParseOutcome | null = null;
+
+    if (AUTO_PROCESS_KINDS.has(sourceDocumentKind)) {
+      parseOutcome = await autoApproveAndParse(sourceDocumentId, sourceDocumentKind);
+    }
+
     revalidateIngestion();
 
     return {
@@ -428,6 +453,7 @@ export async function createSourceDocumentFromStorage(
       documentId: chain.documentId,
       documentRevisionId: chain.documentRevisionId,
       documentCreated: chain.documentCreated,
+      parseOutcome,
     };
   } catch (chainError) {
     await supabase.from("source_documents").delete().eq("id", sourceDocumentId);
@@ -437,9 +463,67 @@ export async function createSourceDocumentFromStorage(
   }
 }
 
+const AUTO_PROCESS_KINDS = new Set<string>(["script-revision", "shoot-schedule", "one-liner", "dood"]);
+
+async function autoApproveAndParse(sourceDocumentId: string, sourceDocumentKind: string): Promise<ParseOutcome> {
+  try {
+    const supabase = createServiceClient();
+
+    await supabase
+      .from("source_documents")
+      .update({ ingestion_status: "approved", modified_at: new Date().toISOString() })
+      .eq("id", sourceDocumentId);
+
+    await syncDocumentStatusForSource(sourceDocumentId, "approved");
+
+    if (SCRIPT_PARSE_KINDS.has(sourceDocumentKind)) {
+      const { parseAndMirrorScript } = await import("./script-actions");
+      const result = await parseAndMirrorScript(sourceDocumentId);
+      if (result.ok) {
+        return {
+          parsed: true,
+          parserKind: "script",
+          sceneCount: result.sceneCount,
+          locationCount: result.locationCount,
+          castCount: result.castCount,
+          scriptId: result.scriptId,
+          warnings: result.warnings,
+        };
+      }
+      return { parsed: false, reason: result.error };
+    }
+
+    if (SCHEDULE_PARSE_KINDS.has(sourceDocumentKind)) {
+      const { parseAndMirrorSchedule } = await import("./schedule-actions");
+      const result = await parseAndMirrorSchedule(sourceDocumentId);
+      if (result.ok) {
+        return {
+          parsed: true,
+          parserKind: "schedule",
+          dayCount: result.dayCount,
+          revisionId: result.revisionId,
+          warnings: result.warnings,
+        };
+      }
+      return { parsed: false, reason: result.error };
+    }
+
+    return { parsed: false, reason: "No parser for this document kind" };
+  } catch (e) {
+    return { parsed: false, reason: e instanceof Error ? e.message : "Auto-process failed" };
+  }
+}
+
 function revalidateIngestion(sourceDocumentId?: string) {
   revalidatePath("/ingestion");
   revalidatePath("/ingestion/upload");
+  revalidatePath("/dashboard/script-hub");
+  revalidatePath("/dashboard/shooting-schedule");
+  revalidatePath("/dashboard/one-line-schedule");
+  revalidatePath("/dashboard/production-calendar");
+  revalidatePath("/dashboard/cast-doods");
+  revalidatePath("/dashboard/production-documents");
+  revalidatePath("/dashboard/script-breakdown");
   if (sourceDocumentId) {
     revalidatePath(`/ingestion/${sourceDocumentId}`);
   }

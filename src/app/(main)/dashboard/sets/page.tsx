@@ -14,8 +14,7 @@ export default async function SetsListPage() {
           <h1 className="text-2xl tracking-tight">Sets</h1>
         </div>
         <p className="max-w-2xl text-muted-foreground text-sm">
-          Choose a set to open the art department workspace. Data loads from persistence only — empty until you seed{" "}
-          <code className="rounded bg-muted px-1 text-xs">production_sets</code>.
+          Art department set workspace. Select a set to view builds, dressing, and work orders.
         </p>
       </header>
 

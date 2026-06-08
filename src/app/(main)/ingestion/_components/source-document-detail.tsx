@@ -31,10 +31,10 @@ export async function SourceDocumentDetailView({ detail }: { detail: SourceDocum
       <div className="flex items-center justify-between gap-4">
         <div>
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/ingestion">← Review queue</Link>
+            <Link href="/ingestion">← Upload History</Link>
           </Button>
           <h1 className="mt-2 text-xl tracking-tight">{sourceDocument.immutable.originalFileName}</h1>
-          <p className="text-muted-foreground text-sm">Read-only source document detail</p>
+          <p className="text-muted-foreground text-sm">Document detail — {kindLabel}</p>
         </div>
         <IngestionDetailActions
           sourceDocumentId={sourceDocument.id}
@@ -49,7 +49,7 @@ export async function SourceDocumentDetailView({ detail }: { detail: SourceDocum
         </CardHeader>
         <CardContent className="grid gap-3 text-sm">
           <Row label="File Name" value={sourceDocument.immutable.originalFileName} />
-          <Row label="Source Kind" value={kindLabel} />
+          <Row label="Document Type" value={kindLabel} />
           <Row label="Upload Date" value={formatDate(sourceDocument.immutable.uploadedAt)} />
           <Row label="Status">
             <Badge variant="outline" className="font-mono text-[10px] uppercase">

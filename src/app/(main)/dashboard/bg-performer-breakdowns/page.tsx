@@ -14,7 +14,7 @@ export default function BgPerformerBreakdownsPage() {
       icon={Users}
       actions={
         <Button size="sm" asChild>
-          <Link href="/ingestion/upload?kind=breakdown-package">
+          <Link href="/ingestion/upload?kind=breakdown-package&label=BG+Breakdown">
             <Upload className="mr-2 size-4" />
             Upload BG Breakdown
           </Link>

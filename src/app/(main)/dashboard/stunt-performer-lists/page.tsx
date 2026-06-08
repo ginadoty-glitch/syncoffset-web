@@ -14,7 +14,7 @@ export default function StuntPerformerListsPage() {
       icon={Shield}
       actions={
         <Button size="sm" asChild>
-          <Link href="/ingestion/upload?kind=crew-list">
+          <Link href="/ingestion/upload?kind=crew-list&label=Stunt+List">
             <Upload className="mr-2 size-4" />
             Upload Stunt List
           </Link>

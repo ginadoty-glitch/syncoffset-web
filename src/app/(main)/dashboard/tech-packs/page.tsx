@@ -14,7 +14,7 @@ export default function TechPacksPage() {
       icon={Wrench}
       actions={
         <Button size="sm" asChild>
-          <Link href="/ingestion/upload?kind=reference-media">
+          <Link href="/ingestion/upload?kind=reference-media&label=Tech+Pack">
             <Upload className="mr-2 size-4" />
             Upload Tech Pack
           </Link>

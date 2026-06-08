@@ -53,7 +53,7 @@ export function TasksIndex({
       emptyMessage="No tasks in"
       actions={
         <Button size="sm" asChild>
-          <Link href="/ingestion/upload?kind=breakdown-package">
+          <Link href="/ingestion/upload?kind=breakdown-package&label=Task+Sheet">
             <Upload className="mr-2 size-4" />
             Upload Task Sheet
           </Link>

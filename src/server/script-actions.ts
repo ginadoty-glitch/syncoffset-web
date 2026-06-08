@@ -13,6 +13,8 @@ export type ScriptParseResult =
       ok: true;
       scriptId: string;
       sceneCount: number;
+      locationCount: number;
+      castCount: number;
       registryCreated: number;
       registryUpdated: number;
       registrySkipped: number;
@@ -143,6 +145,14 @@ export async function parseAndMirrorScript(sourceDocumentId: string): Promise<Sc
     warnings.push(`scene_registry sync partial: ${msg}`);
   }
 
+  const uniqueLocations = new Set(sceneRows.map((r) => r.location_name).filter(Boolean));
+  const allCharacters = new Set(
+    sceneRows.flatMap((r) => {
+      const chars = (r.breakdown_draft as Record<string, unknown>)?.characters;
+      return Array.isArray(chars) ? (chars as string[]) : [];
+    }),
+  );
+
   revalidatePath("/dashboard/script-hub");
   revalidatePath("/dashboard/one-line-schedule");
 
@@ -150,6 +160,8 @@ export async function parseAndMirrorScript(sourceDocumentId: string): Promise<Sc
     ok: true,
     scriptId,
     sceneCount: parsedScenes.length,
+    locationCount: uniqueLocations.size,
+    castCount: allCharacters.size,
     registryCreated: registryResult.created,
     registryUpdated: registryResult.updated,
     registrySkipped: registryResult.skipped,

@@ -37,19 +37,19 @@ export function LocationsIndex({
       actions={
         <>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/ingestion/upload?kind=reference-media">
+            <Link href="/ingestion/upload?kind=reference-media&label=Location+Photos">
               <Camera className="mr-2 size-4" />
               Upload Photos
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href="/ingestion/upload?kind=location-package">
+            <Link href="/ingestion/upload?kind=location-package&label=Location+Documents">
               <FileText className="mr-2 size-4" />
               Upload Documents
             </Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href="/ingestion/upload?kind=location-package">
+            <Link href="/ingestion/upload?kind=location-package&label=Site+Plan">
               <Upload className="mr-2 size-4" />
               Upload Site Plan
             </Link>

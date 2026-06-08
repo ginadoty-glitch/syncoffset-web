@@ -54,7 +54,7 @@ export function PrepMemoView({ tasks, showName }: { tasks: PrepTask[]; showName?
             )}
           </div>
           <Button size="sm" asChild>
-            <Link href="/ingestion/upload?kind=breakdown-package">
+            <Link href="/ingestion/upload?kind=breakdown-package&label=Prep+Memo">
               <Upload className="mr-2 size-4" />
               Upload Prep Memo
             </Link>
@@ -87,7 +87,7 @@ export function PrepMemoView({ tasks, showName }: { tasks: PrepTask[]; showName?
           <p className="mt-1 text-muted-foreground text-sm">{tasks.length} prep tasks</p>
         </div>
         <Button size="sm" asChild>
-          <Link href="/ingestion/upload?kind=breakdown-package">
+          <Link href="/ingestion/upload?kind=breakdown-package&label=Prep+Memo">
             <Upload className="mr-2 size-4" />
             Upload Prep Memo
           </Link>

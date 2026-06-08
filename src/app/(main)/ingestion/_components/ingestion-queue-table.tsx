@@ -31,7 +31,7 @@ export function IngestionQueueTable({ items }: { items: SourceDocumentQueueItem[
         <TableHeader>
           <TableRow>
             <TableHead>File Name</TableHead>
-            <TableHead>Source Kind</TableHead>
+            <TableHead>Document Type</TableHead>
             <TableHead>Upload Date</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Uploaded By</TableHead>

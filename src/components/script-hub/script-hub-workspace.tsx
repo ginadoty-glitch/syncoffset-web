@@ -174,7 +174,7 @@ export function ScriptHubWorkspace({ data, showName }: { data: ScriptHubData; sh
 
       {!data.loadError && data.scripts.length === 0 ? (
         <div className="rounded-lg border border-border bg-muted/30 px-4 py-8 text-center text-muted-foreground text-sm">
-          No scripts in <code className="rounded bg-muted px-1 text-xs">production_scripts</code> for this production.
+          No scripts uploaded yet. Upload a script to populate the Script Hub.
         </div>
       ) : null}
 

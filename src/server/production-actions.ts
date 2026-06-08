@@ -12,15 +12,22 @@ export type ProductionRow = {
   code: string | null;
   production_company: string | null;
   location: string | null;
+  production_type: string | null;
+  notes: string | null;
+  archived_at: string | null;
   updated_at: string;
 };
 
-export async function listProductions(): Promise<ProductionRow[]> {
+export async function listProductions(includeArchived = false): Promise<ProductionRow[]> {
   const supabase = createServiceClient();
-  const { data } = await supabase
+  let query = supabase
     .from("shows")
-    .select("id, name, code, production_company, location, updated_at")
+    .select("id, name, code, production_company, location, production_type, notes, archived_at, updated_at")
     .order("name");
+  if (!includeArchived) {
+    query = query.is("archived_at", null);
+  }
+  const { data } = await query;
   return (data ?? []) as ProductionRow[];
 }
 
@@ -72,4 +79,60 @@ export async function switchActiveProduction(showId: string): Promise<void> {
 export async function getActiveProductionIdFromCookie(): Promise<string | null> {
   const cookieStore = await cookies();
   return cookieStore.get(ACTIVE_PRODUCTION_COOKIE)?.value ?? null;
+}
+
+export async function updateProduction(
+  showId: string,
+  form: {
+    name?: string;
+    code?: string;
+    productionCompany?: string;
+    location?: string;
+    productionType?: string;
+    notes?: string;
+  },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = createServiceClient();
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+
+  if (form.name !== undefined) {
+    const trimmed = form.name.trim();
+    if (!trimmed) return { ok: false, error: "Production name cannot be empty" };
+    updates.name = trimmed;
+  }
+  if (form.code !== undefined) updates.code = form.code.trim() || null;
+  if (form.productionCompany !== undefined) updates.production_company = form.productionCompany.trim() || null;
+  if (form.location !== undefined) updates.location = form.location.trim() || null;
+  if (form.productionType !== undefined) updates.production_type = form.productionType.trim() || null;
+  if (form.notes !== undefined) updates.notes = form.notes.trim() || null;
+
+  const { error } = await supabase.from("shows").update(updates).eq("id", showId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/dashboard", "layout");
+  return { ok: true };
+}
+
+export async function archiveProduction(showId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from("shows")
+    .update({ archived_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq("id", showId);
+
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/dashboard", "layout");
+  return { ok: true };
+}
+
+export async function unarchiveProduction(showId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = createServiceClient();
+  const { error } = await supabase
+    .from("shows")
+    .update({ archived_at: null, updated_at: new Date().toISOString() })
+    .eq("id", showId);
+
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/dashboard", "layout");
+  return { ok: true };
 }
