@@ -1,14 +1,34 @@
-import { ClipboardList } from "lucide-react";
+import { PrepMemoView } from "@/components/prep-memo/prep-memo-view";
+import { getDefaultProductionId } from "@/lib/ingestion/production";
+import { createServiceClient } from "@/lib/supabase/server";
 
-import { CanonWorkspaceShell } from "@/components/canon/canon-workspace-shell";
+export const dynamic = "force-dynamic";
 
-export default function PrepMemoPage() {
-  return (
-    <CanonWorkspaceShell
-      group="Production"
-      title="Prep Memo"
-      description="Department prep memos, scheduling notes, and pre-production coordination."
-      icon={ClipboardList}
-    />
-  );
+type PrepTask = {
+  id: string;
+  title: string;
+  notes: string | null;
+  status: string | null;
+  priority: string | null;
+  due_at: string | null;
+  assignee_name: string | null;
+};
+
+export default async function PrepMemoPage() {
+  let tasks: PrepTask[] = [];
+
+  try {
+    const supabase = createServiceClient();
+    const showId = getDefaultProductionId();
+    const { data } = await supabase
+      .from("production_tasks")
+      .select("id, title, notes, status, priority, due_at, assignee_name")
+      .eq("show_id", showId)
+      .order("due_at", { ascending: true });
+    tasks = (data ?? []) as PrepTask[];
+  } catch {
+    // Supabase not configured
+  }
+
+  return <PrepMemoView tasks={tasks} />;
 }

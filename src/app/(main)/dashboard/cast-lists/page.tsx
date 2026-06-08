@@ -1,14 +1,34 @@
-import { Users } from "lucide-react";
+import { CastListView } from "@/components/cast/cast-list-view";
+import { getDefaultProductionId } from "@/lib/ingestion/production";
+import { createServiceClient } from "@/lib/supabase/server";
 
-import { CanonWorkspaceShell } from "@/components/canon/canon-workspace-shell";
+export const dynamic = "force-dynamic";
 
-export default function CastListsPage() {
-  return (
-    <CanonWorkspaceShell
-      group="Production"
-      title="Cast Lists"
-      description="Cast members, roles, availability, and contact information."
-      icon={Users}
-    />
-  );
+type CastRow = {
+  id: string;
+  name: string;
+  department: string | null;
+  position: string | null;
+  phone: string | null;
+  email: string | null;
+};
+
+export default async function CastListsPage() {
+  let cast: CastRow[] = [];
+
+  try {
+    const supabase = createServiceClient();
+    const showId = getDefaultProductionId();
+    const { data } = await supabase
+      .from("crew_contacts")
+      .select("id, name, department, position, phone, email")
+      .eq("show_id", showId)
+      .eq("department", "Cast")
+      .order("position", { ascending: true });
+    cast = (data ?? []) as CastRow[];
+  } catch {
+    // Supabase not configured
+  }
+
+  return <CastListView cast={cast} />;
 }

@@ -1,0 +1,34 @@
+---
+description: SyncOffset release discipline — auditor gate, migrations, git, production protection (web)
+alwaysApply: true
+---
+
+# SyncOffset Release Discipline (Web)
+
+## System Auditor gate (overrides “done”)
+
+Per **syncoffset-system-auditor.mdc**:
+
+- No feature work may be considered **complete** until the System Auditor reports **PASS** or **WARN** only on the post-task **SYSTEM HEALTH REPORT**.
+- Any **CRITICAL** finding (git topology, schema drift, RLS, dependency corruption, wrong repo commit) **automatically reopens** the task.
+- Pre-work audit is mandatory before implementation.
+
+## Database rules
+
+- Web migrations live in `syncoffset-web/supabase/migrations/`.
+- Schedule migrations require **mobile** `20260519000000_production_documents_layer.sql` applied on the target DB first (FK dependency).
+- Constitutional `documents` requires legacy rename per `docs/SYNCOFFSET_SCHEMA_DECISION_RECORD.md` before `20260531000100`.
+
+## Git rules
+
+- Confirm `git rev-parse --show-toplevel` is **syncoffset-web** before committing web work.
+- Mobile Expo changes belong in **syncoffset-mobile**, not this repo.
+- Stage intentional paths only; verify `git status` file counts before commit.
+
+## Production protection
+
+Without explicit user approval, NEVER execute production SQL, deploy production migrations, or modify production data.
+
+## Task completion
+
+The **SYSTEM HEALTH REPORT** from the System Auditor is required at task end. **FAIL** or **CRITICAL** blocks completion.
