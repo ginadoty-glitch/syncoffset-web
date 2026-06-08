@@ -11,28 +11,52 @@ export type ScriptPdfExtractionResult = {
 };
 
 export async function extractScriptPdfText(buffer: Buffer): Promise<ScriptPdfExtractionResult> {
-  try {
-    const pdfParse = (await import("pdf-parse")) as unknown as (buf: Buffer) => Promise<{
-      numpages: number;
-      text: string;
-    }>;
-    const result = await pdfParse(buffer);
+  const diag = (msg: string) => process.stderr.write(`[pdf-extract] ${msg}\n`);
+  diag(`buffer size: ${buffer.length} bytes`);
 
-    if (result.text && result.text.trim().length > 20) {
-      return {
-        text: result.text.trim(),
-        pageCount: result.numpages ?? 0,
-        method: "pdf-parse",
-      };
+  try {
+    diag("importing pdf-parse...");
+    const mod = await import("pdf-parse");
+    diag(`import resolved — typeof mod: ${typeof mod}, keys: ${Object.keys(mod as Record<string, unknown>).join(",")}`);
+
+    const pdfParse =
+      typeof mod === "function"
+        ? (mod as (buf: Buffer) => Promise<{ numpages: number; text: string }>)
+        : typeof (mod as Record<string, unknown>).default === "function"
+          ? ((mod as Record<string, unknown>).default as (buf: Buffer) => Promise<{ numpages: number; text: string }>)
+          : null;
+
+    if (!pdfParse) {
+      diag(
+        `pdf-parse not callable — typeof mod: ${typeof mod}, typeof mod.default: ${typeof (mod as Record<string, unknown>).default}`,
+      );
+    } else {
+      diag("calling pdfParse(buffer)...");
+      const result = await pdfParse(buffer);
+      diag(`pdf-parse result — pages: ${result.numpages}, text length: ${result.text?.length ?? 0}`);
+
+      if (result.text && result.text.trim().length > 20) {
+        diag("pdf-parse succeeded — returning");
+        return {
+          text: result.text.trim(),
+          pageCount: result.numpages ?? 0,
+          method: "pdf-parse",
+        };
+      }
+      diag(`pdf-parse returned insufficient text: ${result.text?.trim().length ?? 0} chars`);
     }
-  } catch {
-    // pdf-parse failed — fall back to heuristic
+  } catch (err) {
+    const msg = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
+    diag(`pdf-parse FAILED — ${msg}`);
   }
 
-  // Fallback: heuristic extraction for simple PDFs
+  diag("falling through to heuristic extractor");
   const { extractPdfTextLinesFromBinaryPageIsolated } = await import("@/lib/schedule/pdf-text-extract");
   const binary = buffer.toString("latin1");
   const heuristic = extractPdfTextLinesFromBinaryPageIsolated(binary);
+  diag(
+    `heuristic result — pages ok: ${heuristic.pagesSucceeded}, pages failed: ${heuristic.pagesFailed}, text length: ${heuristic.text.length}, parseIssues: ${heuristic.parseIssues}, truncated: ${heuristic.truncated}`,
+  );
 
   return {
     text: heuristic.text,

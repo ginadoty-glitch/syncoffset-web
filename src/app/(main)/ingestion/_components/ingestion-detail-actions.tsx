@@ -8,9 +8,10 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import type { IngestionStatus } from "@/lib/ingestion/ingestion-status";
-import { approveSourceDocument, rejectSourceDocument } from "@/server/ingestion-actions";
+import { approveSourceDocument, rejectSourceDocument, reprocessScript } from "@/server/ingestion-actions";
 
 const SCHEDULE_KINDS = new Set(["shoot-schedule", "one-liner", "dood"]);
+const SCRIPT_KINDS = new Set(["script-revision"]);
 
 export function IngestionDetailActions({
   sourceDocumentId,
@@ -45,6 +46,9 @@ export function IngestionDetailActions({
       ? `/ingestion/${sourceDocumentId}/schedule-preview`
       : undefined;
 
+  const isScript = sourceDocumentKind ? SCRIPT_KINDS.has(sourceDocumentKind) : false;
+  const canReprocess = isScript && ingestionStatus === "approved";
+
   return (
     <div className="flex gap-2">
       <Button
@@ -68,6 +72,28 @@ export function IngestionDetailActions({
       >
         Reject
       </Button>
+      {canReprocess && (
+        <Button
+          size="sm"
+          variant="outline"
+          disabled={pending}
+          onClick={() => {
+            startTransition(async () => {
+              const result = await reprocessScript(sourceDocumentId);
+              if (!result.ok) {
+                toast.error(`Reprocess failed: ${result.error}`);
+                return;
+              }
+              toast.success(
+                `Script processed — ${result.sceneCount} scenes · ${result.locationCount} locations · ${result.castCount} characters`,
+              );
+              router.refresh();
+            });
+          }}
+        >
+          {pending ? "Reprocessing…" : "Reprocess Script"}
+        </Button>
+      )}
     </div>
   );
 }

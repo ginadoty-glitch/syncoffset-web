@@ -272,9 +272,13 @@ async function triggerScriptParseIfApplicable(sourceDocumentId: string): Promise
     if (!SCRIPT_PARSE_KINDS.has(data.source_document_kind as string)) return;
 
     const { parseAndMirrorScript } = await import("./script-actions");
-    await parseAndMirrorScript(sourceDocumentId);
-  } catch {
-    // Script parsing failure must not block document approval
+    const result = await parseAndMirrorScript(sourceDocumentId);
+    if (!result.ok) {
+      process.stderr.write(`[ingestion] script parse failed for ${sourceDocumentId}: ${result.error}\n`);
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`[ingestion] script parse threw for ${sourceDocumentId}: ${msg}\n`);
   }
 }
 
@@ -291,9 +295,13 @@ async function triggerScheduleParseIfApplicable(sourceDocumentId: string): Promi
     if (!SCHEDULE_PARSE_KINDS.has(data.source_document_kind as string)) return;
 
     const { parseAndMirrorSchedule } = await import("./schedule-actions");
-    await parseAndMirrorSchedule(sourceDocumentId);
-  } catch {
-    // Schedule parsing failure must not block document approval
+    const result = await parseAndMirrorSchedule(sourceDocumentId);
+    if (!result.ok) {
+      process.stderr.write(`[ingestion] schedule parse failed for ${sourceDocumentId}: ${result.error}\n`);
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`[ingestion] schedule parse threw for ${sourceDocumentId}: ${msg}\n`);
   }
 }
 
@@ -511,6 +519,56 @@ async function autoApproveAndParse(sourceDocumentId: string, sourceDocumentKind:
     return { parsed: false, reason: "No parser for this document kind" };
   } catch (e) {
     return { parsed: false, reason: e instanceof Error ? e.message : "Auto-process failed" };
+  }
+}
+
+export type ReprocessResult =
+  | { ok: true; scriptId: string; sceneCount: number; locationCount: number; castCount: number; warnings: string[] }
+  | { ok: false; error: string };
+
+export async function reprocessScript(sourceDocumentId: string): Promise<ReprocessResult> {
+  try {
+    const supabase = createServiceClient();
+
+    const { data: doc, error: docErr } = await supabase
+      .from("source_documents")
+      .select("id, source_document_kind, production_id")
+      .eq("id", sourceDocumentId)
+      .maybeSingle();
+
+    if (docErr || !doc) {
+      return { ok: false, error: "Source document not found." };
+    }
+
+    if (!SCRIPT_PARSE_KINDS.has(doc.source_document_kind as string)) {
+      return { ok: false, error: `Not a script document (kind: ${doc.source_document_kind}).` };
+    }
+
+    await supabase
+      .from("source_documents")
+      .update({ ingestion_status: "approved", modified_at: new Date().toISOString() })
+      .eq("id", sourceDocumentId);
+
+    const { parseAndMirrorScript } = await import("./script-actions");
+    const result = await parseAndMirrorScript(sourceDocumentId);
+
+    revalidateIngestion(sourceDocumentId);
+
+    if (!result.ok) {
+      return { ok: false, error: result.error };
+    }
+
+    return {
+      ok: true,
+      scriptId: result.scriptId,
+      sceneCount: result.sceneCount,
+      locationCount: result.locationCount,
+      castCount: result.castCount,
+      warnings: result.warnings,
+    };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Reprocess failed";
+    return { ok: false, error: msg };
   }
 }
 
