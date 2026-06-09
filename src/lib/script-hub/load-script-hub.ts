@@ -1,6 +1,6 @@
 import { getDefaultProductionId } from "@/lib/ingestion/production";
 import { isMissingRelation } from "@/lib/operations/is-missing-relation";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 import type {
   ScriptHubBreakdownItemRow,
@@ -43,7 +43,7 @@ function resolvePreviousScriptTitle(scripts: ScriptHubScriptSummary[], previousS
 }
 
 async function loadBudgetLinksForItems(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: ReturnType<typeof createServiceClient>,
   showId: string,
   itemIds: string[],
 ): Promise<Record<string, ScriptHubBudgetLink>> {
@@ -87,13 +87,13 @@ export async function loadScriptHub(
     return emptyHub(error instanceof Error ? error.message : "Missing NEXT_PUBLIC_DEFAULT_PRODUCTION_ID.");
   }
 
-  let supabase: Awaited<ReturnType<typeof createClient>>;
+  let supabase: ReturnType<typeof createServiceClient>;
 
   try {
-    supabase = await createClient();
+    supabase = createServiceClient();
   } catch (error) {
     return emptyHub(
-      error instanceof Error ? error.message : "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+      error instanceof Error ? error.message : "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY.",
     );
   }
 
