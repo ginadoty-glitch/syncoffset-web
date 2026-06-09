@@ -1,6 +1,6 @@
 /**
  * Shared v2 shadow JSON reader.
- * Consumed by Production Calendar, One-Liner, Shooting Schedule, Callsheet, Prep Memo.
+ * Consumed by Production Calendar, One-Liner, Shooting Schedule, Callsheet, Prep Schedule.
  */
 
 import type { ShootDayEvent, ShootDayMarker, ShootDaySetup, ShootDayUnit, WorkPeriod } from "@/types/schedule";

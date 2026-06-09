@@ -39,7 +39,7 @@ function PriorityDot({ priority }: { priority: string | null }) {
   return null;
 }
 
-export function PrepMemoView({ tasks, showName }: { tasks: PrepTask[]; showName?: string | null }) {
+export function PrepScheduleView({ tasks, showName }: { tasks: PrepTask[]; showName?: string | null }) {
   if (tasks.length === 0) {
     return (
       <div className="mx-auto flex h-full max-w-[1600px] flex-col gap-6 px-4 py-6 md:px-6 md:py-8">
@@ -48,15 +48,15 @@ export function PrepMemoView({ tasks, showName }: { tasks: PrepTask[]; showName?
             {showName ? <h1 className="font-extrabold text-2xl tracking-tight">{showName}</h1> : null}
             <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
             {showName ? (
-              <h2 className="text-xl tracking-tight">Prep Memo</h2>
+              <h2 className="text-xl tracking-tight">Prep Schedule</h2>
             ) : (
-              <h1 className="text-2xl tracking-tight">Prep Memo</h1>
+              <h1 className="text-2xl tracking-tight">Prep Schedule</h1>
             )}
           </div>
           <Button size="sm" asChild>
-            <Link href="/ingestion/upload?kind=breakdown-package&label=Prep+Memo">
+            <Link href="/ingestion/upload?kind=shoot-schedule&label=Prep+Schedule">
               <Upload className="mr-2 size-4" />
-              Upload Prep Memo
+              Upload Prep Schedule
             </Link>
           </Button>
         </header>
@@ -80,16 +80,16 @@ export function PrepMemoView({ tasks, showName }: { tasks: PrepTask[]; showName?
           {showName ? <h1 className="font-extrabold text-2xl tracking-tight">{showName}</h1> : null}
           <p className="text-muted-foreground text-xs uppercase tracking-widest">Production</p>
           {showName ? (
-            <h2 className="text-xl tracking-tight">Prep Memo</h2>
+            <h2 className="text-xl tracking-tight">Prep Schedule</h2>
           ) : (
-            <h1 className="text-2xl tracking-tight">Prep Memo</h1>
+            <h1 className="text-2xl tracking-tight">Prep Schedule</h1>
           )}
           <p className="mt-1 text-muted-foreground text-sm">{tasks.length} prep tasks</p>
         </div>
         <Button size="sm" asChild>
-          <Link href="/ingestion/upload?kind=breakdown-package&label=Prep+Memo">
+          <Link href="/ingestion/upload?kind=shoot-schedule&label=Prep+Schedule">
             <Upload className="mr-2 size-4" />
-            Upload Prep Memo
+            Upload Prep Schedule
           </Link>
         </Button>
       </header>

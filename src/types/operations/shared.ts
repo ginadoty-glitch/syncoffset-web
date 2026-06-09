@@ -105,7 +105,7 @@ export type DocumentType =
   | "signature-record"
   | "damage-report"
   | "actsafe-memo"
-  | "prep-memo"
+  | "prep-schedule"
   | "gate-pass"
   | "vendor-invoice"
   | "return-receipt";

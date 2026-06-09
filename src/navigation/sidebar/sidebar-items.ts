@@ -82,7 +82,7 @@ export const sidebarItems: NavGroup[] = [
       { title: "Script", url: "/dashboard/script-hub", icon: ScrollText, isNew: true },
       { title: "Script Revisions", url: "/dashboard/script-revisions", icon: FileText },
       { title: "Script Breakdown", url: "/dashboard/script-breakdown", icon: ListTree },
-      { title: "Prep Memo", url: "/dashboard/prep-memo", icon: ClipboardList },
+      { title: "Prep Schedule", url: "/dashboard/prep-schedule", icon: ClipboardList },
       { title: "Production Calendar", url: "/dashboard/production-calendar", icon: Calendar, isNew: true },
       { title: "Locations", url: "/dashboard/locations", icon: MapPin, isNew: true },
       { title: "Tasks", url: "/dashboard/tasks", icon: ClipboardList, isNew: true },

@@ -1,4 +1,4 @@
-import { PrepMemoView } from "@/components/prep-memo/prep-memo-view";
+import { PrepScheduleView } from "@/components/prep-schedule/prep-schedule-view";
 import { getDefaultProductionId } from "@/lib/ingestion/production";
 import { getActiveShow } from "@/lib/production/get-active-show";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -15,7 +15,7 @@ type PrepTask = {
   assignee_name: string | null;
 };
 
-export default async function PrepMemoPage() {
+export default async function PrepSchedulePage() {
   let tasks: PrepTask[] = [];
 
   try {
@@ -33,5 +33,5 @@ export default async function PrepMemoPage() {
 
   const show = await getActiveShow();
 
-  return <PrepMemoView tasks={tasks} showName={show.name} />;
+  return <PrepScheduleView tasks={tasks} showName={show.name} />;
 }
