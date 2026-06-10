@@ -590,8 +590,13 @@ function parsePdfText(text: string, defaultBlockId: string, docId: string | null
     const line = lines[idx]!;
     const dm = line.match(DATE_LINE_RE);
     if (!dm) continue;
+    // Header/footer noise: milestone banners and document stamps carry dates
+    // but are not shoot-day rows.
+    if (line.includes("***") || /\bCREATED\b/i.test(line)) continue;
     const dateRaw = dm[0];
     const rest = line.replace(dateRaw, " ").replace(/\s+/g, " ").trim();
+    // A date with no surrounding content is a document header date, not a row.
+    if (!rest) continue;
     const sceneMatch = rest.match(
       /\b(\d+[A-Za-z]?(?:(?:pt|PT)(?:\.\d+)?)?(?:\s*[-,&]\s*\d+[A-Za-z]?(?:(?:pt|PT)(?:\.\d+)?)?)*)\b/,
     );
