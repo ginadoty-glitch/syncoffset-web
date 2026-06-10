@@ -6,6 +6,7 @@
 
 import * as XLSX from "xlsx";
 
+import { extractScriptPdfText } from "@/lib/script/pdf-extract";
 import type {
   OneLinerFieldConfidence,
   OneLinerParseQuality,
@@ -17,7 +18,6 @@ import type {
   ShootDayUnit,
 } from "@/types/schedule";
 
-import { extractPdfTextLinesFromBinaryPageIsolated } from "./pdf-text-extract";
 import { createHash } from "node:crypto";
 
 // ---------------------------------------------------------------------------
@@ -129,20 +129,79 @@ function resolveRevisionLabel(input: {
 // Date parsing (from expo/utils/scheduleParseDates.ts)
 // ---------------------------------------------------------------------------
 
+const MONTH_MAP: Record<string, number> = {
+  jan: 0,
+  january: 0,
+  feb: 1,
+  february: 1,
+  mar: 2,
+  march: 2,
+  apr: 3,
+  april: 3,
+  may: 4,
+  jun: 5,
+  june: 5,
+  jul: 6,
+  july: 6,
+  aug: 7,
+  august: 7,
+  sep: 8,
+  sept: 8,
+  september: 8,
+  oct: 9,
+  october: 9,
+  nov: 10,
+  november: 10,
+  dec: 11,
+  december: 11,
+};
+
 function parseFlexScheduleDate(raw: string): number | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
-  const iso = Date.parse(trimmed);
-  if (!Number.isNaN(iso)) return iso;
-  const m = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
-  if (m) {
-    const mm = parseInt(m[1]!, 10);
-    const dd = parseInt(m[2]!, 10);
-    let yy = parseInt(m[3]!, 10);
+
+  // MM/DD/YYYY or MM-DD-YYYY
+  const numeric = trimmed.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
+  if (numeric) {
+    const mm = parseInt(numeric[1]!, 10);
+    const dd = parseInt(numeric[2]!, 10);
+    let yy = parseInt(numeric[3]!, 10);
     if (yy < 100) yy += 2000;
     const d = new Date(yy, mm - 1, dd);
     if (!Number.isNaN(d.getTime())) return d.getTime();
   }
+
+  // YYYY-MM-DD (ISO)
+  const isoMatch = trimmed.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (isoMatch) {
+    const d = new Date(parseInt(isoMatch[1]!, 10), parseInt(isoMatch[2]!, 10) - 1, parseInt(isoMatch[3]!, 10));
+    if (!Number.isNaN(d.getTime())) return d.getTime();
+  }
+
+  // Spelled-out: "Mon May 11, 2026" / "May 11 2026" / "May 11, 2026" / "11 May 2026"
+  const spelled = trimmed.match(/(?:\w+\s+)?(\w+)\s+(\d{1,2})(?:st|nd|rd|th)?\s*,?\s*(\d{4})/i);
+  if (spelled) {
+    const monthIdx = MONTH_MAP[spelled[1]?.toLowerCase()];
+    if (monthIdx !== undefined) {
+      const d = new Date(parseInt(spelled[3]!, 10), monthIdx, parseInt(spelled[2]!, 10));
+      if (!Number.isNaN(d.getTime())) return d.getTime();
+    }
+  }
+
+  // "11 May 2026" (day-first)
+  const dayFirst = trimmed.match(/(\d{1,2})(?:st|nd|rd|th)?\s+(\w+)\s+(\d{4})/i);
+  if (dayFirst) {
+    const monthIdx = MONTH_MAP[dayFirst[2]?.toLowerCase()];
+    if (monthIdx !== undefined) {
+      const d = new Date(parseInt(dayFirst[3]!, 10), monthIdx, parseInt(dayFirst[1]!, 10));
+      if (!Number.isNaN(d.getTime())) return d.getTime();
+    }
+  }
+
+  // Last resort: native Date.parse
+  const iso = Date.parse(trimmed);
+  if (!Number.isNaN(iso)) return iso;
+
   return null;
 }
 
@@ -509,20 +568,33 @@ function parseXlsxBuffer(buffer: Buffer, defaultBlockId: string, docId: string |
   return { ...base, sourceFormat: "xlsx" };
 }
 
+const DATE_LINE_RE = new RegExp(
+  [
+    /\d{1,2}[/-]\d{1,2}[/-]\d{2,4}/.source, // MM/DD/YYYY
+    /\d{4}-\d{2}-\d{2}/.source, // YYYY-MM-DD
+    /(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)\w*\s+\w+\s+\d{1,2},?\s+\d{4}/.source, // Mon May 11, 2026
+    /\w+\s+\d{1,2},?\s+\d{4}/.source, // May 11, 2026
+    /\d{1,2}\s+\w+\s+\d{4}/.source, // 11 May 2026
+  ].join("|"),
+  "i",
+);
+
 function parsePdfText(text: string, defaultBlockId: string, docId: string | null): OneLinerParseResult {
   const lines = text
     .split(/\n+/)
     .map((l) => l.trim())
     .filter(Boolean);
   const tableRows: Record<string, string>[] = [];
-  const dateLine = /(\d{1,2}[/-]\d{1,2}[/-]\d{2,4}|\d{4}-\d{2}-\d{2})/;
 
-  lines.forEach((line, idx) => {
-    const dm = line.match(dateLine);
-    if (!dm) return;
-    const dateRaw = dm[1]!;
+  for (let idx = 0; idx < lines.length; idx++) {
+    const line = lines[idx]!;
+    const dm = line.match(DATE_LINE_RE);
+    if (!dm) continue;
+    const dateRaw = dm[0];
     const rest = line.replace(dateRaw, " ").replace(/\s+/g, " ").trim();
-    const sceneMatch = rest.match(/\b(\d+[A-Za-z]?(?:\s*[-,&]\s*\d+[A-Za-z]?)*)\b/);
+    const sceneMatch = rest.match(
+      /\b(\d+[A-Za-z]?(?:(?:pt|PT)(?:\.\d+)?)?(?:\s*[-,&]\s*\d+[A-Za-z]?(?:(?:pt|PT)(?:\.\d+)?)?)*)\b/,
+    );
     tableRows.push({
       date: dateRaw,
       day: String(tableRows.length + 1),
@@ -531,7 +603,7 @@ function parsePdfText(text: string, defaultBlockId: string, docId: string | null
       notes: rest,
       _line: String(idx),
     });
-  });
+  }
 
   const preview = parseTabularRows(tableRows, ["date", "day", "scenes", "location", "notes"], defaultBlockId, docId);
   const warnings = [...preview.warnings];
@@ -564,14 +636,15 @@ export function inferFileFormat(mimeType: string, fileName: string): "csv" | "xl
 /**
  * Parse a schedule file buffer into ShootDay rows.
  * Exact same logic as mobile One-Liner import.
+ * Async because PDF extraction uses pdf-parse (decompresses FlateDecode streams).
  */
-export function parseScheduleBuffer(input: {
+export async function parseScheduleBuffer(input: {
   buffer: Buffer;
   mimeType: string;
   fileName: string;
   defaultBlockId: string;
   productionDocumentId?: string | null;
-}): OneLinerParseResult {
+}): Promise<OneLinerParseResult> {
   const format = inferFileFormat(input.mimeType, input.fileName);
   if (!format) {
     return {
@@ -593,10 +666,9 @@ export function parseScheduleBuffer(input: {
   } else if (format === "xlsx") {
     result = parseXlsxBuffer(input.buffer, input.defaultBlockId, input.productionDocumentId ?? null);
   } else {
-    const binary = input.buffer.toString("latin1");
-    const extracted = extractPdfTextLinesFromBinaryPageIsolated(binary);
+    const extracted = await extractScriptPdfText(input.buffer);
     result = parsePdfText(extracted.text, input.defaultBlockId, input.productionDocumentId ?? null);
-    if (extracted.pagesFailed > 0 && extracted.pagesSucceeded === 0) {
+    if (extracted.text.length < 100) {
       result.warnings.push("PDF appears scanned — extracted text is minimal.");
     }
   }

@@ -43,7 +43,7 @@ export async function parseAndMirrorSchedule(sourceDocumentId: string): Promise<
   const buffer = Buffer.from(await fileData.arrayBuffer());
   const showId = doc.production_id as string;
 
-  const parseResult = parseScheduleBuffer({
+  const parseResult = await parseScheduleBuffer({
     buffer,
     mimeType: sourceFile.mimeType,
     fileName: sourceFile.originalFileName,
