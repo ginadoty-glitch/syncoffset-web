@@ -1,13 +1,9 @@
 "use client";
 
-import Link from "next/link";
-
-import { Upload } from "lucide-react";
-
 import { ProductionReadDetailField } from "@/components/production-read/production-read-detail-field";
 import { ProductionReadShell } from "@/components/production-read/production-read-shell";
 import { ProductionReadWorkspace } from "@/components/production-read/production-read-workspace";
-import { Button } from "@/components/ui/button";
+import { CreateTaskDialog } from "@/components/tasks/create-task-dialog";
 import type { ProductionTaskRow } from "@/lib/operations/types";
 import type { ProductionReadResult } from "@/lib/production-read/empty-result";
 import { cn } from "@/lib/utils";
@@ -46,19 +42,12 @@ export function TasksIndex({
       showName={showName}
       eyebrow="Production · Tasks"
       title="Tasks"
-      subtitle="Read-only · production_tasks · live Supabase"
+      subtitle="Prep tasks, meetings, and action items"
       tableLabel="production_tasks"
       count={data.rows.length}
       loadError={data.loadError}
       emptyMessage="No tasks in"
-      actions={
-        <Button size="sm" asChild>
-          <Link href="/ingestion/upload?kind=breakdown-package&label=Task+Sheet">
-            <Upload className="mr-2 size-4" />
-            Upload Task Sheet
-          </Link>
-        </Button>
-      }
+      actions={<CreateTaskDialog />}
     >
       <ProductionReadWorkspace
         rows={data.rows}

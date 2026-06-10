@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 
-import { Camera, FileText, Upload } from "lucide-react";
+import { Camera, FileText } from "lucide-react";
 
+import { CreateLocationDialog } from "@/components/locations/create-location-dialog";
 import { ProductionReadDetailField } from "@/components/production-read/production-read-detail-field";
 import { ProductionReadShell } from "@/components/production-read/production-read-shell";
 import { ProductionReadWorkspace } from "@/components/production-read/production-read-workspace";
@@ -29,7 +30,7 @@ export function LocationsIndex({
       showName={showName}
       eyebrow="Production · Locations"
       title="Locations"
-      subtitle="Read-only · locations table · live Supabase"
+      subtitle="Filming locations, basecamps, and production facilities"
       tableLabel="locations"
       count={data.rows.length}
       loadError={data.loadError}
@@ -48,12 +49,7 @@ export function LocationsIndex({
               Upload Documents
             </Link>
           </Button>
-          <Button size="sm" asChild>
-            <Link href="/ingestion/upload?kind=location-package&label=Site+Plan">
-              <Upload className="mr-2 size-4" />
-              Upload Site Plan
-            </Link>
-          </Button>
+          <CreateLocationDialog />
         </>
       }
     >

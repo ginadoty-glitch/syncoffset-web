@@ -1,7 +1,7 @@
-import { getDefaultProductionId } from "@/lib/ingestion/production";
 import { isMissingRelation } from "@/lib/operations/is-missing-relation";
+import { getActiveProductionId } from "@/lib/production/get-active-production-id";
 import { emptyReadResult, type ProductionReadResult } from "@/lib/production-read/empty-result";
-import { createClient, createServiceClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 
 import type { CrewDirectoryRow } from "./types";
 
@@ -9,19 +9,12 @@ export async function loadCrewDirectory(): Promise<ProductionReadResult<CrewDire
   let showId: string;
 
   try {
-    showId = await getDefaultProductionId();
+    showId = await getActiveProductionId();
   } catch (error) {
-    return emptyReadResult(error instanceof Error ? error.message : "Missing NEXT_PUBLIC_DEFAULT_PRODUCTION_ID.");
+    return emptyReadResult(error instanceof Error ? error.message : "No active production selected.");
   }
 
-  let supabase: Awaited<ReturnType<typeof createClient>>;
-  try {
-    supabase = await createClient();
-  } catch (error) {
-    return emptyReadResult(
-      error instanceof Error ? error.message : "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.",
-    );
-  }
+  const supabase = createServiceClient();
 
   const [contactsResult, driversResult] = await Promise.all([
     supabase
@@ -79,8 +72,7 @@ export async function loadCrewDirectory(): Promise<ProductionReadResult<CrewDire
   }
 
   try {
-    const service = createServiceClient();
-    const { data: members, error: membersError } = await service
+    const { data: members, error: membersError } = await supabase
       .from("show_members")
       .select("id, user_sub, role, department, position, status")
       .eq("show_id", showId)

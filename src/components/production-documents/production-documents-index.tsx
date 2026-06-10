@@ -1,3 +1,7 @@
+import Link from "next/link";
+
+import { Upload } from "lucide-react";
+
 import { ProductionReadShell } from "@/components/production-read/production-read-shell";
 import {
   ProductionReadTable,
@@ -7,6 +11,7 @@ import {
   ProductionReadTh,
   ProductionReadTr,
 } from "@/components/production-read/production-read-table";
+import { Button } from "@/components/ui/button";
 import type { ProductionDocumentRow } from "@/lib/production-documents/types";
 import type { ProductionReadResult } from "@/lib/production-read/empty-result";
 import { cn } from "@/lib/utils";
@@ -49,11 +54,33 @@ export function ProductionDocumentsIndex({
       showName={showName}
       eyebrow="Production · Documents"
       title="Production Documents"
-      subtitle="Read-only · archived sources from Expo · production_documents"
+      subtitle="Call sheets, memos, and production files"
       tableLabel="production_documents"
       count={data.rows.length}
       loadError={data.loadError}
       emptyMessage="No documents in"
+      actions={
+        <>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/ingestion/upload?kind=script-revision&label=Script+Revision">
+              <Upload className="mr-2 size-4" />
+              Upload Script
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/ingestion/upload?kind=shoot-schedule&label=Shooting+Schedule">
+              <Upload className="mr-2 size-4" />
+              Upload Schedule
+            </Link>
+          </Button>
+          <Button size="sm" asChild>
+            <Link href="/ingestion/upload?kind=other&label=Production+Document">
+              <Upload className="mr-2 size-4" />
+              Upload Document
+            </Link>
+          </Button>
+        </>
+      }
     >
       <ProductionReadTable>
         <ProductionReadTableHead>

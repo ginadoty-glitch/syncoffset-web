@@ -1,5 +1,6 @@
 "use client";
 
+import { CreateCrewDialog } from "@/components/crew/create-crew-dialog";
 import { ProductionReadDetailField } from "@/components/production-read/production-read-detail-field";
 import { ProductionReadShell } from "@/components/production-read/production-read-shell";
 import { ProductionReadWorkspace } from "@/components/production-read/production-read-workspace";
@@ -22,13 +23,14 @@ export function CrewIndex({
   return (
     <ProductionReadShell
       showName={showName}
-      eyebrow="System · Crew"
+      eyebrow="Production · Crew"
       title="Crew"
-      subtitle="Read-only · crew_contacts + drivers + show_members"
+      subtitle="Crew contacts, drivers, and show members"
       tableLabel="crew directory"
       count={data.rows.length}
       loadError={data.loadError}
       emptyMessage="No crew records in"
+      actions={<CreateCrewDialog />}
     >
       <ProductionReadWorkspace
         rows={data.rows}

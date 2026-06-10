@@ -1,10 +1,8 @@
-import { getDefaultProductionId } from "@/lib/ingestion/production";
 import { isMissingRelation } from "@/lib/operations/is-missing-relation";
-import { createClient } from "@/lib/supabase/server";
+import { getActiveProductionId } from "@/lib/production/get-active-production-id";
+import { createServiceClient } from "@/lib/supabase/server";
 
 import { emptyReadResult, type ProductionReadResult } from "./empty-result";
-
-type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
 
 export async function loadForShow<T>(
   table: string,
@@ -14,19 +12,16 @@ export async function loadForShow<T>(
   let showId: string;
 
   try {
-    showId = await getDefaultProductionId();
+    showId = await getActiveProductionId();
   } catch (error) {
-    return emptyReadResult(error instanceof Error ? error.message : "Missing NEXT_PUBLIC_DEFAULT_PRODUCTION_ID.");
+    return emptyReadResult(error instanceof Error ? error.message : "No active production selected.");
   }
 
-  let supabase: SupabaseClient;
-
+  let supabase: ReturnType<typeof createServiceClient>;
   try {
-    supabase = await createClient();
+    supabase = createServiceClient();
   } catch (error) {
-    return emptyReadResult(
-      error instanceof Error ? error.message : "Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY.",
-    );
+    return emptyReadResult(error instanceof Error ? error.message : "Supabase not configured.");
   }
 
   const { data, error } = await supabase
