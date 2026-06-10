@@ -15,7 +15,10 @@ export type MirrorScheduleInput = {
   shootDays: ShootDay[];
   revisionSource: ScheduleRevisionSource;
   sourceFingerprint: string;
+  /** FK to production_documents (mobile documents layer) — not web source_documents. */
   sourceDocumentId?: string | null;
+  /** Web ingestion source_documents.id — stored as text key, no FK. */
+  externalSourceDocumentKey?: string | null;
   replaceStripboard: boolean;
   importedBy?: string | null;
   notes?: string;
@@ -115,6 +118,7 @@ export async function mirrorScheduleRevision(
       imported_by: importedBy,
       imported_at: importedAt,
       source_document_id: input.sourceDocumentId ?? null,
+      external_source_document_key: input.externalSourceDocumentKey ?? null,
       source_fingerprint: input.sourceFingerprint.trim().slice(0, 490) || null,
       import_merge_kind: input.replaceStripboard ? "replaced" : "initial",
       notes: input.notes?.slice(0, 8000) ?? null,

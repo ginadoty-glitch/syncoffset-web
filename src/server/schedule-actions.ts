@@ -69,6 +69,7 @@ export async function parseAndMirrorSchedule(sourceDocumentId: string): Promise<
     revisionSource,
     sourceFingerprint: fingerprint,
     sourceDocumentId: null,
+    externalSourceDocumentKey: sourceDocumentId,
     replaceStripboard: true,
     importedBy: "ingestion@syncoffset.local",
     notes: `Web ingestion import · ${sourceFile.originalFileName} · ${parseResult.rows.length} days parsed`,
@@ -134,8 +135,9 @@ export async function publishScheduleRevision(revisionId: string): Promise<Inges
 
 /**
  * Load schedule preview data for a source document.
+ * Binds to the revision created from this specific document.
  */
-export async function loadSchedulePreview(_sourceDocumentId: string): Promise<{
+export async function loadSchedulePreview(sourceDocumentId: string): Promise<{
   revision: { id: string; revision_name: string; revision_scope: string; imported_at: string } | null;
   days: Array<{
     id: string;
@@ -153,7 +155,7 @@ export async function loadSchedulePreview(_sourceDocumentId: string): Promise<{
     .from("production_schedule_revisions")
     .select("id, revision_name, revision_scope, imported_at")
     .eq("show_id", showId)
-    .in("revision_scope", ["shared_draft", "local_shadow"])
+    .eq("external_source_document_key", sourceDocumentId)
     .order("imported_at", { ascending: false })
     .limit(1);
 

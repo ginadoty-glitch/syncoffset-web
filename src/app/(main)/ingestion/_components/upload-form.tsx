@@ -69,9 +69,11 @@ export function UploadForm({ defaultKind, contextLabel }: UploadFormProps) {
   const [file, setFile] = React.useState<File | null>(null);
   const [dragOver, setDragOver] = React.useState(false);
   const [pending, setPending] = React.useState(false);
-  const [lastOutcome, setLastOutcome] = React.useState<{ kind: SourceDocumentKind; parse: ParseOutcome | null } | null>(
-    null,
-  );
+  const [lastOutcome, setLastOutcome] = React.useState<{
+    kind: SourceDocumentKind;
+    parse: ParseOutcome | null;
+    sourceDocumentId: string;
+  } | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const displayLabel = contextLabel ?? SOURCE_INGESTION_REGISTRY[sourceDocumentKind]?.label ?? sourceDocumentKind;
@@ -146,7 +148,11 @@ export function UploadForm({ defaultKind, contextLabel }: UploadFormProps) {
         return;
       }
 
-      setLastOutcome({ kind: sourceDocumentKind, parse: result.parseOutcome });
+      setLastOutcome({
+        kind: sourceDocumentKind,
+        parse: result.parseOutcome,
+        sourceDocumentId: result.sourceDocumentId,
+      });
 
       if (result.parseOutcome?.parsed) {
         toast.success(`${displayLabel} imported`, {
@@ -292,11 +298,14 @@ export function UploadForm({ defaultKind, contextLabel }: UploadFormProps) {
                 </div>
               )}
 
-              {/* Schedule-specific links */}
+              {/* Schedule-specific links — route to the revision just created */}
               {lastOutcome.parse?.parsed && lastOutcome.parse.parserKind === "schedule" && (
                 <div className="flex gap-3 pt-1">
-                  <Link href="/dashboard/shooting-schedule" className="text-xs underline underline-offset-2">
-                    Preview Schedule →
+                  <Link
+                    href={`/ingestion/${lastOutcome.sourceDocumentId}/schedule-preview`}
+                    className="text-xs underline underline-offset-2"
+                  >
+                    Review &amp; Publish Schedule →
                   </Link>
                   <Link href="/dashboard/one-line-schedule" className="text-xs underline underline-offset-2">
                     One-Line Schedule →
