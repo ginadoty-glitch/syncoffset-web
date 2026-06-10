@@ -592,7 +592,7 @@ function parsePdfText(text: string, defaultBlockId: string, docId: string | null
     if (!dm) continue;
     // Header/footer noise: milestone banners and document stamps carry dates
     // but are not shoot-day rows.
-    if (line.includes("***") || /\bCREATED\b/i.test(line)) continue;
+    if (line.includes("***") || /\bCREATED\b/i.test(line) || /script\s+date/i.test(line)) continue;
     const dateRaw = dm[0];
     const rest = line.replace(dateRaw, " ").replace(/\s+/g, " ").trim();
     // A date with no surrounding content is a document header date, not a row.
