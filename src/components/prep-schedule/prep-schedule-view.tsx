@@ -54,7 +54,7 @@ export function PrepScheduleView({ tasks, showName }: { tasks: PrepTask[]; showN
             )}
           </div>
           <Button size="sm" asChild>
-            <Link href="/ingestion/upload?kind=shoot-schedule&label=Prep+Schedule">
+            <Link href="/ingestion/upload?kind=prep-schedule&label=Prep+Schedule">
               <Upload className="mr-2 size-4" />
               Upload Prep Schedule
             </Link>
@@ -87,7 +87,7 @@ export function PrepScheduleView({ tasks, showName }: { tasks: PrepTask[]; showN
           <p className="mt-1 text-muted-foreground text-sm">{tasks.length} prep tasks</p>
         </div>
         <Button size="sm" asChild>
-          <Link href="/ingestion/upload?kind=shoot-schedule&label=Prep+Schedule">
+          <Link href="/ingestion/upload?kind=prep-schedule&label=Prep+Schedule">
             <Upload className="mr-2 size-4" />
             Upload Prep Schedule
           </Link>

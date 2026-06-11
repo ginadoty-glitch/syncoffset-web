@@ -87,10 +87,12 @@ export function SchedulePreviewView({
   revision,
   days,
   sourceDocumentId,
+  sourceDocumentKind,
 }: {
   revision: Revision;
   days: ScheduleDay[];
   sourceDocumentId: string;
+  sourceDocumentKind?: string | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -108,7 +110,9 @@ export function SchedulePreviewView({
     if (info.unitLabel) units.add(info.unitLabel);
   }
 
-  const isPublishable = revision.revision_scope === "shared_draft" || revision.revision_scope === "local_shadow";
+  const isPrepSchedule = sourceDocumentKind === "prep-schedule";
+  const isPublishable =
+    !isPrepSchedule && (revision.revision_scope === "shared_draft" || revision.revision_scope === "local_shadow");
 
   const handlePublish = () => {
     startTransition(async () => {
@@ -142,6 +146,11 @@ export function SchedulePreviewView({
             <Button size="sm" disabled={pending} onClick={handlePublish}>
               {pending ? "Publishing…" : "Publish to Calendar"}
             </Button>
+          )}
+          {isPrepSchedule && (
+            <span className="max-w-[260px] text-right text-muted-foreground text-xs">
+              Prep Schedule · preview only — does not replace the shooting schedule
+            </span>
           )}
         </div>
       </div>

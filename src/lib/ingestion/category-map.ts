@@ -10,6 +10,7 @@ const SOURCE_KIND_TO_CATEGORY: Record<SourceDocumentKind, DocumentCategory> = {
   "script-revision": "script-revision",
   "shoot-schedule": "calendar",
   "one-liner": "one-liner",
+  "prep-schedule": "calendar",
   "callsheet-revision": "callsheet",
   "breakdown-package": "reference",
   "location-package": "location-agreement",

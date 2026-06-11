@@ -256,7 +256,7 @@ export async function getSourceDocumentDownloadUrl(
   return { ok: true, url: signed.signedUrl, fileName: sourceFile.originalFileName };
 }
 
-const SCHEDULE_PARSE_KINDS = new Set(["shoot-schedule", "one-liner", "dood"]);
+const SCHEDULE_PARSE_KINDS = new Set(["shoot-schedule", "one-liner", "dood", "prep-schedule"]);
 const SCRIPT_PARSE_KINDS = new Set(["script-revision"]);
 
 async function triggerScriptParseIfApplicable(sourceDocumentId: string): Promise<void> {
@@ -471,7 +471,7 @@ export async function createSourceDocumentFromStorage(
   }
 }
 
-const AUTO_PROCESS_KINDS = new Set<string>(["script-revision", "shoot-schedule", "one-liner", "dood"]);
+const AUTO_PROCESS_KINDS = new Set<string>(["script-revision", "shoot-schedule", "one-liner", "dood", "prep-schedule"]);
 
 async function autoApproveAndParse(sourceDocumentId: string, sourceDocumentKind: string): Promise<ParseOutcome> {
   try {

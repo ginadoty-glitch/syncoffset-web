@@ -111,6 +111,30 @@ export async function publishScheduleRevision(revisionId: string): Promise<Inges
   const supabase = createServiceClient();
   const showId = await getDefaultProductionId();
 
+  // Publish supersedes ALL published revisions for the show (single chain).
+  // Prep Schedules must never replace the Shooting Schedule / One-Liner.
+  const { data: revisionRow } = await supabase
+    .from("production_schedule_revisions")
+    .select("external_source_document_key")
+    .eq("id", revisionId)
+    .maybeSingle();
+
+  if (revisionRow?.external_source_document_key) {
+    const { data: sourceDoc } = await supabase
+      .from("source_documents")
+      .select("source_document_kind")
+      .eq("id", revisionRow.external_source_document_key)
+      .maybeSingle();
+
+    if (sourceDoc?.source_document_kind === "prep-schedule") {
+      return {
+        ok: false,
+        error:
+          "Prep Schedules stay in preview — publishing would replace the shooting schedule on the Production Calendar.",
+      };
+    }
+  }
+
   const { data, error } = await supabase.rpc("publish_production_schedule_revision", {
     p_show_id: showId,
     p_revision_id: revisionId,
@@ -139,6 +163,7 @@ export async function publishScheduleRevision(revisionId: string): Promise<Inges
  */
 export async function loadSchedulePreview(sourceDocumentId: string): Promise<{
   revision: { id: string; revision_name: string; revision_scope: string; imported_at: string } | null;
+  sourceDocumentKind: string | null;
   days: Array<{
     id: string;
     strip_position: number;
@@ -162,11 +187,18 @@ export async function loadSchedulePreview(sourceDocumentId: string): Promise<{
   const revision = revisions?.[0] ?? null;
   if (!revision) return null;
 
-  const { data: days } = await supabase
-    .from("production_schedule_days")
-    .select("id, strip_position, shoot_day, day_type, title, notes")
-    .eq("revision_id", revision.id)
-    .order("strip_position", { ascending: true });
+  const [{ data: days }, { data: sourceDoc }] = await Promise.all([
+    supabase
+      .from("production_schedule_days")
+      .select("id, strip_position, shoot_day, day_type, title, notes")
+      .eq("revision_id", revision.id)
+      .order("strip_position", { ascending: true }),
+    supabase.from("source_documents").select("source_document_kind").eq("id", sourceDocumentId).maybeSingle(),
+  ]);
 
-  return { revision, days: days ?? [] };
+  return {
+    revision,
+    sourceDocumentKind: (sourceDoc?.source_document_kind as string | null) ?? null,
+    days: days ?? [],
+  };
 }

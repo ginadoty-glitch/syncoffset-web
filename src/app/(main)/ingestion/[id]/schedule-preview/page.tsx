@@ -29,5 +29,12 @@ export default async function SchedulePreviewPage({ params }: PageProps) {
     );
   }
 
-  return <SchedulePreviewView revision={preview.revision} days={preview.days} sourceDocumentId={id} />;
+  return (
+    <SchedulePreviewView
+      revision={preview.revision}
+      days={preview.days}
+      sourceDocumentId={id}
+      sourceDocumentKind={preview.sourceDocumentKind}
+    />
+  );
 }

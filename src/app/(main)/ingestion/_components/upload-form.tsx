@@ -27,6 +27,7 @@ const WORKSPACE_ROUTES: Partial<Record<SourceDocumentKind, { label: string; href
   "script-revision": { label: "Script Hub", href: "/dashboard/script-hub" },
   "shoot-schedule": { label: "Shooting Schedule", href: "/dashboard/shooting-schedule" },
   "one-liner": { label: "One-Line Schedule", href: "/dashboard/one-line-schedule" },
+  "prep-schedule": { label: "Prep Schedule", href: "/dashboard/prep-schedule" },
   dood: { label: "Cast DOODs", href: "/dashboard/cast-doods" },
   "cast-list": { label: "Cast Lists", href: "/dashboard/cast-lists" },
   "breakdown-package": { label: "Script Breakdown", href: "/dashboard/script-breakdown" },

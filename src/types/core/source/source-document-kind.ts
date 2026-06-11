@@ -12,6 +12,8 @@ export type SourceDocumentKind =
   /** Immutable uploaded schedule file — constitutional object is core kind `shooting-schedule` (Shooting Schedule Authority). */
   | "shoot-schedule"
   | "one-liner"
+  /** Prep-period schedule (tech scouts, dept meetings, camera tests) — parses to draft revisions, never publishes into the shooting-schedule chain. */
+  | "prep-schedule"
   /** Immutable uploaded callsheet file — distinct from core `callsheet-revision` object (Callsheet Authority). */
   | "callsheet-revision"
   | "breakdown-package"

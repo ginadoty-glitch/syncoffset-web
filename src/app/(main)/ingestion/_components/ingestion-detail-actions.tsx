@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import type { IngestionStatus } from "@/lib/ingestion/ingestion-status";
 import { approveSourceDocument, rejectSourceDocument, reprocessScript } from "@/server/ingestion-actions";
 
-const SCHEDULE_KINDS = new Set(["shoot-schedule", "one-liner", "dood"]);
+const SCHEDULE_KINDS = new Set(["shoot-schedule", "one-liner", "dood", "prep-schedule"]);
 const SCRIPT_KINDS = new Set(["script-revision"]);
 
 export function IngestionDetailActions({

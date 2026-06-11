@@ -22,6 +22,7 @@ const SOURCE_KIND_TO_BUCKET: Record<SourceDocumentKind, StorageBucketId> = {
   "script-revision": "scripts",
   "shoot-schedule": "shooting-schedules",
   "one-liner": "production-calendars",
+  "prep-schedule": "production-calendars",
   "callsheet-revision": "callsheets",
   "breakdown-package": "scripts",
   "location-package": "reference-media",

@@ -78,6 +78,15 @@ export const SOURCE_INGESTION_REGISTRY: Record<SourceDocumentKind, SourceIngesti
     supportedSourceSystems: ["movie-magic-scheduling", "ep-scheduling", "excel", "pdf", "manual-upload"],
     extractionTargets: ["shoot-day", "scene", "location", "company-move"],
   },
+  "prep-schedule": {
+    sourceDocumentKind: "prep-schedule",
+    label: "Prep Schedule",
+    isImmutable: true,
+    supportedSourceSystems: ["excel", "pdf", "manual-upload"],
+    extractionTargets: ["prep-day", "location", "crew-member"],
+    notes:
+      "Prep-period scheduling (tech scouts, dept meetings) — parses to preview, never supersedes the shooting schedule.",
+  },
   "callsheet-revision": {
     sourceDocumentKind: "callsheet-revision",
     label: "Callsheet Revision",

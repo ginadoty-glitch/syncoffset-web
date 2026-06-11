@@ -13,7 +13,7 @@ import { DocumentTimelineView } from "./document-timeline";
 import { DownloadOriginalButton } from "./download-original-button";
 import { IngestionDetailActions } from "./ingestion-detail-actions";
 
-const SCHEDULE_KINDS = new Set(["shoot-schedule", "one-liner", "dood"]);
+const SCHEDULE_KINDS = new Set(["shoot-schedule", "one-liner", "dood", "prep-schedule"]);
 
 function formatDate(iso: string) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
