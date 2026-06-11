@@ -6,6 +6,7 @@ export type ProductionBudgetLineRow = {
   category: string;
   department: string | null;
   description: string;
+  vendor: string | null;
   quantity: number;
   unit_cost: number;
   estimated_cost: number;

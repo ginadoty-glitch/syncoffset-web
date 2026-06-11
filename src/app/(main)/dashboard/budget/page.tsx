@@ -1,14 +1,10 @@
-import { DollarSign } from "lucide-react";
+import { BudgetWorkspace } from "@/components/budget/budget-workspace";
+import { loadLiveBudgetLines } from "@/lib/live-budget/load-live-budget-lines";
+import { getActiveShow } from "@/lib/production/get-active-show";
 
-import { CanonWorkspaceShell } from "@/components/canon/canon-workspace-shell";
+export const dynamic = "force-dynamic";
 
-export default function BudgetPage() {
-  return (
-    <CanonWorkspaceShell
-      group="Accounting"
-      title="Budget"
-      description="Approved production budget with line-item detail."
-      icon={DollarSign}
-    />
-  );
+export default async function BudgetPage() {
+  const [data, show] = await Promise.all([loadLiveBudgetLines(), getActiveShow()]);
+  return <BudgetWorkspace rows={data.rows} showName={show.name} loadError={data.loadError} />;
 }
