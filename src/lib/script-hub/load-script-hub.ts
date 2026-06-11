@@ -17,7 +17,7 @@ const SCENE_SELECT =
   "id, script_id, scene_number, scene_heading, location_name, time_of_day, sort_order, raw_text, scene_status, change_summary, breakdown_draft" as const;
 
 const ITEM_SELECT =
-  "id, script_id, scene_id, label, department, category, element_type, status, quantity, unit, estimated_unit_cost, notes, item_slot, source_column" as const;
+  "id, script_id, scene_id, label, department, category, status, quantity, unit, estimated_unit_cost, notes, item_slot" as const;
 
 const BUDGET_SELECT = "id, source_id, status, estimated_cost" as const;
 
@@ -32,6 +32,7 @@ function emptyHub(loadError: string | null): ScriptHubData {
     selectedSceneId: null,
     sceneCount: 0,
     breakdownItemCount: 0,
+    itemCountBySceneId: {},
     budgetByItemId: {},
     loadError,
   };
@@ -124,6 +125,7 @@ export async function loadScriptHub(
       selectedSceneId: null,
       sceneCount: 0,
       breakdownItemCount: 0,
+      itemCountBySceneId: {},
       budgetByItemId: {},
       loadError: null,
     };
@@ -143,6 +145,7 @@ export async function loadScriptHub(
       selectedSceneId: null,
       sceneCount: 0,
       breakdownItemCount: 0,
+      itemCountBySceneId: {},
       budgetByItemId: {},
       loadError: null,
     };
@@ -163,23 +166,6 @@ export async function loadScriptHub(
       .order("label", { ascending: true }),
   ]);
 
-  if (isMissingRelation(scenesResult.error)) {
-    const message = scenesResult.error?.message ?? 'relation "production_script_scenes" does not exist';
-    return {
-      showId,
-      scripts,
-      selectedScript,
-      previousScriptTitle,
-      scenes: [],
-      breakdownItems: [],
-      selectedSceneId: null,
-      sceneCount: 0,
-      breakdownItemCount: 0,
-      budgetByItemId: {},
-      loadError: message,
-    };
-  }
-
   if (scenesResult.error) {
     return {
       showId,
@@ -191,46 +177,25 @@ export async function loadScriptHub(
       selectedSceneId: null,
       sceneCount: 0,
       breakdownItemCount: 0,
+      itemCountBySceneId: {},
       budgetByItemId: {},
       loadError: scenesResult.error.message,
     };
   }
 
-  if (isMissingRelation(itemsResult.error)) {
-    const message = itemsResult.error?.message ?? 'relation "production_breakdown_items" does not exist';
-    return {
-      showId,
-      scripts,
-      selectedScript,
-      previousScriptTitle,
-      scenes: (scenesResult.data ?? []) as ScriptHubSceneRow[],
-      breakdownItems: [],
-      selectedSceneId: null,
-      sceneCount: (scenesResult.data ?? []).length,
-      breakdownItemCount: 0,
-      budgetByItemId: {},
-      loadError: message,
-    };
-  }
-
-  if (itemsResult.error) {
-    return {
-      showId,
-      scripts,
-      selectedScript,
-      previousScriptTitle,
-      scenes: (scenesResult.data ?? []) as ScriptHubSceneRow[],
-      breakdownItems: [],
-      selectedSceneId: null,
-      sceneCount: (scenesResult.data ?? []).length,
-      breakdownItemCount: 0,
-      budgetByItemId: {},
-      loadError: itemsResult.error.message,
-    };
-  }
-
   const scenes = (scenesResult.data ?? []) as ScriptHubSceneRow[];
-  const allItems = (itemsResult.data ?? []) as ScriptHubBreakdownItemRow[];
+
+  // Scenes are the operational spine — a breakdown-items failure must never
+  // block scene rendering. Degrade to an empty item list instead.
+  const allItems = itemsResult.error ? [] : ((itemsResult.data ?? []) as ScriptHubBreakdownItemRow[]);
+  if (itemsResult.error) {
+    console.error("[script-hub] breakdown items query failed:", itemsResult.error.message);
+  }
+
+  const itemCountBySceneId: Record<string, number> = {};
+  for (const item of allItems) {
+    itemCountBySceneId[item.scene_id] = (itemCountBySceneId[item.scene_id] ?? 0) + 1;
+  }
 
   const selectedSceneId =
     sceneIdParam && scenes.some((s) => s.id === sceneIdParam) ? sceneIdParam : (scenes[0]?.id ?? null);
@@ -253,6 +218,7 @@ export async function loadScriptHub(
     selectedSceneId,
     sceneCount: scenes.length,
     breakdownItemCount: allItems.length,
+    itemCountBySceneId,
     budgetByItemId,
     loadError: null,
   };

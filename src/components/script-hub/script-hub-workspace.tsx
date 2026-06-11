@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { FileText, Upload } from "lucide-react";
 
+import { CreateBreakdownItemDialog } from "@/components/script-hub/create-breakdown-item-dialog";
 import { Button } from "@/components/ui/button";
 import { DEPARTMENT_LENSES, filterItemsByDepartmentLens } from "@/lib/script-hub/department-lenses";
 import type {
@@ -326,12 +327,21 @@ export function ScriptHubWorkspace({ data, showName }: { data: ScriptHubData; sh
           {/* Right — breakdown items */}
           <section className="flex min-h-0 flex-col rounded-lg border border-border bg-card lg:col-span-4">
             <div className="space-y-3 border-border border-b px-4 py-3">
-              <div>
-                <h2 className="font-medium text-sm">Breakdown items</h2>
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h2 className="font-medium text-sm">Breakdown items</h2>
+                  {selectedSceneId ? (
+                    <p className="text-muted-foreground text-xs">
+                      Scene {selectedScene?.scene_number ?? selectedScene?.scene_heading ?? selectedSceneId}
+                    </p>
+                  ) : null}
+                </div>
                 {selectedSceneId ? (
-                  <p className="text-muted-foreground text-xs">
-                    Scene {selectedScene?.scene_number ?? selectedScene?.scene_heading ?? selectedSceneId}
-                  </p>
+                  <CreateBreakdownItemDialog
+                    scriptId={selectedScript.id}
+                    sceneId={selectedSceneId}
+                    sceneLabel={selectedScene?.scene_number ?? selectedScene?.scene_heading ?? selectedSceneId}
+                  />
                 ) : null}
               </div>
               <fieldset className="flex flex-wrap gap-1.5 border-0 p-0">
@@ -444,14 +454,6 @@ function BreakdownItemRow({
         <div>
           <dt className="text-muted-foreground">Item slot</dt>
           <dd>{formatSlotLabel(item.item_slot)}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">Source column</dt>
-          <dd>{formatSlotLabel(item.source_column)}</dd>
-        </div>
-        <div className="col-span-2">
-          <dt className="text-muted-foreground">Element type</dt>
-          <dd>{item.element_type ?? "—"}</dd>
         </div>
         {item.notes?.trim() ? (
           <div className="col-span-2">

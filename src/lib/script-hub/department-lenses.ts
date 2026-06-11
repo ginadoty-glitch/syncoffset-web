@@ -25,10 +25,7 @@ function norm(value: string | null | undefined): string {
 }
 
 function haystack(item: ScriptHubBreakdownItemRow): string {
-  return [item.department, item.category, item.element_type, item.source_column, item.item_slot]
-    .map(norm)
-    .filter(Boolean)
-    .join(" ");
+  return [item.department, item.category, item.item_slot].map(norm).filter(Boolean).join(" ");
 }
 
 function matchesAny(hay: string, patterns: string[]): boolean {

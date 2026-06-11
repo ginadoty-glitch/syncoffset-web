@@ -40,14 +40,12 @@ export type ScriptHubBreakdownItemRow = {
   label: string;
   department: string | null;
   category: string | null;
-  element_type: string | null;
   status: BreakdownItemStatus;
   quantity: number;
   unit: string | null;
   estimated_unit_cost: number | null;
   notes: string | null;
   item_slot: string | null;
-  source_column: string | null;
 };
 
 export type ScriptHubBudgetLink = {
@@ -66,6 +64,7 @@ export type ScriptHubData = {
   selectedSceneId: string | null;
   sceneCount: number;
   breakdownItemCount: number;
+  itemCountBySceneId: Record<string, number>;
   budgetByItemId: Record<string, ScriptHubBudgetLink>;
   loadError: string | null;
 };

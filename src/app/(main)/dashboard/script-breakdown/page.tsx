@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { Upload } from "lucide-react";
 
+import { ScriptIntelligence } from "@/components/script-breakdown/script-intelligence";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -54,6 +55,8 @@ export default async function ScriptBreakdownPage() {
         </div>
       )}
 
+      {hasScenes && <ScriptIntelligence scenes={data.scenes} />}
+
       {!hasScenes ? (
         <div className="rounded-lg border border-dashed px-6 py-16 text-center text-muted-foreground text-sm">
           No scenes yet. Upload a script to populate the breakdown.
@@ -64,25 +67,29 @@ export default async function ScriptBreakdownPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[60px]">Scene</TableHead>
-                <TableHead className="w-[70px]">I/E</TableHead>
+                <TableHead className="w-[70px]">INT/EXT</TableHead>
                 <TableHead>Location</TableHead>
-                <TableHead className="w-[100px]">Time</TableHead>
+                <TableHead className="w-[100px]">Day/Night</TableHead>
+                <TableHead className="w-[70px]">Pages</TableHead>
                 <TableHead>Heading</TableHead>
                 <TableHead className="w-[80px]">Status</TableHead>
-                <TableHead className="w-[80px] text-right">Elements</TableHead>
+                <TableHead className="w-[120px] text-right">Breakdown Items</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {data.scenes.map((scene) => {
-                const ie = intExtFromHeading(scene.scene_heading);
-                const chars = (scene.breakdown_draft as Record<string, unknown>)?.characters;
-                const charCount = Array.isArray(chars) ? chars.length : 0;
+                const bd = (scene.breakdown_draft ?? {}) as Record<string, unknown>;
+                const ie =
+                  (typeof bd.int_ext === "string" && bd.int_ext.trim()) || intExtFromHeading(scene.scene_heading);
+                const pages = typeof bd.pages === "string" && bd.pages.trim() ? bd.pages.trim() : null;
+                const itemCount = data.itemCountBySceneId[scene.id] ?? 0;
                 return (
                   <TableRow key={scene.id}>
                     <TableCell className="font-mono font-semibold text-sm">{scene.scene_number ?? "—"}</TableCell>
-                    <TableCell className="text-muted-foreground text-xs">{ie ?? "—"}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">{ie || "—"}</TableCell>
                     <TableCell className="font-medium text-sm">{scene.location_name ?? "—"}</TableCell>
                     <TableCell className="text-muted-foreground text-xs">{scene.time_of_day ?? "—"}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs tabular-nums">{pages ?? "—"}</TableCell>
                     <TableCell className="max-w-[300px] truncate text-muted-foreground text-xs">
                       {scene.scene_heading}
                     </TableCell>
@@ -92,7 +99,21 @@ export default async function ScriptBreakdownPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right text-sm tabular-nums">
-                      {charCount > 0 ? `${charCount} cast` : "—"}
+                      {itemCount > 0 ? (
+                        <Link
+                          href={`/dashboard/script-hub?scriptId=${scene.script_id}&sceneId=${scene.id}`}
+                          className="underline-offset-2 hover:underline"
+                        >
+                          {itemCount} item{itemCount === 1 ? "" : "s"}
+                        </Link>
+                      ) : (
+                        <Link
+                          href={`/dashboard/script-hub?scriptId=${scene.script_id}&sceneId=${scene.id}`}
+                          className="text-muted-foreground underline-offset-2 hover:underline"
+                        >
+                          + Add
+                        </Link>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
