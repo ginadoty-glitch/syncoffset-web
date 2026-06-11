@@ -437,6 +437,7 @@ function mapRecordToShootDay(
     units,
     companyMove,
     notes,
+    totalPages: pages.trim() || undefined,
     productionDocumentSourceId: docId ?? undefined,
     scenes,
     intExt,
@@ -579,6 +580,103 @@ const DATE_LINE_RE = new RegExp(
   "i",
 );
 
+// "End of Shooting Day 1 -- Monday, June 22, 2026 -- 4 1/8 Pages"
+// "End Day # 3 -- Wednesday, May 13, 2026 -- Total Pages: 2 5/8"
+const DAY_BANNER_RE = /end\s+(?:of\s+)?(?:shooting\s+)?day\s*#?\s*(\d+)?/i;
+const PDF_INT_EXT_RE = /^(INT\/EXT|EXT\/INT|INT|EXT)\.?$/i;
+const PDF_DAY_NIGHT_RE = /^([DN])\d*$/i;
+const PDF_DAY_HEADER_RE = /^DAY\s+\d+\s*[(\b]/i;
+
+function isNoiseDateLine(line: string): boolean {
+  return line.includes("***") || /\bCREATED\b/i.test(line) || /script\s+date/i.test(line);
+}
+
+/**
+ * Extract one shoot-day record from the strip lines preceding an
+ * "End of Shooting Day" banner (Movie Magic one-liner PDF layout).
+ * Strips render as: SET NAME / scene numbers / INT|EXT / pages+cast /
+ * "Scenes:" / description / D-number.
+ */
+function extractDayFromBannerBlock(
+  block: string[],
+  bannerLine: string,
+  dateRaw: string,
+  fallbackDayNumber: number,
+): Record<string, string> {
+  const dayMatch = bannerLine.match(DAY_BANNER_RE);
+  const pagesMatch = bannerLine.match(/(\d+\s+\d+\/\d+|\d+\/\d+|\d+)\s*pages/i);
+
+  let location = "";
+  const setCounts = new Map<string, number>();
+  const scenes: string[] = [];
+  const intExtVotes: string[] = [];
+  const dayNightVotes: string[] = [];
+  let companyMove = false;
+
+  for (let i = 0; i < block.length; i++) {
+    const l = block[i] ?? "";
+
+    if (PDF_DAY_HEADER_RE.test(l)) {
+      const next = block[i + 1]?.trim() ?? "";
+      if (next && !PDF_INT_EXT_RE.test(next) && !/CALLTIME/i.test(next)) location = next;
+      continue;
+    }
+
+    if (/company\s+move/i.test(l)) companyMove = true;
+
+    if (PDF_INT_EXT_RE.test(l)) {
+      intExtVotes.push(l.toUpperCase().replace(/\.$/, ""));
+      const sceneLine = block[i - 1]?.trim() ?? "";
+      const setLine = block[i - 2]?.trim() ?? "";
+      const sceneTokens = sceneLine.match(/\d+[A-Z]{0,2}(?:\s*PT\s*\.?\s*\d+)?/gi) ?? [];
+      const sceneLineIsScenes = sceneTokens.length > 0 && !/CALLTIME|[a-z]{4,}/.test(sceneLine);
+      if (sceneLineIsScenes) {
+        for (const t of sceneTokens) {
+          const cleaned = t.replace(/\s+/g, " ").trim();
+          if (!scenes.includes(cleaned)) scenes.push(cleaned);
+        }
+      }
+      if (
+        setLine &&
+        /[A-Za-z]{3,}/.test(setLine) &&
+        !/scenes:|calltime/i.test(setLine) &&
+        !PDF_DAY_NIGHT_RE.test(setLine) &&
+        !PDF_DAY_HEADER_RE.test(setLine)
+      ) {
+        setCounts.set(setLine, (setCounts.get(setLine) ?? 0) + 1);
+      }
+      continue;
+    }
+
+    const dn = l.match(PDF_DAY_NIGHT_RE);
+    if (dn?.[1]) dayNightVotes.push(dn[1].toUpperCase());
+  }
+
+  const majority = (votes: string[]): string => {
+    if (votes.length === 0) return "";
+    const counts = new Map<string, number>();
+    for (const v of votes) counts.set(v, (counts.get(v) ?? 0) + 1);
+    return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+  };
+
+  const topSet = [...setCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+
+  return {
+    date: dateRaw,
+    day: dayMatch?.[1] ?? String(fallbackDayNumber),
+    scenes: scenes.join(", "),
+    location: location || topSet || "TBD",
+    set: topSet,
+    "int/ext": majority(intExtVotes),
+    "d/n": majority(dayNightVotes),
+    pages: pagesMatch?.[1]?.trim() ?? "",
+    "company move": companyMove ? "yes" : "",
+    notes: "",
+  };
+}
+
+const PDF_HEADERS = ["date", "day", "scenes", "location", "set", "int/ext", "d/n", "pages", "company move", "notes"];
+
 function parsePdfText(text: string, defaultBlockId: string, docId: string | null): OneLinerParseResult {
   const lines = text
     .split(/\n+/)
@@ -586,31 +684,44 @@ function parsePdfText(text: string, defaultBlockId: string, docId: string | null
     .filter(Boolean);
   const tableRows: Record<string, string>[] = [];
 
+  // Pass 1 — Movie Magic one-liner layout: day blocks closed by
+  // "End of (Shooting) Day N -- <date> -- X X/X Pages" banners. All strip
+  // content (sets, scenes, INT/EXT, D/N) lives on the lines ABOVE the banner.
+  let blockStart = 0;
   for (let idx = 0; idx < lines.length; idx++) {
-    const line = lines[idx]!;
+    const line = lines[idx] ?? "";
     const dm = line.match(DATE_LINE_RE);
-    if (!dm) continue;
-    // Header/footer noise: milestone banners and document stamps carry dates
-    // but are not shoot-day rows.
-    if (line.includes("***") || /\bCREATED\b/i.test(line) || /script\s+date/i.test(line)) continue;
-    const dateRaw = dm[0];
-    const rest = line.replace(dateRaw, " ").replace(/\s+/g, " ").trim();
-    // A date with no surrounding content is a document header date, not a row.
-    if (!rest) continue;
-    const sceneMatch = rest.match(
-      /\b(\d+[A-Za-z]?(?:(?:pt|PT)(?:\.\d+)?)?(?:\s*[-,&]\s*\d+[A-Za-z]?(?:(?:pt|PT)(?:\.\d+)?)?)*)\b/,
-    );
-    tableRows.push({
-      date: dateRaw,
-      day: String(tableRows.length + 1),
-      scenes: sceneMatch?.[1] ?? "",
-      location: rest.replace(sceneMatch?.[0] ?? "", "").trim() || "TBD",
-      notes: rest,
-      _line: String(idx),
-    });
+    if (!dm || isNoiseDateLine(line)) continue;
+    if (!DAY_BANNER_RE.test(line)) continue;
+    tableRows.push(extractDayFromBannerBlock(lines.slice(blockStart, idx), line, dm[0], tableRows.length + 1));
+    blockStart = idx + 1;
   }
 
-  const preview = parseTabularRows(tableRows, ["date", "day", "scenes", "location", "notes"], defaultBlockId, docId);
+  // Pass 2 — fallback for PDF layouts without day banners: one row per date line.
+  if (tableRows.length === 0) {
+    for (let idx = 0; idx < lines.length; idx++) {
+      const line = lines[idx] ?? "";
+      const dm = line.match(DATE_LINE_RE);
+      if (!dm || isNoiseDateLine(line)) continue;
+      const dateRaw = dm[0];
+      const rest = line.replace(dateRaw, " ").replace(/\s+/g, " ").trim();
+      // A date with no surrounding content is a document header date, not a row.
+      if (!rest) continue;
+      const sceneMatch = rest.match(
+        /\b(\d+[A-Za-z]?(?:(?:pt|PT)(?:\.\d+)?)?(?:\s*[-,&]\s*\d+[A-Za-z]?(?:(?:pt|PT)(?:\.\d+)?)?)*)\b/,
+      );
+      tableRows.push({
+        date: dateRaw,
+        day: String(tableRows.length + 1),
+        scenes: sceneMatch?.[1] ?? "",
+        location: rest.replace(sceneMatch?.[0] ?? "", "").trim() || "TBD",
+        notes: rest,
+        _line: String(idx),
+      });
+    }
+  }
+
+  const preview = parseTabularRows(tableRows, PDF_HEADERS, defaultBlockId, docId);
   const warnings = [...preview.warnings];
   if (preview.rows.length === 0) {
     warnings.push("PDF text extraction yielded no dated rows — file may be scanned; OCR not available.");
