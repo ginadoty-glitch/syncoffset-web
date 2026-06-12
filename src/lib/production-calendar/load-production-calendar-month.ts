@@ -99,26 +99,48 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
     (publishedRev.revision_name as string | null)?.trim() ||
     (publishedRev.revision_number != null ? `Revision ${publishedRev.revision_number}` : "Published schedule");
 
-  // Fetch the full date range for the published revision (for navigation)
+  // Prep schedules live in their own (unpublished) revision and never supersede
+  // the shooting schedule. Surface the LATEST prep revision alongside the
+  // published shooting schedule so prep days + shoot days share the calendar.
+  const revisionIds: string[] = [revisionId];
+  const { data: prepDocs } = await supabase
+    .from("source_documents")
+    .select("id")
+    .eq("production_id", showId)
+    .eq("source_document_kind", "prep-schedule");
+  const prepDocIds = (prepDocs ?? []).map((d) => d.id as string);
+  if (prepDocIds.length > 0) {
+    const { data: prepRev } = await supabase
+      .from("production_schedule_revisions")
+      .select("id")
+      .eq("show_id", showId)
+      .in("external_source_document_key", prepDocIds)
+      .order("imported_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (prepRev?.id) revisionIds.push(prepRev.id as string);
+  }
+
+  // Fetch the full date range across both revisions (for navigation)
   const [firstDayResult, lastDayResult, dayCountResult] = await Promise.all([
     supabase
       .from("production_schedule_days")
       .select("shoot_day")
-      .eq("revision_id", revisionId)
+      .in("revision_id", revisionIds)
       .order("shoot_day", { ascending: true })
       .limit(1)
       .maybeSingle(),
     supabase
       .from("production_schedule_days")
       .select("shoot_day")
-      .eq("revision_id", revisionId)
+      .in("revision_id", revisionIds)
       .order("shoot_day", { ascending: false })
       .limit(1)
       .maybeSingle(),
     supabase
       .from("production_schedule_days")
       .select("id", { count: "exact", head: true })
-      .eq("revision_id", revisionId),
+      .in("revision_id", revisionIds),
   ]);
 
   let scheduleRange: ScheduleDateRange | null = null;
@@ -135,7 +157,7 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
   const { data: dayRows, error: daysError } = await supabase
     .from("production_schedule_days")
     .select("id, strip_position, shoot_day, day_type, title, notes, meeting_url, map_url")
-    .eq("revision_id", revisionId)
+    .in("revision_id", revisionIds)
     .gte("shoot_day", `${rangeStart}T00:00:00`)
     .lte("shoot_day", `${rangeEnd}T23:59:59`)
     .order("strip_position", { ascending: true });
@@ -150,10 +172,22 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
 
   const dayByDate = new Map<string, ReturnType<typeof publishedScheduleDayToCalendarRow>>();
   const scenesByDate = new Map<string, CalendarDaySceneRow[]>();
+  const obligationsByDate = new Map<string, CalendarDayObligationRow[]>();
 
   for (const raw of (dayRows ?? []) as PublishedScheduleDayRow[]) {
     const mapped = publishedScheduleDayToCalendarRow(raw);
     dayByDate.set(mapped.row.calendar_date, mapped);
+
+    if (mapped.events.length > 0) {
+      obligationsByDate.set(
+        mapped.row.calendar_date,
+        mapped.events.map((e) => ({
+          obligation_type: e.eventType,
+          label: e.title,
+          time_label: e.startTime ?? null,
+        })),
+      );
+    }
 
     if (mapped.sceneRows.length > 0) {
       scenesByDate.set(mapped.row.calendar_date, mapped.sceneRows);
@@ -230,7 +264,7 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
           }
         : null,
       scenes: day ? (scenesByDate.get(date) ?? []) : [],
-      obligations: [] as CalendarDayObligationRow[],
+      obligations: day ? (obligationsByDate.get(date) ?? []) : [],
       departmentFlags,
       workOrderCount: wo?.count ?? 0,
       transportCount,
