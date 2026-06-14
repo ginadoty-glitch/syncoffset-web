@@ -14,6 +14,8 @@ import type {
   OneLinerUnresolvedRow,
   ParsedOneLinerRow,
   ShootDay,
+  ShootDayEvent,
+  ShootDayEventType,
   ShootDaySetup,
   ShootDayUnit,
 } from "@/types/schedule";
@@ -677,11 +679,194 @@ function extractDayFromBannerBlock(
 
 const PDF_HEADERS = ["date", "day", "scenes", "location", "set", "int/ext", "d/n", "pages", "company move", "notes"];
 
+// ---------------------------------------------------------------------------
+// Prep memo parsing (prep-schedule PDFs: dated meeting/scout blocks, no strips)
+// ---------------------------------------------------------------------------
+
+// "THURSDAY, JUNE 11     Prep Day 9 of 15     Tech Survey — Day 1"
+const PREP_DAY_HEADER_RE =
+  /^(?:MON|TUE|WED|THU|FRI|SAT|SUN)[A-Z]*,?\s+([A-Za-z]+)\s+(\d{1,2})\b.*?\bPREP\s+DAY\s+(\d+)\s+OF\s+(\d+)/i;
+const PREP_YEAR_RE = /\b(20\d{2})\b/;
+// "0900 - 1000 HAIR & MAKEUP MEETING (Zoom)" · "All day TECH SURVEY — … (On location)" · "TBD VFX MEETING (Zoom)"
+const PREP_EVENT_RE = /^(All\s+day|TBD|\d{3,4}\s*-{1,2}\s*\d{3,4}(?:\s+TBD)?|\d{3,4})\s+(.*\S)\s+\(([^)]+)\)\s*$/i;
+const PREP_SECTION_RE =
+  /^(WEEK\s+(?:ONE|TWO|THREE|FOUR|FIVE|SIX)\b|END\s+OF\s+PREP|PRINCIPAL\s+PHOTOGRAPHY|POSITION\s+ABBREVIATIONS|CONFIDENTIAL)/i;
+const PREP_HEADERS = ["date", "prepDay", "events"];
+
+function classifyPrepEvent(title: string): ShootDayEventType {
+  const t = title.toLowerCase();
+  if (/tech\s*survey|tech\s*scout|\bscout\b/.test(t)) return "tech_scout";
+  if (/location/.test(t) && /scout|review/.test(t)) return "location_scout";
+  if (/production\s+meeting/.test(t)) return "production_meeting";
+  if (/logistics/.test(t)) return "logistics_meeting";
+  if (/fitting/.test(t)) return "costume_fitting";
+  if (/show\s*&?\s*tell|show\s+and\s+tell/.test(t)) return "props_show_and_tell";
+  if (/health|safety/.test(t)) return "safety_meeting";
+  if (/camera\s+(?:load|test)/.test(t)) return "camera_test";
+  if (/read-?through|rehears/.test(t)) return "rehearsal";
+  if (/load-?in|pre-?light/.test(t)) return "pre_light";
+  if (/meeting|review|discussion|recap|walkthrough/.test(t)) return "production_meeting";
+  return "other";
+}
+
+function extractPrepLocation(title: string): string | undefined {
+  const parts = title.split(/\s[—–-]\s/);
+  if (parts.length > 1) {
+    const tail = parts.slice(1).join(" — ").trim();
+    if (tail && /[A-Za-z]/.test(tail)) return tail;
+  }
+  return undefined;
+}
+
+function parsePrepMemo(lines: string[], defaultBlockId: string, docId: string | null): OneLinerParseResult | null {
+  const headerIdxs: number[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    if (PREP_DAY_HEADER_RE.test(lines[i] ?? "")) headerIdxs.push(i);
+  }
+  if (headerIdxs.length < 2) return null;
+
+  let year = new Date().getFullYear();
+  for (const l of lines.slice(0, 30)) {
+    const m = l.match(PREP_YEAR_RE);
+    if (m?.[1]) {
+      year = Number.parseInt(m[1], 10);
+      break;
+    }
+  }
+
+  const parsedRows: ParsedOneLinerRow[] = [];
+
+  headerIdxs.forEach((startIdx, h) => {
+    const header = lines[startIdx] ?? "";
+    const hm = header.match(PREP_DAY_HEADER_RE);
+    if (!hm) return;
+    const ts = parseFlexScheduleDate(`${hm[1]} ${hm[2]}, ${year}`);
+    if (!ts) return;
+    const prepDayNum = Number.parseInt(hm[3] ?? "0", 10);
+    const prepTotal = hm[4] ?? "";
+
+    const endIdx = h + 1 < headerIdxs.length ? (headerIdxs[h + 1] ?? lines.length) : lines.length;
+    const block = lines.slice(startIdx + 1, endIdx);
+
+    const events: ShootDayEvent[] = [];
+    let cur: ShootDayEvent | null = null;
+    let attendeeBuf: string[] = [];
+    let attendeeMode = false;
+
+    const flushAttendees = () => {
+      if (cur && attendeeBuf.length > 0) {
+        cur.attendees = attendeeBuf
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .split(",")
+          .map((a) => a.trim())
+          .filter(Boolean);
+      }
+      attendeeBuf = [];
+      attendeeMode = false;
+    };
+
+    for (const raw of block) {
+      const line = raw.trim();
+      if (!line) continue;
+      if (PREP_SECTION_RE.test(line)) {
+        flushAttendees();
+        break;
+      }
+
+      const em = line.match(PREP_EVENT_RE);
+      if (em) {
+        flushAttendees();
+        const title = (em[2] ?? "").replace(/\s+/g, " ").trim();
+        const modality = (em[3] ?? "").trim();
+        cur = {
+          eventType: classifyPrepEvent(title),
+          title,
+          startTime: (em[1] ?? "").replace(/\s+/g, " ").trim(),
+          location: extractPrepLocation(title),
+          notes: modality ? `(${modality})` : undefined,
+        };
+        events.push(cur);
+        continue;
+      }
+
+      if (/^agenda:/i.test(line)) {
+        flushAttendees();
+        if (cur) {
+          const agenda = line.replace(/^agenda:\s*/i, "").trim();
+          cur.notes = [cur.notes, agenda].filter(Boolean).join(" ");
+        }
+        continue;
+      }
+
+      if (/^to\s+attend:/i.test(line)) {
+        attendeeMode = true;
+        attendeeBuf = [line.replace(/^to\s+attend:\s*/i, "").trim()];
+        continue;
+      }
+
+      if (attendeeMode) attendeeBuf.push(line);
+    }
+    flushAttendees();
+
+    const isTechScout = events.some((e) => e.eventType === "tech_scout") || /tech\s*survey/i.test(header);
+
+    const shootDay: ShootDay = {
+      id: `sd-prep-${ts}-${h}`,
+      blockId: defaultBlockId,
+      dayNumber: prepDayNum,
+      date: ts,
+      location: `Prep Day ${prepDayNum} of ${prepTotal}`,
+      calendarDayType: isTechScout ? "tech-scout" : "prep",
+      setups: [],
+      units: [{ unitLabel: "PREP" }],
+      markers: [],
+      events,
+      scenes: [],
+      productionDocumentSourceId: docId ?? undefined,
+    };
+
+    parsedRows.push({
+      rowIndex: parsedRows.length,
+      shootDay,
+      confidence: {
+        date: "certain",
+        location: "inferred",
+        scenes: "missing",
+        intExt: "missing",
+        unit: "inferred",
+        overall: "inferred",
+      },
+      rawCells: {},
+    });
+  });
+
+  if (parsedRows.length === 0) return null;
+
+  const techScoutCount = parsedRows.filter((r) => r.shootDay.calendarDayType === "tech-scout").length;
+
+  return {
+    rows: parsedRows,
+    unresolvedRows: [],
+    warnings: [`Prep schedule parsed — ${parsedRows.length} prep day(s), ${techScoutCount} tech-scout day(s).`],
+    revisionLabel: null,
+    episodeIdentifier: null,
+    detectedColumns: PREP_HEADERS,
+    sourceFormat: "pdf",
+    parseQuality: "partial",
+  };
+}
+
 function parsePdfText(text: string, defaultBlockId: string, docId: string | null): OneLinerParseResult {
   const lines = text
     .split(/\n+/)
     .map((l) => l.trim())
     .filter(Boolean);
+
+  // Pass 0 — prep memo (dated meeting/scout blocks). Distinct from shoot strips.
+  const prep = parsePrepMemo(lines, defaultBlockId, docId);
+  if (prep) return prep;
+
   const tableRows: Record<string, string>[] = [];
 
   // Pass 1 — Movie Magic one-liner layout: day blocks closed by

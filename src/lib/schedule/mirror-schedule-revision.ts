@@ -66,7 +66,7 @@ function mapRowsForMirror(
       show_id: showId.trim(),
       strip_position: idx,
       shoot_day: iso,
-      day_type: primaryIntExt,
+      day_type: d.calendarDayType ?? primaryIntExt,
       title,
       notes: bodyNotes.slice(0, 49_000) || null,
       meeting_url: d.meetingJoinUrl?.trim() || null,

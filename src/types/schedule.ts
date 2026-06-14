@@ -69,6 +69,8 @@ export interface ShootDay {
   location: string;
   secondaryLocation?: string;
   zone?: string;
+  /** Explicit calendar day type (prep, tech-scout, travel…) — bypasses INT/EXT inference in the mirror. */
+  calendarDayType?: string;
 
   setups: ShootDaySetup[];
   units: ShootDayUnit[];
