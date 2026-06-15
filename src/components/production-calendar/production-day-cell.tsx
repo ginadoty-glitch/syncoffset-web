@@ -4,19 +4,13 @@ import {
   formatSceneReferenceList,
   wallBlockClassForDay,
 } from "@/lib/production-calendar/day-type-styles";
+import { locationColorClass, locationDisplayLabel } from "@/lib/production-calendar/location-color";
 import { resolveUnitIndicator } from "@/lib/production-calendar/unit-indicators";
 import { cn } from "@/lib/utils";
 import type { CalendarDayType } from "@/types/core/production-calendar/calendar-day-type";
 import type { ShootDayMarker } from "@/types/schedule";
 
 const WEEKDAYS = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
-
-const ZONE_STRIP_BG: Record<string, string> = {
-  van: "bg-emerald-600",
-  north: "bg-sky-600",
-  east: "bg-amber-600",
-  island: "bg-violet-600",
-};
 
 function MarkerList({ markers }: { markers: ShootDayMarker[] }) {
   if (markers.length === 0) return null;
@@ -67,7 +61,6 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
   const blockClass = wallBlockClassForDay(dayType, productionDay.unit_label);
   const unit = resolveUnitIndicator(productionDay.unit_label);
   const isShootDay = dayType === "shoot" && productionDay.day_number != null;
-  const zoneBg = ZONE_STRIP_BG[productionDay.zone_color ?? ""] ?? "bg-emerald-600";
   const markers = productionDay.markers ?? [];
   const maxSetups = variant === "print" ? 8 : 4;
 
@@ -81,22 +74,28 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
         : [],
     );
     const sceneRefLine = formatSceneReferenceList(allScenes);
+    const locationLabel = locationDisplayLabel(productionDay.shoot_location);
+    const chipColor = locationColorClass(productionDay.shoot_location);
 
     return (
       <div className={cn("production-wall-calendar__cell flex flex-col", blockClass)}>
-        <div className="flex items-stretch gap-0">
-          <span className="production-wall-calendar__date-num shrink-0 self-start pr-1">{dayNum}</span>
-          <div className={cn("flex min-w-0 flex-1 items-baseline gap-1 rounded-sm px-1.5 py-0.5", zoneBg)}>
-            <span className="shrink-0 font-black font-mono text-[11px] text-white leading-tight tracking-wider">
+        <div className="flex items-start gap-1">
+          <span className="production-wall-calendar__date-num shrink-0 self-start">{dayNum}</span>
+          <div className={cn("flex min-w-0 flex-1 flex-col gap-0.5 rounded-sm px-1.5 py-1", chipColor)}>
+            <span className="font-black font-mono text-[11px] text-white leading-none tracking-wider">
               DAY {productionDay.day_number}
             </span>
-            {productionDay.shoot_location?.trim() ? (
-              <span className="min-w-0 truncate font-bold text-[9px] text-white/90 uppercase leading-tight tracking-wide">
-                {productionDay.shoot_location}
+            {locationLabel ? (
+              <span className="truncate font-bold text-[9px] text-white uppercase leading-tight tracking-wide">
+                {locationLabel}
               </span>
             ) : null}
           </div>
         </div>
+
+        {unit ? (
+          <span className={cn("production-wall-calendar__unit-badge mt-1", unit.className)}>{unit.label}</span>
+        ) : null}
 
         {/* Split day + company move badges */}
         {productionDay.split_day || productionDay.company_move ? (
@@ -112,10 +111,6 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
               </span>
             ) : null}
           </div>
-        ) : null}
-
-        {unit ? (
-          <span className={cn("production-wall-calendar__unit-badge mt-1", unit.className)}>{unit.label}</span>
         ) : null}
 
         {sceneRefLine ? <div className="production-wall-calendar__scenes">{sceneRefLine}</div> : null}
