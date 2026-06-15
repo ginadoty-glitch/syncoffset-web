@@ -1,4 +1,6 @@
 import {
+  EVENT_CATEGORY_STYLE,
+  EVENT_LEGEND,
   UNIT_LEGEND,
   WALL_DAY_TYPE_BLOCK_CLASS,
   WALL_LEGEND_DAY_TYPES,
@@ -26,6 +28,16 @@ export function ProductionCalendarLegend() {
           <div key={type} className="flex items-center gap-1.5">
             <span className={cn("production-wall-calendar__legend-swatch", WALL_DAY_TYPE_BLOCK_CLASS[type])} />
             <span className="text-[10px] uppercase">{CALENDAR_DAY_TYPE_REGISTRY[type].label}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <span className="font-mono text-[10px] text-muted-foreground uppercase tracking-widest">Events</span>
+        {EVENT_LEGEND.map((cat) => (
+          <div key={cat} className="flex items-center gap-1.5">
+            <span className={cn("production-wall-calendar__legend-swatch", EVENT_CATEGORY_STYLE[cat].swatch)} />
+            <span className="text-[10px] uppercase">{EVENT_CATEGORY_STYLE[cat].label}</span>
           </div>
         ))}
       </div>

@@ -64,6 +64,64 @@ export const UNIT_LEGEND: { id: string; label: string; className: string }[] = [
   { id: "splinter", label: "Splinter Unit", className: "wall-unit-splinter" },
 ];
 
+/**
+ * Event blocks — wall calendars stack several colored event blocks inside one
+ * day box (meetings, scouts, fittings, company move, etc.). Colors are grouped
+ * into categories the top-of-calendar legend explains; the block text carries
+ * the specific event ("Props Show & Tell"), the color carries the category.
+ */
+export type EventBlockCategory =
+  | "company-move"
+  | "meeting"
+  | "scout"
+  | "fitting"
+  | "rehearsal"
+  | "technical"
+  | "safety"
+  | "other";
+
+export const EVENT_CATEGORY_STYLE: Record<EventBlockCategory, { block: string; swatch: string; label: string }> = {
+  "company-move": { block: "bg-violet-500/25 border-violet-400", swatch: "bg-violet-500", label: "Company Move" },
+  meeting: { block: "bg-indigo-500/25 border-indigo-400", swatch: "bg-indigo-500", label: "Meeting" },
+  scout: { block: "bg-blue-500/25 border-blue-400", swatch: "bg-blue-500", label: "Scout / Survey" },
+  fitting: { block: "bg-pink-500/25 border-pink-400", swatch: "bg-pink-500", label: "Fitting" },
+  rehearsal: { block: "bg-orange-500/25 border-orange-400", swatch: "bg-orange-500", label: "Rehearsal" },
+  technical: { block: "bg-cyan-500/25 border-cyan-400", swatch: "bg-cyan-500", label: "Technical" },
+  safety: { block: "bg-red-500/25 border-red-400", swatch: "bg-red-500", label: "Safety" },
+  other: { block: "bg-slate-500/25 border-slate-400", swatch: "bg-slate-500", label: "Other" },
+};
+
+const EVENT_TYPE_CATEGORY: Record<string, EventBlockCategory> = {
+  production_meeting: "meeting",
+  logistics_meeting: "meeting",
+  props_show_and_tell: "meeting",
+  show_and_tell: "meeting",
+  safety_meeting: "safety",
+  tech_scout: "scout",
+  location_scout: "scout",
+  costume_fitting: "fitting",
+  rehearsal: "rehearsal",
+  stunt_rehearsal: "rehearsal",
+  pre_light: "technical",
+  vfx_element_shoot: "technical",
+  camera_test: "technical",
+  other: "other",
+};
+
+export function eventBlockCategory(obligationType: string): EventBlockCategory {
+  return EVENT_TYPE_CATEGORY[obligationType] ?? "other";
+}
+
+export const EVENT_LEGEND: EventBlockCategory[] = [
+  "company-move",
+  "meeting",
+  "scout",
+  "fitting",
+  "rehearsal",
+  "technical",
+  "safety",
+];
+
 export function dayTypeLabel(dayType: CalendarDayType): string {
   return CALENDAR_DAY_TYPE_REGISTRY[dayType]?.label ?? dayType;
 }

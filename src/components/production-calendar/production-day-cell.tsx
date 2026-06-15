@@ -1,6 +1,8 @@
-import type { ProductionCalendarDayCell } from "@/lib/production-calendar/calendar-types";
+import type { CalendarDayObligationRow, ProductionCalendarDayCell } from "@/lib/production-calendar/calendar-types";
 import {
   dayTypeLabel,
+  EVENT_CATEGORY_STYLE,
+  eventBlockCategory,
   formatSceneReferenceList,
   wallBlockClassForDay,
 } from "@/lib/production-calendar/day-type-styles";
@@ -28,6 +30,56 @@ function MarkerList({ markers }: { markers: ShootDayMarker[] }) {
           {m.label}
         </span>
       ))}
+    </div>
+  );
+}
+
+/**
+ * Stacked event blocks — multiple independent colored blocks inside one day
+ * cell (company move, meetings, scouts, fittings, etc.). Color = category
+ * (the calendar legend explains it); text = the specific event.
+ */
+function EventBlocks({
+  obligations,
+  companyMove,
+  max,
+}: {
+  obligations: CalendarDayObligationRow[];
+  companyMove?: boolean;
+  max: number;
+}) {
+  const blocks: { key: string; category: keyof typeof EVENT_CATEGORY_STYLE; label: string; time: string | null }[] = [];
+  if (companyMove) {
+    blocks.push({ key: "company-move", category: "company-move", label: "Company Move", time: null });
+  }
+  for (const o of obligations) {
+    blocks.push({
+      key: `${o.label}-${o.time_label ?? ""}`,
+      category: eventBlockCategory(o.obligation_type),
+      label: o.label,
+      time: o.time_label,
+    });
+  }
+  if (blocks.length === 0) return null;
+
+  const shown = blocks.slice(0, max);
+  const extra = blocks.length - shown.length;
+
+  return (
+    <div className="mt-1 flex flex-col gap-0.5">
+      {shown.map((b) => (
+        <span
+          key={b.key}
+          className={cn(
+            "truncate rounded-sm border-l-2 px-1 py-px font-bold text-[8px] uppercase leading-tight tracking-wide",
+            EVENT_CATEGORY_STYLE[b.category].block,
+          )}
+        >
+          {b.time ? `${b.time} ` : ""}
+          {b.label}
+        </span>
+      ))}
+      {extra > 0 ? <span className="text-[8px] text-muted-foreground">+{extra} more</span> : null}
     </div>
   );
 }
@@ -103,19 +155,12 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
           <span className={cn("production-wall-calendar__unit-badge mt-1", unit.className)}>{unit.label}</span>
         ) : null}
 
-        {/* Split day + company move badges */}
-        {productionDay.split_day || productionDay.company_move ? (
+        {/* Split day badge (company move now renders as an event block below) */}
+        {productionDay.split_day ? (
           <div className="mt-0.5 flex gap-1">
-            {productionDay.split_day ? (
-              <span className="rounded bg-violet-600/30 px-1 py-px font-bold text-[7px] text-violet-300 uppercase">
-                SPLIT
-              </span>
-            ) : null}
-            {productionDay.company_move ? (
-              <span className="rounded bg-amber-600/30 px-1 py-px font-bold text-[7px] text-amber-300 uppercase">
-                CO. MOVE
-              </span>
-            ) : null}
+            <span className="rounded bg-violet-600/30 px-1 py-px font-bold text-[7px] text-violet-300 uppercase">
+              SPLIT
+            </span>
           </div>
         ) : null}
 
@@ -149,16 +194,15 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
           <p className="production-wall-calendar__notes line-clamp-2">{productionDay.notes}</p>
         ) : null}
 
-        {(cell.obligations.length > 0 || cell.departmentFlags.length > 0) && (
-          <div className="mt-1 flex flex-col gap-0.5 border-foreground/10 border-t pt-1">
-            {cell.obligations.slice(0, variant === "print" ? 5 : 2).map((o) => (
-              <span key={`${o.label}-${o.time_label}`} className="production-wall-calendar__scene-loc font-semibold">
-                {o.time_label ? `${o.time_label} — ` : ""}
-                {o.label}
-              </span>
-            ))}
+        {cell.obligations.length > 0 || productionDay.company_move ? (
+          <div className="mt-1 border-foreground/10 border-t pt-1">
+            <EventBlocks
+              obligations={cell.obligations}
+              companyMove={productionDay.company_move}
+              max={variant === "print" ? 8 : 4}
+            />
           </div>
-        )}
+        ) : null}
       </div>
     );
   }
@@ -181,16 +225,9 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
 
       <MarkerList markers={markers} />
 
-      {cell.obligations.length > 0 && (
-        <div className="mt-1 flex flex-col gap-0.5">
-          {cell.obligations.slice(0, variant === "print" ? 5 : 3).map((o) => (
-            <span key={`${o.label}-${o.time_label}`} className="production-wall-calendar__scene-loc font-semibold">
-              {o.time_label ? `${o.time_label} — ` : ""}
-              {o.label}
-            </span>
-          ))}
-        </div>
-      )}
+      {cell.obligations.length > 0 ? (
+        <EventBlocks obligations={cell.obligations} max={variant === "print" ? 8 : 4} />
+      ) : null}
 
       {productionDay.notes ? (
         <p className="production-wall-calendar__notes line-clamp-3">{productionDay.notes}</p>
