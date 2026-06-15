@@ -67,13 +67,20 @@ export async function createProduction(form: {
   return { ok: true, showId };
 }
 
-export async function switchActiveProduction(showId: string): Promise<void> {
+export async function switchActiveProduction(showId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = createServiceClient();
+  const { data } = await supabase.from("shows").select("id, archived_at").eq("id", showId).maybeSingle();
+
+  if (!data) return { ok: false, error: "Production not found." };
+  if (data.archived_at) return { ok: false, error: "Cannot open an archived production. Restore it first." };
+
   const cookieStore = await cookies();
   cookieStore.set(ACTIVE_PRODUCTION_COOKIE, showId, {
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
   });
   revalidatePath("/dashboard", "layout");
+  return { ok: true };
 }
 
 export async function getActiveProductionIdFromCookie(): Promise<string | null> {
@@ -121,6 +128,23 @@ export async function archiveProduction(showId: string): Promise<{ ok: true } | 
     .eq("id", showId);
 
   if (error) return { ok: false, error: error.message };
+
+  // If the archived production was the active cookie, switch away
+  const cookieStore = await cookies();
+  const activeCookie = cookieStore.get(ACTIVE_PRODUCTION_COOKIE)?.value;
+  if (activeCookie === showId) {
+    const { data: remaining } = await supabase.from("shows").select("id").is("archived_at", null).limit(2);
+
+    if (remaining?.length === 1) {
+      cookieStore.set(ACTIVE_PRODUCTION_COOKIE, remaining[0].id as string, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 30,
+      });
+    } else {
+      cookieStore.delete(ACTIVE_PRODUCTION_COOKIE);
+    }
+  }
+
   revalidatePath("/dashboard", "layout");
   return { ok: true };
 }

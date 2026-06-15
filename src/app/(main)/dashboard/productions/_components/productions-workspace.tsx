@@ -93,8 +93,12 @@ export function ProductionsWorkspace({
 
   function handleOpen(showId: string) {
     startTransition(async () => {
-      await switchActiveProduction(showId);
-      toast.success("Production opened");
+      const result = await switchActiveProduction(showId);
+      if (result.ok) {
+        toast.success("Production opened");
+      } else {
+        toast.error(result.error);
+      }
       router.refresh();
     });
   }

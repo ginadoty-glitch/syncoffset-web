@@ -31,6 +31,7 @@ export async function getActiveShow(): Promise<ActiveShow> {
       .from("shows")
       .select("id, name, code, production_company, location")
       .eq("id", showId)
+      .is("archived_at", null)
       .maybeSingle();
 
     if (data) {
