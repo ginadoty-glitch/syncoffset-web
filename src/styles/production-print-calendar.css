@@ -1,0 +1,334 @@
+/*
+ * SyncOffset Production Calendar — PRINT / EXPORT surface (24×36 wall calendar).
+ *
+ * A dedicated white presentation layer that copies the supplied production
+ * calendar PDF treatment. Scoped entirely under `.po-print` with explicit
+ * colors (NOT theme tokens) so the printed/exported sheet is ALWAYS white,
+ * regardless of the application's dark/light theme. The interactive dark
+ * screen calendar is a separate surface and is unaffected by this file.
+ *
+ * Color semantics (matched to the reference PDF):
+ *   blue   → shoot-day number + location band
+ *   black  → scene / set content
+ *   purple → meetings & events
+ *   orange → company day off (dark days)
+ *   red    → holiday / hiatus + "end" milestones + TBD callouts
+ *   green  → "begin" milestones
+ *   gray   → off / outside-month cells
+ */
+
+.po-print {
+  --po-ink: #111418;
+  --po-ink-soft: #444a52;
+  --po-grid: #9aa0a8;
+  --po-grid-strong: #5b6168;
+  --po-header-band: #d9dce0;
+  --po-off-fill: #ececee;
+  --po-outside-fill: #f4f5f6;
+  --po-blue: #163fd0;
+  --po-purple: #9b1b9b;
+  --po-orange: #db7700;
+  --po-red: #cc1414;
+  --po-green: #1f9d2f;
+
+  background: #ffffff;
+  color: var(--po-ink);
+  font-family: Arial, Helvetica, "Segoe UI", sans-serif;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* ── Header band ───────────────────────────────────────────────── */
+.po-print__header {
+  align-items: baseline;
+  border-bottom: 2px solid var(--po-ink);
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 0 0.25rem 0.4rem;
+}
+
+.po-print__header-left {
+  align-items: baseline;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.po-print__tag {
+  color: var(--po-red);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.po-print__doc {
+  color: var(--po-ink);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.po-print__month {
+  color: var(--po-ink);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.po-print__dated {
+  color: var(--po-ink);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-align: right;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ── Weekday band ──────────────────────────────────────────────── */
+.po-print__weekday-row {
+  border: 1px solid var(--po-grid-strong);
+  border-bottom: none;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  margin-top: 0.4rem;
+}
+
+.po-print__weekday-cell {
+  background: var(--po-header-band);
+  border-right: 1px solid var(--po-grid);
+  color: var(--po-ink);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.32rem 0.25rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.po-print__weekday-cell:last-child {
+  border-right: none;
+}
+
+/* ── Grid ──────────────────────────────────────────────────────── */
+.po-print__grid {
+  border: 1px solid var(--po-grid-strong);
+}
+
+.po-print__week {
+  border-bottom: 1px solid var(--po-grid-strong);
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.po-print__week:last-child {
+  border-bottom: none;
+}
+
+.po-print__cell {
+  border-right: 1px solid var(--po-grid);
+  min-height: 8.6rem;
+  padding: 1.15rem 0.3rem 0.55rem;
+  position: relative;
+}
+
+.po-print__cell:last-child {
+  border-right: none;
+}
+
+.po-print__cell--off {
+  background: var(--po-off-fill);
+}
+
+.po-print__cell--outside {
+  background: var(--po-outside-fill);
+}
+
+/* ── Corner metadata ───────────────────────────────────────────── */
+.po-print__date {
+  color: var(--po-ink-soft);
+  font-size: 0.74rem;
+  font-weight: 700;
+  left: 0.35rem;
+  line-height: 1;
+  position: absolute;
+  top: 0.32rem;
+}
+
+.po-print__date--outside {
+  opacity: 0.45;
+}
+
+.po-print__dnum {
+  color: var(--po-blue);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  position: absolute;
+  right: 0.35rem;
+  top: 0.32rem;
+}
+
+/* ── Centered body ─────────────────────────────────────────────── */
+.po-print__body {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  justify-content: center;
+  min-height: 100%;
+  text-align: center;
+}
+
+.po-print__scene {
+  color: var(--po-ink);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.18;
+  text-transform: uppercase;
+}
+
+/* Short centered hairline between stacked scenes — matches the PDF. */
+.po-print__divider {
+  background: var(--po-ink);
+  height: 1px;
+  margin: 0.22rem auto;
+  width: 55%;
+}
+
+.po-print__location {
+  color: var(--po-blue);
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  margin-top: 0.2rem;
+  text-transform: uppercase;
+}
+
+.po-print__event {
+  color: var(--po-purple);
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.18;
+  text-transform: uppercase;
+}
+
+.po-print__dayoff {
+  color: var(--po-orange);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.po-print__dayoff--holiday {
+  color: var(--po-red);
+}
+
+.po-print__milestone {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.po-print__milestone--begin {
+  color: var(--po-green);
+}
+
+.po-print__milestone--end {
+  color: var(--po-red);
+}
+
+.po-print__milestone--note {
+  color: var(--po-ink-soft);
+}
+
+.po-print__countdown {
+  color: var(--po-ink);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.po-print__callout-label {
+  color: var(--po-blue);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.po-print__callout-value {
+  color: var(--po-red);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* ── Legend ────────────────────────────────────────────────────── */
+.po-print__legend {
+  border: 1px solid var(--po-grid);
+  border-top: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.4rem;
+  padding: 0.5rem 0.6rem;
+}
+
+.po-print__legend-item {
+  align-items: center;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.po-print__legend-key {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.po-print__legend-label {
+  color: var(--po-ink-soft);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+}
+
+.po-print__legend-swatch {
+  border: 1px solid rgb(0 0 0 / 25%);
+  height: 0.7rem;
+  width: 0.7rem;
+}
+
+/* ── Print media (24×36 landscape) ─────────────────────────────── */
+@media print {
+  @page {
+    margin: 0.3in 0.4in;
+    size: 36in 24in;
+  }
+
+  .po-print {
+    background: #ffffff !important;
+  }
+
+  .po-print__cell {
+    min-height: 2.2in;
+  }
+
+  .po-print__grid,
+  .po-print__week,
+  .po-print__legend {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

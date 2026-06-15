@@ -1,10 +1,13 @@
-import { ProductionCalendarLegend } from "@/components/production-calendar/production-calendar-legend";
+import { ProductionPrintHeader } from "@/components/production-calendar/print/production-print-header";
+import { ProductionPrintLegend } from "@/components/production-calendar/print/production-print-legend";
+import { ProductionPrintMonth } from "@/components/production-calendar/print/production-print-month";
 import { ProductionCalendarPrintFrame } from "@/components/production-calendar/production-calendar-print-frame";
-import { ProductionStripMonth } from "@/components/production-calendar/production-strip-month";
+import { getActiveShow } from "@/lib/production/get-active-show";
 import { parseCalendarMonthParam } from "@/lib/production-calendar/calendar-utils";
 import { loadProductionCalendarMonth } from "@/lib/production-calendar/load-production-calendar-month";
 
 import "@/styles/production-wall-calendar.css";
+import "@/styles/production-print-calendar.css";
 
 export const dynamic = "force-dynamic";
 
@@ -15,18 +18,23 @@ type PageProps = {
 export default async function ProductionCalendarPrintPage({ searchParams }: PageProps) {
   const { month: monthParam } = await searchParams;
   const { year, month } = parseCalendarMonthParam(monthParam);
-  const data = await loadProductionCalendarMonth(year, month);
+  const [data, show] = await Promise.all([loadProductionCalendarMonth(year, month), getActiveShow()]);
 
   return (
-    <div className="min-h-screen bg-background px-2 py-3 md:px-4" data-content-padding="false">
+    <div className="min-h-screen bg-neutral-300 px-2 py-4 md:px-4" data-content-padding="false">
       <ProductionCalendarPrintFrame monthLabel={data.monthLabel} />
 
-      {data.loadError ? (
-        <div className="mb-3 border border-destructive/40 px-4 py-3 text-destructive text-sm">{data.loadError}</div>
-      ) : null}
+      <div className="po-print mx-auto w-full max-w-[1700px] p-4 shadow-xl print:max-w-none print:p-0 print:shadow-none">
+        {data.loadError ? (
+          <div className="mb-3 border border-[#cc1414] px-4 py-3 font-semibold text-[#cc1414] text-sm">
+            {data.loadError}
+          </div>
+        ) : null}
 
-      <ProductionStripMonth data={data} variant="print" showMeta />
-      <ProductionCalendarLegend />
+        <ProductionPrintHeader showName={show.name} monthLabel={data.monthLabel} calendarName={data.calendarName} />
+        <ProductionPrintMonth data={data} />
+        <ProductionPrintLegend />
+      </div>
     </div>
   );
 }
