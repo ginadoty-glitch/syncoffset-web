@@ -54,12 +54,20 @@ export async function loadSetWorkspace(setId: string): Promise<SetWorkspaceData>
 
   const set = setRow as ProductionSetRow;
   const heroImageUrl = (setRow as { hero_image_url?: string | null }).hero_image_url ?? null;
+  const relatedSceneIds = Array.isArray(set.related_scene_ids) ? set.related_scene_ids : [];
 
   const [heroImageDisplayUrl, assetsResult, scenesResult, documentsResult, workOrdersResult, transportResult] =
     await Promise.all([
       resolveHeroImageDisplayUrl(heroImageUrl),
       supabase.from("assets").select("*").eq("set_id", setId).order("asset_name"),
-      supabase.from("scenes").select("*").eq("set_id", setId).order("scene_number"),
+      // scene_registry is the live scene source; the set carries the linkage.
+      relatedSceneIds.length > 0
+        ? supabase
+            .from("scene_registry")
+            .select("id, scene_number, notes, cast_numbers")
+            .in("id", relatedSceneIds)
+            .order("scene_number")
+        : Promise.resolve({ data: [], error: null }),
       supabase.from("documents").select("*").eq("set_id", setId).order("created_at", { ascending: false }),
       supabase
         .from("work_orders")
@@ -74,7 +82,22 @@ export async function loadSetWorkspace(setId: string): Promise<SetWorkspaceData>
     ]);
 
   const assets = isMissingRelation(assetsResult.error) ? [] : ((assetsResult.data ?? []) as AssetRow[]);
-  const scenes = isMissingRelation(scenesResult.error) ? [] : ((scenesResult.data ?? []) as SceneRow[]);
+  const registryRows = isMissingRelation(scenesResult.error)
+    ? []
+    : ((scenesResult.data ?? []) as Array<{
+        id: string;
+        scene_number: string;
+        notes: string | null;
+        cast_numbers: number[] | null;
+      }>);
+  const scenes: SceneRow[] = registryRows.map((r) => ({
+    id: r.id,
+    scene_number: r.scene_number,
+    description: r.notes ?? "",
+    episode_number: "",
+    cast_count: Array.isArray(r.cast_numbers) ? r.cast_numbers.length : 0,
+    asset_count: 0,
+  }));
   const documents = isMissingRelation(documentsResult.error)
     ? []
     : mapDocuments((documentsResult.data ?? []) as DocumentRow[]);

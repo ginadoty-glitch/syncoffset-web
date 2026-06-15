@@ -63,13 +63,9 @@ export async function listProductionSets(): Promise<ProductionSetListResult> {
   }
 
   const ids = rows.map((r) => r.id);
-  const [assetsResult, scenesResult] = await Promise.all([
-    supabase.from("assets").select("set_id").in("set_id", ids),
-    supabase.from("scenes").select("set_id").in("set_id", ids),
-  ]);
+  const assetsResult = await supabase.from("assets").select("set_id").in("set_id", ids);
 
   const assetCounts = countBySetId(assetsResult.data ?? [], "set_id");
-  const sceneCounts = countBySetId(scenesResult.data ?? [], "set_id");
 
   const heroUrls = await Promise.all(
     rows.map((row) => resolveHeroImageDisplayUrl((row as ProductionSetRow).hero_image_url ?? null)),
@@ -79,7 +75,8 @@ export async function listProductionSets(): Promise<ProductionSetListResult> {
     ...row,
     hero_image_url: (row as ProductionSetRow).hero_image_url ?? null,
     assetCount: assetCounts.get(row.id) ?? 0,
-    sceneCount: sceneCounts.get(row.id) ?? 0,
+    // scene_registry is the live scene source; linkage lives on the set row.
+    sceneCount: Array.isArray(row.related_scene_ids) ? row.related_scene_ids.length : 0,
     heroImageDisplayUrl: heroUrls[index] ?? null,
   }));
 

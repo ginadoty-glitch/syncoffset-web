@@ -88,6 +88,17 @@ export async function parseAndMirrorSchedule(sourceDocumentId: string): Promise<
         `scene_registry: ${sceneResult.created} created, ${sceneResult.updated} updated, ${sceneResult.omitted} omitted`,
       );
     }
+
+    // Refresh Production Sets from the updated scene_registry (linkage only).
+    try {
+      const { syncSetsFromSceneRegistry } = await import("@/lib/sets/sync-sets-from-scene-registry");
+      const setResult = await syncSetsFromSceneRegistry(supabase, showId);
+      if (setResult.created > 0 || setResult.updated > 0) {
+        parseResult.warnings.push(`production_sets: ${setResult.created} created, ${setResult.updated} updated`);
+      }
+    } catch {
+      parseResult.warnings.push("production_sets sync skipped.");
+    }
   } catch {
     parseResult.warnings.push("scene_registry sync skipped (table may not exist).");
   }

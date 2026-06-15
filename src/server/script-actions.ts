@@ -151,6 +151,18 @@ export async function parseAndMirrorScript(sourceDocumentId: string): Promise<Sc
     warnings.push(`scene_registry sync partial: ${msg}`);
   }
 
+  // Refresh Production Sets from the updated scene_registry (linkage only).
+  try {
+    const { syncSetsFromSceneRegistry } = await import("@/lib/sets/sync-sets-from-scene-registry");
+    const setResult = await syncSetsFromSceneRegistry(supabase, showId);
+    if (setResult.created > 0 || setResult.updated > 0) {
+      warnings.push(`production_sets: ${setResult.created} created, ${setResult.updated} updated`);
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Unknown error";
+    warnings.push(`production_sets sync partial: ${msg}`);
+  }
+
   const uniqueLocations = new Set(sceneRows.map((r) => r.location_name).filter(Boolean));
   const allCharacters = new Set(
     sceneRows.flatMap((r) => {
