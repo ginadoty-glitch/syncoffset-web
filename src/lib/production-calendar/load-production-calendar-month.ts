@@ -10,6 +10,7 @@ import type {
   ProductionCalendarMonthData,
   ScheduleDateRange,
 } from "@/lib/production-calendar/calendar-types";
+import { canonicalLocationKey, locationDisplayLabel } from "@/lib/production-calendar/location-color";
 import {
   type PublishedScheduleDayRow,
   publishedScheduleDayToCalendarRow,
@@ -202,6 +203,25 @@ export async function loadProductionCalendarMonth(year: number, month: number): 
           location_label: mapped.row.shoot_location,
         })),
       );
+    }
+  }
+
+  // Location transitions — derived from location-key deltas (not companyMove fields).
+  // Within the loaded grid window, walk shoot days in date order; when a day's
+  // canonical location differs from the prior shoot day, mark it as an arrival.
+  const shootEntries = [...dayByDate.values()]
+    .filter((m) => m.row.day_type === "shoot")
+    .sort((a, b) => a.row.calendar_date.localeCompare(b.row.calendar_date));
+  let prevLocationKey: string | null = null;
+  let prevLocationLabel = "";
+  for (const entry of shootEntries) {
+    const key = canonicalLocationKey(entry.row.shoot_location);
+    if (key) {
+      if (prevLocationKey !== null && key !== prevLocationKey) {
+        entry.row.move_from_label = prevLocationLabel;
+      }
+      prevLocationKey = key;
+      prevLocationLabel = locationDisplayLabel(entry.row.shoot_location);
     }
   }
 

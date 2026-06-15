@@ -79,6 +79,12 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
 
     return (
       <div className={cn("production-wall-calendar__cell flex flex-col", blockClass)}>
+        {productionDay.move_from_label ? (
+          <div className="mb-0.5 flex items-center gap-0.5 font-bold text-[7px] text-amber-400 uppercase leading-none tracking-wider">
+            <span aria-hidden>↑</span>
+            <span className="min-w-0 truncate">FROM {productionDay.move_from_label}</span>
+          </div>
+        ) : null}
         <div className="flex items-start gap-1">
           <span className="production-wall-calendar__date-num shrink-0 self-start">{dayNum}</span>
           <div className={cn("flex min-w-0 flex-1 flex-col gap-0.5 rounded-sm px-1.5 py-1", chipColor)}>

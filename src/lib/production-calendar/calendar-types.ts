@@ -15,6 +15,8 @@ export type CalendarDayRow = {
   total_pages?: string | null;
   split_day?: boolean;
   company_move?: boolean;
+  /** Derived presentation field: prior shoot day's location when this day is a location arrival. */
+  move_from_label?: string;
 };
 
 export type CalendarDaySceneRow = {
