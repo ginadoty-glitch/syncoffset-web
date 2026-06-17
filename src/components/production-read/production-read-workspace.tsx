@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ type ProductionReadWorkspaceProps<T extends { id: string }> = {
   renderListMeta?: (row: T) => string | null;
   renderDetail: (row: T) => React.ReactNode;
   emptySelectionMessage?: string;
+  initialSelectedId?: string | null;
 };
 
 export function ProductionReadWorkspace<T extends { id: string }>({
@@ -23,9 +24,16 @@ export function ProductionReadWorkspace<T extends { id: string }>({
   renderListMeta,
   renderDetail,
   emptySelectionMessage = "Select a row to view details.",
+  initialSelectedId = null,
 }: ProductionReadWorkspaceProps<T>) {
   const [query, setQuery] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(rows[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? rows[0]?.id ?? null);
+
+  useEffect(() => {
+    if (initialSelectedId && rows.some((row) => row.id === initialSelectedId)) {
+      setSelectedId(initialSelectedId);
+    }
+  }, [initialSelectedId, rows]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
