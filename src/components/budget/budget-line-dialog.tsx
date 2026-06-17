@@ -15,8 +15,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { VendorPicker, type VendorSelection } from "@/components/vendors/vendor-picker";
 import { BUDGET_DEPARTMENTS } from "@/lib/budget/departments";
 import type { ProductionBudgetLineRow } from "@/lib/live-budget/types";
+import type { VendorRow } from "@/lib/vendors/types";
 import { createBudgetLine, updateBudgetLine } from "@/server/budget-actions";
 
 const selectClass = "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs";
@@ -26,19 +28,26 @@ export function BudgetLineDialog({
   onOpenChange,
   line,
   defaultDepartment,
+  vendors,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** When provided, dialog edits this row; otherwise creates a new one. */
   line?: ProductionBudgetLineRow | null;
   defaultDepartment?: string;
+  vendors: VendorRow[];
 }) {
   const isEdit = Boolean(line);
   const [isPending, startTransition] = useTransition();
   const [department, setDepartment] = useState(line?.department ?? defaultDepartment ?? "Art");
   const [category, setCategory] = useState(line?.category === "Misc" ? "" : (line?.category ?? ""));
   const [description, setDescription] = useState(line?.description ?? "");
-  const [vendor, setVendor] = useState(line?.vendor ?? "");
+  const [vendorSelection, setVendorSelection] = useState<VendorSelection | null>(() => {
+    const name = line?.vendor?.trim();
+    if (!name) return null;
+    const match = vendors.find((v) => v.name.toLowerCase() === name.toLowerCase());
+    return match ? { id: match.id, name: match.name } : { id: name, name };
+  });
   const [quantity, setQuantity] = useState(line ? String(line.quantity) : "1");
   const [rate, setRate] = useState(line ? String(line.unit_cost) : "");
   const [actualCost, setActualCost] = useState(line?.actual_cost != null ? String(line.actual_cost) : "");
@@ -53,7 +62,16 @@ export function BudgetLineDialog({
 
   function handleSubmit() {
     startTransition(async () => {
-      const form = { department, category, description, vendor, quantity, rate, actualCost, status };
+      const form = {
+        department,
+        category,
+        description,
+        vendor: vendorSelection?.name ?? "",
+        quantity,
+        rate,
+        actualCost,
+        status,
+      };
       const result = line ? await updateBudgetLine(line.id, form) : await createBudgetLine(form);
       if (result.ok) {
         toast.success(line ? "Budget line saved" : "Budget line added");
@@ -111,13 +129,8 @@ export function BudgetLineDialog({
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="bl-vendor">Vendor</Label>
-              <Input
-                id="bl-vendor"
-                value={vendor}
-                onChange={(e) => setVendor(e.target.value)}
-                placeholder="Vendor / supplier"
-              />
+              <Label>Vendor</Label>
+              <VendorPicker vendors={vendors} value={vendorSelection} onChange={setVendorSelection} />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="bl-status">Status</Label>

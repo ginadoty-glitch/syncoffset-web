@@ -10,6 +10,8 @@ type ProductionReadShellProps = {
   loadError: string | null;
   emptyMessage: string;
   actions?: ReactNode;
+  /** Shown inside the zero-count empty panel (e.g. Add Vendor when directory is empty). */
+  emptyActions?: ReactNode;
   children: ReactNode;
 };
 
@@ -23,6 +25,7 @@ export function ProductionReadShell({
   loadError,
   emptyMessage,
   actions,
+  emptyActions,
   children,
 }: ProductionReadShellProps) {
   return (
@@ -57,7 +60,10 @@ export function ProductionReadShell({
 
       {!loadError && count === 0 ? (
         <div className="rounded-lg border border-[var(--desk-border-subtle)] bg-[var(--desk-surface-elevated)]/30 px-4 py-8 text-center text-muted-foreground text-sm">
-          {emptyMessage} <code className="rounded bg-muted px-1 text-xs">{tableLabel}</code> for this production.
+          <p>
+            {emptyMessage} <code className="rounded bg-muted px-1 text-xs">{tableLabel}</code> for this production.
+          </p>
+          {emptyActions != null ? <div className="mt-4 flex justify-center">{emptyActions}</div> : null}
         </div>
       ) : null}
 

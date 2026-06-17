@@ -1,4 +1,4 @@
-/** RUNTIME CLASSIFICATION: PRODUCTION — read-only vendors; live Supabase only. */
+/** RUNTIME CLASSIFICATION: PRODUCTION — vendor directory CRUD; live Supabase only. */
 
 import { VendorsIndex } from "@/components/vendors/vendors-index";
 import { getActiveShow } from "@/lib/production/get-active-show";

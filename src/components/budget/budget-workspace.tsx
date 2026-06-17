@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { BUDGET_DEPARTMENTS } from "@/lib/budget/departments";
 import type { ProductionBudgetLineRow } from "@/lib/live-budget/types";
 import { cn } from "@/lib/utils";
+import type { VendorRow } from "@/lib/vendors/types";
 import { deleteBudgetLine } from "@/server/budget-actions";
 
 function money(value: number | null | undefined): string {
@@ -66,10 +67,12 @@ function groupByDepartment(rows: ProductionBudgetLineRow[]): DepartmentGroup[] {
 
 export function BudgetWorkspace({
   rows,
+  vendors,
   showName,
   loadError,
 }: {
   rows: ProductionBudgetLineRow[];
+  vendors: VendorRow[];
   showName?: string | null;
   loadError: string | null;
 }) {
@@ -266,6 +269,7 @@ export function BudgetWorkspace({
           }}
           line={dialogState.line}
           defaultDepartment={dialogState.department}
+          vendors={vendors}
         />
       ) : null}
     </div>
