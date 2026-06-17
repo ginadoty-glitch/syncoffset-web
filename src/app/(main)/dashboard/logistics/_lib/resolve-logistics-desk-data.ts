@@ -2,34 +2,28 @@ import type { LogisticsDeskSnapshot, ResolvedLogisticsDeskData } from "./logisti
 import { buildLogisticsDeskViewModel } from "./map-logistics-desk";
 
 /**
- * Prefer live transport order data when the loader succeeds and returns rows.
+ * Prefer live transport order data when the loader succeeds.
  * Phase 1C: no mock fallback — empty manifest when Supabase has no rows.
  */
 export function resolveLogisticsDeskData(snapshot: LogisticsDeskSnapshot): ResolvedLogisticsDeskData {
   const viewModel = buildLogisticsDeskViewModel(snapshot);
-  const hasLiveData = snapshot.loadError === null && viewModel.shipments.length > 0;
 
-  if (hasLiveData) {
+  if (snapshot.loadError === null) {
     return {
       shipments: viewModel.shipments,
       driverAssignments: viewModel.driverAssignments,
       dataSource: "live",
-      fallbackReason: null,
+      fallbackReason: viewModel.shipments.length === 0 ? "No transport orders found for this production." : null,
       loadError: null,
       persistenceAvailable: viewModel.persistenceAvailable,
     };
   }
 
-  const fallbackReason =
-    snapshot.loadError !== null
-      ? `Supabase load failed — ${snapshot.loadError}`
-      : "No transport orders found for this production.";
-
   return {
     shipments: [],
     driverAssignments: viewModel.driverAssignments,
     dataSource: "live",
-    fallbackReason,
+    fallbackReason: `Supabase load failed — ${snapshot.loadError}`,
     loadError: snapshot.loadError,
     persistenceAvailable: viewModel.persistenceAvailable,
   };

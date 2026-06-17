@@ -21,8 +21,9 @@
 import * as React from "react";
 
 import { computeGlobalPropagation } from "@/lib/operations/propagation";
+import type { VendorRow } from "@/lib/vendors/types";
 
-import type { LogisticsDeskDataSource, Shipment } from "../_lib/logistics-desk-types";
+import type { DriverRow, LogisticsDeskDataSource, Shipment } from "../_lib/logistics-desk-types";
 import type { DriverAssignment } from "./operational-data";
 import { activeCallsheetRevision, operationalConditions, PRODUCTION_TIME } from "./operational-data";
 import { OperationalIntelligence } from "./operational-intelligence";
@@ -32,6 +33,8 @@ import { parseProductionMinutes, TransportQueue } from "./transport-queue";
 export type LogisticsProps = {
   shipments: Shipment[];
   driverAssignments: DriverAssignment[];
+  drivers: DriverRow[];
+  vendors: VendorRow[];
   dataSource?: LogisticsDeskDataSource;
   fallbackReason?: string | null;
   persistenceAvailable?: boolean;
@@ -81,6 +84,8 @@ function temporalSortKey(s: Shipment, productionMinutes: number): number {
 export function Logistics({
   shipments,
   driverAssignments,
+  drivers,
+  vendors,
   dataSource: _dataSource = "live",
   fallbackReason = null,
 }: LogisticsProps) {
@@ -93,6 +98,7 @@ export function Logistics({
   const [selectedOrderId, setSelectedOrderId] = React.useState<string | null>(
     () => sortShipments(shipments, productionMinutes)[0]?.id ?? null,
   );
+  const [pendingSelectId, setPendingSelectId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setSelectedOrderId((current) => {
@@ -100,6 +106,19 @@ export function Logistics({
       return sortedShipments[0]?.id ?? null;
     });
   }, [sortedShipments]);
+
+  React.useEffect(() => {
+    if (!pendingSelectId) return;
+    if (sortedShipments.some((shipment) => shipment.id === pendingSelectId)) {
+      setSelectedOrderId(pendingSelectId);
+      setPendingSelectId(null);
+    }
+  }, [sortedShipments, pendingSelectId]);
+
+  const handleTransportOrderCreated = React.useCallback((id: string) => {
+    setPendingSelectId(id);
+    setSelectedOrderId(id);
+  }, []);
 
   const derivedStates = React.useMemo(
     () => computeGlobalPropagation(sortedShipments, operationalConditions, activeCallsheetRevision, driverAssignments),
@@ -131,6 +150,9 @@ export function Logistics({
             selectedShipmentId={selectedOrderId}
             onSelectShipment={setSelectedOrderId}
             productionTime={PRODUCTION_TIME}
+            vendors={vendors}
+            drivers={drivers}
+            onTransportOrderCreated={handleTransportOrderCreated}
           />
         </div>
 

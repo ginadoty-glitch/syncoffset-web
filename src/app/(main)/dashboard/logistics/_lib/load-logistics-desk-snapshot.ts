@@ -19,6 +19,13 @@ const LEGACY_SHIPMENT_SELECT = "id, runsheet_id, origin, destination, status, ca
 
 const DOCUMENT_SELECT = "id, title, document_type, uploaded_at, linked_runsheet_id, notes";
 
+function isOptionalLinkedTableError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  if (isMissingRelation(error)) return true;
+  if (error.code === "42501") return true;
+  return error.message?.toLowerCase().includes("permission denied") ?? false;
+}
+
 function emptySnapshot(loadError: string | null): LogisticsDeskSnapshot {
   return {
     showId: null,
@@ -72,15 +79,15 @@ export async function loadLogisticsDeskSnapshot(): Promise<LogisticsDeskSnapshot
       : Promise.resolve({ data: [], error: null }),
   ]);
 
-  if (driversResult.error && !isMissingRelation(driversResult.error)) {
+  if (driversResult.error && !isOptionalLinkedTableError(driversResult.error)) {
     return { ...emptySnapshot(driversResult.error.message), showId };
   }
 
-  if (shipmentsResult.error && !isMissingRelation(shipmentsResult.error)) {
+  if (shipmentsResult.error && !isOptionalLinkedTableError(shipmentsResult.error)) {
     return { ...emptySnapshot(shipmentsResult.error.message), showId };
   }
 
-  if (documentsResult.error && !isMissingRelation(documentsResult.error)) {
+  if (documentsResult.error && !isOptionalLinkedTableError(documentsResult.error)) {
     return { ...emptySnapshot(documentsResult.error.message), showId };
   }
 

@@ -29,8 +29,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { DerivedOrderState } from "@/lib/operations/propagation";
 import { cn } from "@/lib/utils";
+import type { VendorRow } from "@/lib/vendors/types";
 
+import type { DriverRow } from "../_lib/logistics-desk-types";
 import type { Shipment } from "./shipment-data";
+import { TransportOrderFormDialog } from "./transport-order-form-dialog";
 
 // ─── Semantic status maps ──────────────────────────────────────────────────────
 
@@ -298,6 +301,9 @@ type TransportQueueProps = {
   productionTime: string;
   selectedShipmentId: string | null;
   shipments: Shipment[];
+  vendors: VendorRow[];
+  drivers: DriverRow[];
+  onTransportOrderCreated?: (id: string) => void;
 };
 
 const EMPTY_DERIVED: DerivedOrderState = {
@@ -321,6 +327,9 @@ export function TransportQueue({
   selectedShipmentId,
   onSelectShipment,
   productionTime,
+  vendors,
+  drivers,
+  onTransportOrderCreated,
 }: TransportQueueProps) {
   const productionMinutes = parseProductionMinutes(productionTime) ?? 0;
 
@@ -340,11 +349,18 @@ export function TransportQueue({
             </span>
           )}
         </CardTitle>
-        <CardAction>
-          {/* Production clock — anchors all temporal ETA calculations */}
-          <span className="mr-1.5 font-mono text-[8px] text-muted-foreground/30 tracking-wider">
-            D12 · {productionTime}
-          </span>
+        <CardAction className="flex items-center gap-1">
+          <TransportOrderFormDialog
+            vendors={vendors}
+            drivers={drivers}
+            onCreated={onTransportOrderCreated}
+            trigger={
+              <Button size="sm" className="h-6 px-2 text-[10px]">
+                New Transport Order
+              </Button>
+            }
+          />
+          <span className="font-mono text-[8px] text-muted-foreground/30 tracking-wider">D12 · {productionTime}</span>
           <Button size="icon-sm" variant="ghost" className="size-6">
             <SlidersHorizontal className="size-3" />
           </Button>
@@ -390,16 +406,25 @@ export function TransportQueue({
         {/* Manifest list */}
         <ScrollArea className="h-0 flex-1">
           <div className="flex flex-col gap-0.5 px-2.5 pb-3">
-            {shipments.map((shipment) => (
-              <ManifestRow
-                key={shipment.id}
-                active={shipment.id === selectedShipmentId}
-                derived={derivedStates.get(shipment.id) ?? EMPTY_DERIVED}
-                shipment={shipment}
-                temporal={computeTemporalState(shipment, productionMinutes)}
-                onSelectShipment={onSelectShipment}
-              />
-            ))}
+            {shipments.length === 0 ? (
+              <div className="rounded-md border border-dashed border-[var(--desk-border-subtle)] px-3 py-6 text-center">
+                <p className="text-muted-foreground text-xs">No transport orders in runsheets for this production.</p>
+                <div className="mt-3 flex justify-center">
+                  <TransportOrderFormDialog vendors={vendors} drivers={drivers} onCreated={onTransportOrderCreated} />
+                </div>
+              </div>
+            ) : (
+              shipments.map((shipment) => (
+                <ManifestRow
+                  key={shipment.id}
+                  active={shipment.id === selectedShipmentId}
+                  derived={derivedStates.get(shipment.id) ?? EMPTY_DERIVED}
+                  shipment={shipment}
+                  temporal={computeTemporalState(shipment, productionMinutes)}
+                  onSelectShipment={onSelectShipment}
+                />
+              ))
+            )}
           </div>
         </ScrollArea>
       </CardContent>
