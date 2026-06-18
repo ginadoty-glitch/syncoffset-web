@@ -13,11 +13,15 @@ type Props = {
   data: ProductionCalendarMonthData;
   prev: { year: number; month: number };
   next: { year: number; month: number };
+  view?: "wall" | "desk";
 };
 
-export function ProductionCalendarToolbar({ showName, data, prev, next }: Props) {
+export function ProductionCalendarToolbar({ showName, data, prev, next, view = "wall" }: Props) {
   const monthParam = monthParamFromParts(data.year, data.month);
   const range = data.scheduleRange;
+  const viewQ = view === "desk" ? "&view=desk" : "";
+  const monthHref = (y: number, m: number) =>
+    `/dashboard/production-calendar?month=${monthParamFromParts(y, m)}${viewQ}`;
 
   const isOnActiveMonth = range != null && data.year === range.firstMonth.year && data.month === range.firstMonth.month;
 
@@ -35,17 +39,18 @@ export function ProductionCalendarToolbar({ showName, data, prev, next }: Props)
           <p className="text-muted-foreground text-xs">
             {data.monthLabel}
             {range ? ` · ${range.totalDays} shoot days scheduled` : ""}
+            {view === "wall" ? " · Wall calendar view" : " · Desk view"}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/production-calendar?month=${monthParamFromParts(prev.year, prev.month)}`}>
+            <Link href={monthHref(prev.year, prev.month)}>
               <ChevronLeft className="size-4" />
               <span className="sr-only">Previous Month</span>
             </Link>
           </Button>
           <Button variant="outline" size="sm" asChild>
-            <Link href={`/dashboard/production-calendar?month=${monthParamFromParts(next.year, next.month)}`}>
+            <Link href={monthHref(next.year, next.month)}>
               <ChevronRight className="size-4" />
               <span className="sr-only">Next Month</span>
             </Link>
@@ -54,13 +59,23 @@ export function ProductionCalendarToolbar({ showName, data, prev, next }: Props)
           {range && !isOnActiveMonth ? (
             <Button variant="outline" size="sm" asChild>
               <Link
-                href={`/dashboard/production-calendar?month=${monthParamFromParts(range.firstMonth.year, range.firstMonth.month)}`}
+                href={`/dashboard/production-calendar?month=${monthParamFromParts(range.firstMonth.year, range.firstMonth.month)}${viewQ}`}
               >
                 <CalendarSearch className="mr-1.5 size-4" />
                 Jump to Active Schedule
               </Link>
             </Button>
           ) : null}
+
+          {view === "wall" ? (
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/dashboard/production-calendar?month=${monthParam}&view=desk`}>Desk View</Link>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`/dashboard/production-calendar?month=${monthParam}`}>Wall Calendar</Link>
+            </Button>
+          )}
 
           <Button variant="outline" size="sm" asChild>
             <Link

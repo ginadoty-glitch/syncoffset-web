@@ -30,7 +30,7 @@ export default async function ScriptBreakdownPage() {
           <h2 className="text-xl tracking-tight">Script Breakdown</h2>
           <p className="text-muted-foreground text-sm">
             {hasScenes
-              ? `${data.sceneCount} scenes · ${data.selectedScript?.title ?? "Script"} · ${data.selectedScript?.version_label ?? ""}`
+              ? `${data.sceneCount} scenes · ${data.breakdownItemCount} breakdown items · ${data.selectedScript?.title ?? "Script"} · ${data.selectedScript?.version_label ?? ""}`
               : "Scene-by-scene breakdown of production elements, departments, and requirements."}
           </p>
         </div>

@@ -32,8 +32,8 @@ export default async function ProductionCalendarPrintPage({ searchParams }: Page
         ) : null}
 
         <ProductionPrintHeader showName={show.name} monthLabel={data.monthLabel} calendarName={data.calendarName} />
-        <ProductionPrintMonth data={data} />
         <ProductionPrintLegend data={data} />
+        <ProductionPrintMonth data={data} />
       </div>
     </div>
   );

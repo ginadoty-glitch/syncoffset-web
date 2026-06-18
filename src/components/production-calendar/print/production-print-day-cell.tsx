@@ -18,6 +18,12 @@ const MAX_SCENES = 6;
 
 type Region = { location: string; scenes: CalendarDaySceneRow[] };
 
+function locationKeysMatch(a: string | null | undefined, b: string | null | undefined): boolean {
+  const left = (a ?? "").trim().toLowerCase();
+  const right = (b ?? "").trim().toLowerCase();
+  return left.length > 0 && left === right;
+}
+
 /** Group a day's scenes into colored regions by location (split-location days). */
 function buildRegions(cell: ProductionCalendarDayCell, day: CalendarDayRow): Region[] {
   const order: string[] = [];
@@ -32,8 +38,22 @@ function buildRegions(cell: ProductionCalendarDayCell, day: CalendarDayRow): Reg
       order.push(key);
     }
   }
-  if (order.length === 0) return [{ location: day.shoot_location, scenes: [] }];
-  return order.map((key) => ({ location: key, scenes: map.get(key) ?? [] }));
+  let regions: Region[];
+  if (order.length === 0) {
+    regions = [{ location: day.shoot_location ?? "", scenes: [] }];
+  } else {
+    regions = order.map((key) => ({ location: key, scenes: map.get(key) ?? [] }));
+  }
+
+  const pmDestination = day.company_move_destination?.trim() ?? "";
+  if (day.company_move && pmDestination) {
+    const hasPmRegion = regions.some((r) => locationKeysMatch(r.location, pmDestination));
+    if (!hasPmRegion) {
+      regions = [...regions, { location: pmDestination, scenes: [] }];
+    }
+  }
+
+  return regions;
 }
 
 function sceneLine(scene: CalendarDaySceneRow): string | null {
@@ -99,6 +119,8 @@ export function ProductionPrintDayCell({ cell }: { cell: ProductionCalendarDayCe
   const isShootType = SHOOT_TYPES.has(dayType);
   const isShoot = dayType === "shoot" && day.day_number != null;
   const regions = buildRegions(cell, day);
+  const pmDestination = day.company_move_destination?.trim() ?? "";
+  const showCompanyMoveSplit = Boolean(day.company_move && pmDestination);
   const primaryLoc = locationDisplayLabel(day.shoot_location);
   const topColor = isShootType ? printLocationColor(day.shoot_location) : dayTypePrintColor(dayType);
   const markers = day.markers ?? [];
@@ -116,8 +138,6 @@ export function ProductionPrintDayCell({ cell }: { cell: ProductionCalendarDayCe
       </div>
 
       <div className="po-cell__regions">
-        {day.company_move ? <div className="po-cell__cm">Company Move</div> : null}
-
         {regions.map((region, idx) => {
           const c = isShootType
             ? printLocationColor(region.location || day.shoot_location)
@@ -130,44 +150,46 @@ export function ProductionPrintDayCell({ cell }: { cell: ProductionCalendarDayCe
           const nums = sceneNumbers(region.scenes);
 
           return (
-            <div
-              key={`${cell.date}-${region.location || "main"}`}
-              className="po-cell__region"
-              style={{ background: c.tint, color: c.ink }}
-            >
-              {showOwnBar ? (
-                <div className="po-cell__rbar" style={{ background: c.bar, color: c.onBar }}>
-                  {!isShootType ? <span>{dayTypeLabel(dayType).toUpperCase()}</span> : null}
-                  {loc ? <span className="po-cell__rbarloc">{loc}</span> : null}
-                </div>
+            <div key={`${cell.date}-${region.location || "main"}`}>
+              {idx === 1 && showCompanyMoveSplit ? <div className="po-cell__cm">Company Move</div> : null}
+              {idx === 0 && day.company_move && !showCompanyMoveSplit ? (
+                <div className="po-cell__cm">Company Move</div>
               ) : null}
-
-              <div className="po-cell__rbody">
-                {idx === 0
-                  ? cell.obligations.map((o) => (
-                      <div key={`ev-${o.label}`} className="po-cell__event">
-                        {o.time_label ? <span className="po-cell__time">{o.time_label} </span> : null}
-                        {o.label}
-                      </div>
-                    ))
-                  : null}
-
-                {idx === 0
-                  ? markers.map((m) => (
-                      <div key={`mk-${m.label}`} className="po-cell__marker">
-                        {m.label}
-                      </div>
-                    ))
-                  : null}
-
-                {shown.map((line) => (
-                  <div key={`sc-${line}`} className="po-cell__scene">
-                    {line}
+              <div className="po-cell__region" style={{ background: c.tint, color: c.ink }}>
+                {showOwnBar ? (
+                  <div className="po-cell__rbar" style={{ background: c.bar, color: c.onBar }}>
+                    {!isShootType ? <span>{dayTypeLabel(dayType).toUpperCase()}</span> : null}
+                    {loc ? <span className="po-cell__rbarloc">{loc}</span> : null}
                   </div>
-                ))}
-                {extra > 0 ? <div className="po-cell__more">+{extra} more</div> : null}
+                ) : null}
 
-                {nums ? <div className="po-cell__scenenums">{nums}</div> : null}
+                <div className="po-cell__rbody">
+                  {idx === 0
+                    ? cell.obligations.map((o) => (
+                        <div key={`ev-${o.label}`} className="po-cell__event">
+                          {o.time_label ? <span className="po-cell__time">{o.time_label} </span> : null}
+                          {o.label}
+                        </div>
+                      ))
+                    : null}
+
+                  {idx === 0
+                    ? markers.map((m) => (
+                        <div key={`mk-${m.label}`} className="po-cell__marker">
+                          {m.label}
+                        </div>
+                      ))
+                    : null}
+
+                  {shown.map((line) => (
+                    <div key={`sc-${line}`} className="po-cell__scene">
+                      {line}
+                    </div>
+                  ))}
+                  {extra > 0 ? <div className="po-cell__more">+{extra} more</div> : null}
+
+                  {nums ? <div className="po-cell__scenenums">{nums}</div> : null}
+                </div>
               </div>
             </div>
           );

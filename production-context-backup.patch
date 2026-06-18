@@ -1,0 +1,255 @@
+diff --git a/src/app/(main)/dashboard/layout.tsx b/src/app/(main)/dashboard/layout.tsx
+index 391f0c0..2e0c999 100644
+--- a/src/app/(main)/dashboard/layout.tsx
++++ b/src/app/(main)/dashboard/layout.tsx
+@@ -1,12 +1,14 @@
+ import type { ReactNode } from "react";
+ 
+-import { cookies } from "next/headers";
++import { cookies, headers } from "next/headers";
++import { redirect } from "next/navigation";
+ 
+ import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
+ import { SyncOffsetLogo } from "@/components/brand/syncoffset-logo";
+ import { Separator } from "@/components/ui/separator";
+ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+ import { SIDEBAR_COLLAPSIBLE_VALUES, SIDEBAR_VARIANT_VALUES } from "@/lib/preferences/layout";
++import { getActiveProductionId } from "@/lib/production/get-active-production-id";
+ import { cn } from "@/lib/utils";
+ import { getPreference } from "@/server/server-actions";
+ 
+@@ -14,9 +16,22 @@ import { LayoutControls } from "./_components/sidebar/layout-controls";
+ import { SearchDialog } from "./_components/sidebar/search-dialog";
+ import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
+ 
++const PRODUCTION_EXEMPT_PATHS = ["/dashboard/productions"];
++
+ export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
+-  const cookieStore = await cookies();
++  const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
+   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
++
++  const pathname = headerStore.get("x-pathname") ?? "";
++  const isExempt = PRODUCTION_EXEMPT_PATHS.some((p) => pathname.startsWith(p));
++
++  if (!isExempt) {
++    try {
++      await getActiveProductionId();
++    } catch {
++      redirect("/dashboard/productions");
++    }
++  }
+   const [variant, collapsible] = await Promise.all([
+     getPreference("sidebar_variant", SIDEBAR_VARIANT_VALUES, "inset"),
+     getPreference("sidebar_collapsible", SIDEBAR_COLLAPSIBLE_VALUES, "icon"),
+diff --git a/src/app/(main)/dashboard/productions/_components/productions-workspace.tsx b/src/app/(main)/dashboard/productions/_components/productions-workspace.tsx
+index e924c08..2696394 100644
+--- a/src/app/(main)/dashboard/productions/_components/productions-workspace.tsx
++++ b/src/app/(main)/dashboard/productions/_components/productions-workspace.tsx
+@@ -93,8 +93,12 @@ export function ProductionsWorkspace({
+ 
+   function handleOpen(showId: string) {
+     startTransition(async () => {
+-      await switchActiveProduction(showId);
+-      toast.success("Production opened");
++      const result = await switchActiveProduction(showId);
++      if (result.ok) {
++        toast.success("Production opened");
++      } else {
++        toast.error(result.error);
++      }
+       router.refresh();
+     });
+   }
+diff --git a/src/lib/production/get-active-production-id.ts b/src/lib/production/get-active-production-id.ts
+index 572593c..9881ebb 100644
+--- a/src/lib/production/get-active-production-id.ts
++++ b/src/lib/production/get-active-production-id.ts
+@@ -1,31 +1,92 @@
+ import { cookies } from "next/headers";
+ 
++import { createServiceClient } from "@/lib/supabase/server";
++
+ const COOKIE_KEY = "syncoffset_active_production";
+ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+ 
+ export { COOKIE_KEY as ACTIVE_PRODUCTION_COOKIE };
+ 
+ /**
+- * Resolve the active production ID from (in order):
+- *   1. `syncoffset_active_production` cookie
+- *   2. `NEXT_PUBLIC_DEFAULT_PRODUCTION_ID` env var
++ * Verify a production ID exists and is not archived.
++ * Returns the ID if valid, null otherwise.
++ */
++async function verifyActiveProduction(
++  supabase: ReturnType<typeof createServiceClient>,
++  id: string,
++): Promise<string | null> {
++  const { data } = await supabase.from("shows").select("id").eq("id", id).is("archived_at", null).maybeSingle();
++  return data?.id ? (data.id as string) : null;
++}
++
++/**
++ * Try to heal the cookie to a validated production ID.
++ * Silently fails in Server Component context (read-only cookies).
++ */
++async function tryHealCookie(cookieStore: Awaited<ReturnType<typeof cookies>>, id: string): Promise<void> {
++  try {
++    cookieStore.set(COOKIE_KEY, id, { path: "/", maxAge: 60 * 60 * 24 * 30 });
++  } catch {
++    // Server Component context — cookie is read-only, healed on next action
++  }
++}
++
++/**
++ * Resolve the active production ID with archive-awareness.
++ *
++ * Resolution order:
++ *   1. Cookie — if set and points to an active (non-archived) production
++ *   2. Auto-select — if exactly one active production exists
++ *   3. Env bootstrap — NEXT_PUBLIC_DEFAULT_PRODUCTION_ID, only if active
++ *   4. Throw — requires explicit selection
+  *
+- * Throws if neither source provides a valid UUID.
++ * When multiple active productions exist and no valid cookie is set,
++ * the user must explicitly select a production.
+  */
+ export async function getActiveProductionId(): Promise<string> {
+   const cookieStore = await cookies();
+   const fromCookie = cookieStore.get(COOKIE_KEY)?.value;
+ 
++  let supabase: ReturnType<typeof createServiceClient>;
++  try {
++    supabase = createServiceClient();
++  } catch {
++    // Supabase not configured — fall back to env-only (dev bootstrap)
++    const fromEnv = process.env.NEXT_PUBLIC_DEFAULT_PRODUCTION_ID;
++    if (fromEnv && UUID_RE.test(fromEnv)) return fromEnv;
++    throw new Error("No active production — Supabase is not configured.");
++  }
++
++  // 1. Cookie → validate against DB
+   if (fromCookie && UUID_RE.test(fromCookie)) {
+-    return fromCookie;
++    const verified = await verifyActiveProduction(supabase, fromCookie);
++    if (verified) return verified;
++    // Cookie points to archived/deleted production — fall through
+   }
+ 
++  // 2. Auto-select if exactly one active production exists
++  const { data: activeShows } = await supabase.from("shows").select("id").is("archived_at", null).limit(2);
++
++  if (activeShows?.length === 1) {
++    const onlyId = activeShows[0].id as string;
++    await tryHealCookie(cookieStore, onlyId);
++    return onlyId;
++  }
++
++  // 3. Env var bootstrap — only if the referenced production is active
+   const fromEnv = process.env.NEXT_PUBLIC_DEFAULT_PRODUCTION_ID;
+   if (fromEnv && UUID_RE.test(fromEnv)) {
+-    return fromEnv;
++    const verified = await verifyActiveProduction(supabase, fromEnv);
++    if (verified) {
++      await tryHealCookie(cookieStore, verified);
++      return verified;
++    }
++  }
++
++  // 4. No valid production found
++  if (activeShows?.length === 0) {
++    throw new Error("No active productions. Create or restore a production to continue.");
+   }
+ 
+-  throw new Error(
+-    "No active production — set syncoffset_active_production cookie or NEXT_PUBLIC_DEFAULT_PRODUCTION_ID env var",
+-  );
++  throw new Error("No production selected. Open a production from the Productions page.");
+ }
+diff --git a/src/lib/production/get-active-show.ts b/src/lib/production/get-active-show.ts
+index 310936a..82d3937 100644
+--- a/src/lib/production/get-active-show.ts
++++ b/src/lib/production/get-active-show.ts
+@@ -31,6 +31,7 @@ export async function getActiveShow(): Promise<ActiveShow> {
+       .from("shows")
+       .select("id, name, code, production_company, location")
+       .eq("id", showId)
++      .is("archived_at", null)
+       .maybeSingle();
+ 
+     if (data) {
+diff --git a/src/lib/supabase/middleware.ts b/src/lib/supabase/middleware.ts
+index 072a1e5..56a254e 100644
+--- a/src/lib/supabase/middleware.ts
++++ b/src/lib/supabase/middleware.ts
+@@ -7,8 +7,11 @@ import { createServerClient } from "@supabase/ssr";
+  * Phase 3: ingestion works via service role on server; middleware prepares Auth for Phase 4+.
+  */
+ export async function updateSession(request: NextRequest) {
++  const pathname = request.nextUrl.pathname;
+   let supabaseResponse = NextResponse.next({ request });
+ 
++  supabaseResponse.headers.set("x-pathname", pathname);
++
+   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+ 
+@@ -26,6 +29,7 @@ export async function updateSession(request: NextRequest) {
+           request.cookies.set(name, value);
+         }
+         supabaseResponse = NextResponse.next({ request });
++        supabaseResponse.headers.set("x-pathname", pathname);
+         for (const { name, value, options } of cookiesToSet) {
+           supabaseResponse.cookies.set(name, value, options);
+         }
+diff --git a/src/server/production-actions.ts b/src/server/production-actions.ts
+index aedcc80..f40031c 100644
+--- a/src/server/production-actions.ts
++++ b/src/server/production-actions.ts
+@@ -67,13 +67,20 @@ export async function createProduction(form: {
+   return { ok: true, showId };
+ }
+ 
+-export async function switchActiveProduction(showId: string): Promise<void> {
++export async function switchActiveProduction(showId: string): Promise<{ ok: true } | { ok: false; error: string }> {
++  const supabase = createServiceClient();
++  const { data } = await supabase.from("shows").select("id, archived_at").eq("id", showId).maybeSingle();
++
++  if (!data) return { ok: false, error: "Production not found." };
++  if (data.archived_at) return { ok: false, error: "Cannot open an archived production. Restore it first." };
++
+   const cookieStore = await cookies();
+   cookieStore.set(ACTIVE_PRODUCTION_COOKIE, showId, {
+     path: "/",
+     maxAge: 60 * 60 * 24 * 30,
+   });
+   revalidatePath("/dashboard", "layout");
++  return { ok: true };
+ }
+ 
+ export async function getActiveProductionIdFromCookie(): Promise<string | null> {
+@@ -121,6 +128,23 @@ export async function archiveProduction(showId: string): Promise<{ ok: true } |
+     .eq("id", showId);
+ 
+   if (error) return { ok: false, error: error.message };
++
++  // If the archived production was the active cookie, switch away
++  const cookieStore = await cookies();
++  const activeCookie = cookieStore.get(ACTIVE_PRODUCTION_COOKIE)?.value;
++  if (activeCookie === showId) {
++    const { data: remaining } = await supabase.from("shows").select("id").is("archived_at", null).limit(2);
++
++    if (remaining?.length === 1) {
++      cookieStore.set(ACTIVE_PRODUCTION_COOKIE, remaining[0].id as string, {
++        path: "/",
++        maxAge: 60 * 60 * 24 * 30,
++      });
++    } else {
++      cookieStore.delete(ACTIVE_PRODUCTION_COOKIE);
++    }
++  }
++
+   revalidatePath("/dashboard", "layout");
+   return { ok: true };
+ }

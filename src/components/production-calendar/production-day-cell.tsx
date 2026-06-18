@@ -128,6 +128,11 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
     const sceneRefLine = formatSceneReferenceList(allScenes);
     const locationLabel = locationDisplayLabel(productionDay.shoot_location);
     const chipColor = locationColorClass(productionDay.shoot_location);
+    const pmLocation = productionDay.company_move_destination?.trim() ?? "";
+    const showCompanyMoveSplit = Boolean(productionDay.company_move && pmLocation);
+    const pmLocationLabel = locationDisplayLabel(pmLocation);
+    const pmChipColor = locationColorClass(pmLocation);
+    const showFooterEvents = cell.obligations.length > 0 || (productionDay.company_move && !showCompanyMoveSplit);
 
     return (
       <div className={cn("production-wall-calendar__cell flex flex-col", blockClass)}>
@@ -139,23 +144,50 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
         ) : null}
         <div className="flex items-start gap-1">
           <span className="production-wall-calendar__date-num shrink-0 self-start">{dayNum}</span>
-          <div className={cn("flex min-w-0 flex-1 flex-col gap-0.5 rounded-sm px-1.5 py-1", chipColor)}>
-            <span className="font-black font-mono text-[11px] text-white leading-none tracking-wider">
-              DAY {productionDay.day_number}
-            </span>
-            {locationLabel ? (
-              <span className="truncate font-bold text-[9px] text-white uppercase leading-tight tracking-wide">
-                {locationLabel}
+          {showCompanyMoveSplit ? (
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <div className={cn("rounded-sm px-1.5 py-1", chipColor)}>
+                <span className="font-black font-mono text-[11px] text-white leading-none tracking-wider">
+                  DAY {productionDay.day_number}
+                </span>
+                {locationLabel ? (
+                  <>
+                    <span className="block font-bold text-[7px] text-white/70 uppercase">AM</span>
+                    <span className="truncate font-bold text-[9px] text-white uppercase leading-tight tracking-wide">
+                      {locationLabel}
+                    </span>
+                  </>
+                ) : null}
+              </div>
+              <div className="rounded-sm border border-violet-400/40 bg-violet-950/60 px-1 py-0.5 text-center font-black text-[7px] text-violet-200 uppercase tracking-wider">
+                Company Move
+              </div>
+              <div className={cn("rounded-sm px-1.5 py-1", pmChipColor)}>
+                <span className="block font-bold text-[7px] text-white/70 uppercase">PM</span>
+                <span className="truncate font-bold text-[9px] text-white uppercase leading-tight tracking-wide">
+                  {pmLocationLabel}
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className={cn("flex min-w-0 flex-1 flex-col gap-0.5 rounded-sm px-1.5 py-1", chipColor)}>
+              <span className="font-black font-mono text-[11px] text-white leading-none tracking-wider">
+                DAY {productionDay.day_number}
               </span>
-            ) : null}
-          </div>
+              {locationLabel ? (
+                <span className="truncate font-bold text-[9px] text-white uppercase leading-tight tracking-wide">
+                  {locationLabel}
+                </span>
+              ) : null}
+            </div>
+          )}
         </div>
 
         {unit ? (
           <span className={cn("production-wall-calendar__unit-badge mt-1", unit.className)}>{unit.label}</span>
         ) : null}
 
-        {/* Split day badge (company move now renders as an event block below) */}
+        {/* Split day badge (D/N at same location — distinct from company move) */}
         {productionDay.split_day ? (
           <div className="mt-0.5 flex gap-1">
             <span className="rounded bg-violet-600/30 px-1 py-px font-bold text-[7px] text-violet-300 uppercase">
@@ -167,9 +199,12 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
         {sceneRefLine ? <div className="production-wall-calendar__scenes">{sceneRefLine}</div> : null}
 
         <div className="mt-0.5 flex flex-col gap-0.5">
-          {cell.scenes.slice(0, maxSetups).map((sc, i) =>
+          {cell.scenes.slice(0, maxSetups).map((sc) =>
             sc.set_name ? (
-              <div key={`${cell.date}-setup-${i}`} className="production-wall-calendar__scene-loc">
+              <div
+                key={`${cell.date}-${sc.scene_number}-${sc.set_name}`}
+                className="production-wall-calendar__scene-loc"
+              >
                 <span className="font-semibold">{sc.interior_exterior}</span>
                 {sc.interior_exterior ? ". " : ""}
                 {sc.set_name}
@@ -194,11 +229,11 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
           <p className="production-wall-calendar__notes line-clamp-2">{productionDay.notes}</p>
         ) : null}
 
-        {cell.obligations.length > 0 || productionDay.company_move ? (
+        {showFooterEvents ? (
           <div className="mt-1 border-foreground/10 border-t pt-1">
             <EventBlocks
               obligations={cell.obligations}
-              companyMove={productionDay.company_move}
+              companyMove={productionDay.company_move && !showCompanyMoveSplit}
               max={variant === "print" ? 8 : 4}
             />
           </div>

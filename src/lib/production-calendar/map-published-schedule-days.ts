@@ -82,6 +82,7 @@ export function publishedScheduleDayToCalendarRow(row: PublishedScheduleDayRow):
       total_pages: shadow.totalPages,
       split_day: shadow.splitDay,
       company_move: shadow.companyMove,
+      company_move_destination: shadow.companyMoveDestination,
     },
     sceneLabels: shadow.allScenes,
     sceneRows,

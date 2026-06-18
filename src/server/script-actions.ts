@@ -15,6 +15,7 @@ export type ScriptParseResult =
       sceneCount: number;
       locationCount: number;
       castCount: number;
+      breakdownItemCount: number;
       registryCreated: number;
       registryUpdated: number;
       registrySkipped: number;
@@ -142,7 +143,21 @@ export async function parseAndMirrorScript(sourceDocumentId: string): Promise<Sc
     return { ok: false, error: `production_script_scenes insert failed: ${scenesErr.message}` };
   }
 
-  // 7. Sync to scene_registry
+  // 7. Extract breakdown items from scene text → production_breakdown_items
+  let breakdownItemCount = 0;
+  try {
+    const { syncBreakdownItemsFromScript } = await import("@/lib/script/sync-breakdown-items-from-script");
+    const breakdownResult = await syncBreakdownItemsFromScript(supabase, scriptId);
+    breakdownItemCount = breakdownResult.itemCount;
+    if (breakdownResult.itemCount > 0) {
+      warnings.push(`production_breakdown_items: ${breakdownResult.itemCount} auto-extracted`);
+    }
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Unknown error";
+    warnings.push(`production_breakdown_items sync partial: ${msg}`);
+  }
+
+  // 8. Sync to scene_registry
   let registryResult = { created: 0, updated: 0, skipped: 0 };
   try {
     registryResult = await syncScenesFromScript(supabase, showId, scriptId);
@@ -172,6 +187,7 @@ export async function parseAndMirrorScript(sourceDocumentId: string): Promise<Sc
   );
 
   revalidatePath("/dashboard/script-hub");
+  revalidatePath("/dashboard/script-breakdown");
   revalidatePath("/dashboard/one-line-schedule");
 
   return {
@@ -180,6 +196,7 @@ export async function parseAndMirrorScript(sourceDocumentId: string): Promise<Sc
     sceneCount: parsedScenes.length,
     locationCount: uniqueLocations.size,
     castCount: allCharacters.size,
+    breakdownItemCount,
     registryCreated: registryResult.created,
     registryUpdated: registryResult.updated,
     registrySkipped: registryResult.skipped,

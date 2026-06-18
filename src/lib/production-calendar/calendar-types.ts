@@ -15,6 +15,8 @@ export type CalendarDayRow = {
   total_pages?: string | null;
   split_day?: boolean;
   company_move?: boolean;
+  /** PM / post–company-move location from SYNCO_SHADOW_JSON v2. */
+  company_move_destination?: string | null;
   /** Derived presentation field: prior shoot day's location when this day is a location arrival. */
   move_from_label?: string;
 };

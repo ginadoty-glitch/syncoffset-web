@@ -1,12 +1,14 @@
 import type { ReactNode } from "react";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { AppSidebar } from "@/app/(main)/dashboard/_components/sidebar/app-sidebar";
 import { SyncOffsetLogo } from "@/components/brand/syncoffset-logo";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { SIDEBAR_COLLAPSIBLE_VALUES, SIDEBAR_VARIANT_VALUES } from "@/lib/preferences/layout";
+import { getActiveProductionId } from "@/lib/production/get-active-production-id";
 import { cn } from "@/lib/utils";
 import { getPreference } from "@/server/server-actions";
 
@@ -14,9 +16,22 @@ import { LayoutControls } from "./_components/sidebar/layout-controls";
 import { SearchDialog } from "./_components/sidebar/search-dialog";
 import { ThemeSwitcher } from "./_components/sidebar/theme-switcher";
 
+const PRODUCTION_EXEMPT_PATHS = ["/dashboard/productions"];
+
 export default async function Layout({ children }: Readonly<{ children: ReactNode }>) {
-  const cookieStore = await cookies();
+  const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
   const defaultOpen = cookieStore.get("sidebar_state")?.value !== "false";
+
+  const pathname = headerStore.get("x-pathname") ?? "";
+  const isExempt = PRODUCTION_EXEMPT_PATHS.some((p) => pathname.startsWith(p));
+
+  if (!isExempt) {
+    try {
+      await getActiveProductionId();
+    } catch {
+      redirect("/dashboard/productions");
+    }
+  }
   const [variant, collapsible] = await Promise.all([
     getPreference("sidebar_variant", SIDEBAR_VARIANT_VALUES, "inset"),
     getPreference("sidebar_collapsible", SIDEBAR_COLLAPSIBLE_VALUES, "icon"),
