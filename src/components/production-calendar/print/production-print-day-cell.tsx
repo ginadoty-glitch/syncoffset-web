@@ -3,7 +3,11 @@ import type {
   CalendarDaySceneRow,
   ProductionCalendarDayCell,
 } from "@/lib/production-calendar/calendar-types";
-import { dayTypeLabel, formatSceneReferenceList } from "@/lib/production-calendar/day-type-styles";
+import {
+  companyMoveBandLabel,
+  dayTypeLabel,
+  formatSceneReferenceList,
+} from "@/lib/production-calendar/day-type-styles";
 import { locationDisplayLabel } from "@/lib/production-calendar/location-color";
 import {
   dayTypePrintColor,
@@ -151,9 +155,11 @@ export function ProductionPrintDayCell({ cell }: { cell: ProductionCalendarDayCe
 
           return (
             <div key={`${cell.date}-${region.location || "main"}`}>
-              {idx === 1 && showCompanyMoveSplit ? <div className="po-cell__cm">Company Move</div> : null}
+              {idx === 1 && showCompanyMoveSplit ? (
+                <div className="po-cell__cm">{companyMoveBandLabel(day.company_move_type)}</div>
+              ) : null}
               {idx === 0 && day.company_move && !showCompanyMoveSplit ? (
-                <div className="po-cell__cm">Company Move</div>
+                <div className="po-cell__cm">{companyMoveBandLabel(day.company_move_type)}</div>
               ) : null}
               <div className="po-cell__region" style={{ background: c.tint, color: c.ink }}>
                 {showOwnBar ? (

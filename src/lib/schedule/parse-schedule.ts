@@ -6,6 +6,12 @@
 
 import * as XLSX from "xlsx";
 
+import {
+  appendCompanyMoveIntegrityWarnings,
+  linkCompanyMoveDestinations,
+  locationsDiffer,
+  parseCompanyMoveTypeFromLine,
+} from "@/lib/schedule/company-move-inference";
 import { extractScriptPdfText } from "@/lib/script/pdf-extract";
 import type {
   OneLinerFieldConfidence,
@@ -311,6 +317,15 @@ const HEADER_ALIASES: Record<string, string[]> = {
   setName: ["set", "set name", "setname", "description"],
   unit: ["unit", "unit label", "u"],
   companyMove: ["company move", "company_move", "move", "travel", "cm"],
+  pmLocation: [
+    "pm location",
+    "company move destination",
+    "company_move_destination",
+    "after lunch location",
+    "secondary location",
+  ],
+  companyMoveType: ["company move type", "company_move_type", "move type", "move timing"],
+  destinationSource: ["destination source", "destination_source", "pm source"],
   pages: ["pages", "page count", "page", "pgs"],
   episode: ["episode", "ep", "episode #", "ep #"],
   revision: ["revision", "rev", "revision color", "color"],
@@ -400,6 +415,12 @@ function mapRecordToShootDay(
   const intExt = parseIntExt(intExtRaw);
   const unitLabel = resolveColumn(row, "unit") || undefined;
   const companyMove = parseCompanyMove(resolveColumn(row, "companyMove"));
+  const pmLocationRaw = resolveColumn(row, "pmLocation");
+  const companyMoveTypeRaw = resolveColumn(row, "companyMoveType");
+  const destinationSourceRaw = resolveColumn(row, "destinationSource");
+  const companyMoveDestination = pmLocationRaw.trim() || undefined;
+  const companyMoveType = companyMoveTypeRaw.trim() || undefined;
+  const companyMoveDestinationSource = destinationSourceRaw.trim() || undefined;
   const setName = resolveColumn(row, "setName") || undefined;
   const zone = resolveColumn(row, "zone") || undefined;
   const blockId = resolveColumn(row, "block") || defaultBlockId;
@@ -438,6 +459,21 @@ function mapRecordToShootDay(
     setups: [setup],
     units,
     companyMove,
+    companyMoveDestination,
+    companyMoveType: companyMoveType || (companyMove ? "unknown" : undefined),
+    companyMoveDestinationSource: companyMoveDestinationSource || (companyMoveDestination ? "same_strip" : undefined),
+    companyMoveDestinationConfidence:
+      companyMoveDestination && (companyMoveDestinationSource || "same_strip") === "same_strip" ? 1 : undefined,
+    workPeriods:
+      companyMove && companyMoveDestination
+        ? [
+            { label: "DAY WORK", setupIndexes: [0] },
+            {
+              label: (companyMoveType || "after lunch") === "before lunch" ? "BEFORE LUNCH" : "AFTER LUNCH",
+              setupIndexes: [],
+            },
+          ]
+        : undefined,
     notes,
     totalPages: pages.trim() || undefined,
     productionDocumentSourceId: docId ?? undefined,
@@ -503,6 +539,10 @@ function parseTabularRows(
   if (uncertain > 0) {
     warnings.push(`${uncertain} parsed row(s) flagged with uncertain fields — verify before commit.`);
   }
+
+  const shootDays = parsedRows.map((r) => r.shootDay);
+  linkCompanyMoveDestinations(shootDays);
+  appendCompanyMoveIntegrityWarnings(shootDays, warnings);
 
   let parseQuality: OneLinerParseQuality = "minimal";
   if (parsedRows.length > 0 && unresolvedRows.length === 0) parseQuality = "full";
@@ -609,11 +649,29 @@ function extractDayFromBannerBlock(
   const pagesMatch = bannerLine.match(/(\d+\s+\d+\/\d+|\d+\/\d+|\d+)\s*pages/i);
 
   let location = "";
-  const setCounts = new Map<string, number>();
+  const amSetCounts = new Map<string, number>();
+  const pmSetCounts = new Map<string, number>();
   const scenes: string[] = [];
   const intExtVotes: string[] = [];
   const dayNightVotes: string[] = [];
   let companyMove = false;
+  let companyMoveType = "unknown";
+  let pastCompanyMove = false;
+
+  const recordSetLine = (setLine: string) => {
+    if (
+      !setLine ||
+      !/[A-Za-z]{3,}/.test(setLine) ||
+      /scenes:|calltime/i.test(setLine) ||
+      PDF_DAY_NIGHT_RE.test(setLine) ||
+      PDF_DAY_HEADER_RE.test(setLine) ||
+      /company\s+move/i.test(setLine)
+    ) {
+      return;
+    }
+    const bucket = pastCompanyMove ? pmSetCounts : amSetCounts;
+    bucket.set(setLine, (bucket.get(setLine) ?? 0) + 1);
+  };
 
   for (let i = 0; i < block.length; i++) {
     const l = block[i] ?? "";
@@ -624,7 +682,12 @@ function extractDayFromBannerBlock(
       continue;
     }
 
-    if (/company\s+move/i.test(l)) companyMove = true;
+    if (/company\s+move/i.test(l)) {
+      companyMove = true;
+      companyMoveType = parseCompanyMoveTypeFromLine(l);
+      pastCompanyMove = true;
+      continue;
+    }
 
     if (PDF_INT_EXT_RE.test(l)) {
       intExtVotes.push(l.toUpperCase().replace(/\.$/, ""));
@@ -638,15 +701,7 @@ function extractDayFromBannerBlock(
           if (!scenes.includes(cleaned)) scenes.push(cleaned);
         }
       }
-      if (
-        setLine &&
-        /[A-Za-z]{3,}/.test(setLine) &&
-        !/scenes:|calltime/i.test(setLine) &&
-        !PDF_DAY_NIGHT_RE.test(setLine) &&
-        !PDF_DAY_HEADER_RE.test(setLine)
-      ) {
-        setCounts.set(setLine, (setCounts.get(setLine) ?? 0) + 1);
-      }
+      recordSetLine(setLine);
       continue;
     }
 
@@ -661,23 +716,46 @@ function extractDayFromBannerBlock(
     return [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
   };
 
-  const topSet = [...setCounts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+  const topFrom = (counts: Map<string, number>): string =>
+    [...counts.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] ?? "";
+
+  const amTopSet = topFrom(amSetCounts);
+  const pmTopSet = topFrom(pmSetCounts);
+  const amLocation = location || amTopSet || "TBD";
+  const pmDestination = companyMove && pmTopSet && locationsDiffer(amLocation, pmTopSet) ? pmTopSet : "";
 
   return {
     date: dateRaw,
     day: dayMatch?.[1] ?? String(fallbackDayNumber),
     scenes: scenes.join(", "),
-    location: location || topSet || "TBD",
-    set: topSet,
+    location: amLocation,
+    set: amTopSet || topFrom(amSetCounts) || topFrom(pmSetCounts),
     "int/ext": majority(intExtVotes),
     "d/n": majority(dayNightVotes),
     pages: pagesMatch?.[1]?.trim() ?? "",
     "company move": companyMove ? "yes" : "",
+    "pm location": pmDestination,
+    "company move type": companyMoveType,
+    "destination source": pmDestination ? "same_strip" : "",
     notes: "",
   };
 }
 
-const PDF_HEADERS = ["date", "day", "scenes", "location", "set", "int/ext", "d/n", "pages", "company move", "notes"];
+const PDF_HEADERS = [
+  "date",
+  "day",
+  "scenes",
+  "location",
+  "set",
+  "int/ext",
+  "d/n",
+  "pages",
+  "company move",
+  "pm location",
+  "company move type",
+  "destination source",
+  "notes",
+];
 
 // ---------------------------------------------------------------------------
 // Prep memo parsing (prep-schedule PDFs: dated meeting/scout blocks, no strips)
@@ -990,7 +1068,9 @@ export async function parseScheduleBuffer(input: {
 }
 
 export function parsedRowsToShootDays(rows: ParsedOneLinerRow[]): ShootDay[] {
-  return rows.map((r) => r.shootDay);
+  const days = rows.map((r) => r.shootDay);
+  linkCompanyMoveDestinations(days);
+  return days;
 }
 
 export function fingerprintShootDays(days: ShootDay[]): string {

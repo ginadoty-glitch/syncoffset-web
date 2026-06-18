@@ -1,5 +1,6 @@
 import type { CalendarDayObligationRow, ProductionCalendarDayCell } from "@/lib/production-calendar/calendar-types";
 import {
+  companyMoveBandLabel,
   dayTypeLabel,
   EVENT_CATEGORY_STYLE,
   eventBlockCategory,
@@ -160,7 +161,7 @@ export function ProductionDayCell({ cell, variant = "screen" }: ProductionDayCel
                 ) : null}
               </div>
               <div className="rounded-sm border border-violet-400/40 bg-violet-950/60 px-1 py-0.5 text-center font-black text-[7px] text-violet-200 uppercase tracking-wider">
-                Company Move
+                {companyMoveBandLabel(productionDay.company_move_type)}
               </div>
               <div className={cn("rounded-sm px-1.5 py-1", pmChipColor)}>
                 <span className="block font-bold text-[7px] text-white/70 uppercase">PM</span>

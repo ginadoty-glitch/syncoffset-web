@@ -28,6 +28,9 @@ type V2Shadow = {
   zone: string | null;
   companyMove: boolean;
   companyMoveDestination: string | null;
+  companyMoveType?: string | null;
+  companyMoveDestinationSource?: string | null;
+  companyMoveDestinationConfidence?: number | null;
   secondaryLocation?: string | null;
   totalPages?: string | null;
   splitDay?: boolean;
@@ -47,6 +50,9 @@ export type NormalizedShadow = {
   zone: string;
   companyMove: boolean;
   companyMoveDestination: string | null;
+  companyMoveType: string | null;
+  companyMoveDestinationSource: string | null;
+  companyMoveDestinationConfidence: number | null;
   totalPages: string | null;
   splitDay: boolean;
   cleanedNotes: string;
@@ -62,6 +68,9 @@ export function extractShadow(rawNotes: string | null): NormalizedShadow {
     zone: "unit-a",
     companyMove: false,
     companyMoveDestination: null,
+    companyMoveType: null,
+    companyMoveDestinationSource: null,
+    companyMoveDestinationConfidence: null,
     totalPages: null,
     splitDay: false,
     cleanedNotes: rawNotes?.trim() ?? "",
@@ -83,6 +92,9 @@ export function extractShadow(rawNotes: string | null): NormalizedShadow {
         zone: meta.zone?.trim() || "unit-a",
         companyMove: meta.companyMove,
         companyMoveDestination: meta.companyMoveDestination,
+        companyMoveType: meta.companyMoveType ?? null,
+        companyMoveDestinationSource: meta.companyMoveDestinationSource ?? null,
+        companyMoveDestinationConfidence: meta.companyMoveDestinationConfidence ?? null,
         totalPages: meta.totalPages ?? null,
         splitDay: meta.splitDay ?? false,
         cleanedNotes: cleaned,
@@ -122,6 +134,9 @@ export function extractShadow(rawNotes: string | null): NormalizedShadow {
         zone: meta.zone?.trim() || "unit-a",
         companyMove: false,
         companyMoveDestination: null,
+        companyMoveType: null,
+        companyMoveDestinationSource: null,
+        companyMoveDestinationConfidence: null,
         totalPages: null,
         splitDay: false,
         cleanedNotes: notesText,

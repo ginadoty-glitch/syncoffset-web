@@ -140,6 +140,14 @@ export function formatSceneReferenceList(sceneNumbers: string[]): string {
   return `Sc. ${sceneNumbers.join(", ")}`;
 }
 
+/** Operational company-move band copy — includes meal timing when known. */
+export function companyMoveBandLabel(moveType: string | null | undefined): string {
+  const t = moveType?.trim().toLowerCase();
+  if (t === "after lunch") return "Company Move After Lunch";
+  if (t === "before lunch") return "Company Move Before Lunch";
+  return "Company Move";
+}
+
 export function formatProductionHeadline(
   dayType: CalendarDayType,
   dayNumber: number | null,

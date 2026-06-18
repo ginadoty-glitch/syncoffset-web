@@ -79,6 +79,11 @@ export interface ShootDay {
 
   companyMove?: boolean;
   companyMoveDestination?: string;
+  /** before lunch · after lunch · unknown */
+  companyMoveType?: string;
+  /** same_strip · scene_continuation · next_strip · set_registry */
+  companyMoveDestinationSource?: string;
+  companyMoveDestinationConfidence?: number;
 
   /** Total pages for the day: "5 4/8", "3 1/8" */
   totalPages?: string;
